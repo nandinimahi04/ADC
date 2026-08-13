@@ -1,0 +1,356 @@
+:host {
+  display: block;
+
+  flex-shrink: 0;
+}
+
+
+/* =====================================
+   SIDEBAR
+   ===================================== */
+
+.sidebar {
+  position: relative;
+
+  width: 270px;
+  height: 100vh;
+
+  display: flex;
+  flex-direction: column;
+
+  background: #15152a;
+
+  border-right: 1px solid #25243d;
+
+  transition:
+    width 0.25s cubic-bezier(
+      0.4,
+      0,
+      0.2,
+      1
+    );
+
+  z-index: 100;
+}
+
+.sidebar-collapsed {
+  width: 76px;
+}
+
+
+/* =====================================
+   BRAND
+   ===================================== */
+
+.brand {
+  height: 76px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 12px;
+
+  padding: 0 20px;
+
+  border-bottom: 1px solid #25243d;
+
+  overflow: hidden;
+}
+
+.brand-icon {
+  width: 34px;
+  height: 34px;
+
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 9px;
+
+  background: #28234f;
+
+  color: #7667ff;
+}
+
+.brand-text {
+  display: flex;
+  flex-direction: column;
+
+  white-space: nowrap;
+}
+
+.brand-name {
+  color: #f5f5f7;
+
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.brand-subtitle {
+  margin-top: 2px;
+
+  color: #656378;
+
+  font-size: 10px;
+  font-weight: 500;
+
+  letter-spacing: 0.4px;
+}
+
+.sidebar-collapsed .brand {
+  justify-content: center;
+
+  padding: 0;
+}
+
+
+/* =====================================
+   NAVIGATION
+   ===================================== */
+
+.navigation {
+  display: flex;
+  flex-direction: column;
+
+  gap: 5px;
+
+  padding: 20px 13px;
+}
+
+.navigation-item {
+  position: relative;
+
+  height: 44px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 13px;
+
+  padding: 0 15px;
+
+  border-radius: 9px;
+
+  color: #88869a;
+
+  font-size: 13px;
+  font-weight: 500;
+
+  white-space: nowrap;
+
+  transition:
+    background 0.18s ease,
+    color 0.18s ease;
+}
+
+.navigation-item:hover {
+  background: #1e1d35;
+
+  color: #d3d1df;
+}
+
+.navigation-item-active {
+  background: #292650;
+
+  color: #786bff;
+}
+
+.navigation-item-active:hover {
+  background: #292650;
+
+  color: #786bff;
+}
+
+
+/* Active indicator */
+
+.navigation-item-active::before {
+  content: '';
+
+  position: absolute;
+
+  left: 0;
+
+  width: 3px;
+  height: 20px;
+
+  border-radius: 0 4px 4px 0;
+
+  background: #6c5cff;
+}
+
+.sidebar-collapsed .navigation-item {
+  justify-content: center;
+
+  padding: 0;
+}
+
+.sidebar-collapsed
+.navigation-item-active::before {
+  display: none;
+}
+
+
+/* =====================================
+   FOOTER
+   ===================================== */
+
+.sidebar-footer {
+  margin-top: auto;
+
+  min-height: 58px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 0 18px;
+
+  border-top: 1px solid #25243d;
+}
+
+.connection-status {
+  display: flex;
+  align-items: center;
+
+  gap: 8px;
+
+  color: #aaa8b9;
+
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.status-dot {
+  width: 7px;
+  height: 7px;
+
+  flex-shrink: 0;
+
+  border-radius: 50%;
+
+  background: #22c55e;
+
+  box-shadow:
+    0 0 8px rgba(
+      34,
+      197,
+      94,
+      0.55
+    );
+}
+
+.version {
+  color: #514f65;
+
+  font-size: 10px;
+}
+
+.sidebar-collapsed
+.sidebar-footer {
+  justify-content: center;
+
+  padding: 0;
+}
+
+
+/* =====================================
+   COLLAPSE
+   ===================================== */
+
+.collapse-button {
+  position: absolute;
+
+  top: 50%;
+  right: -11px;
+
+  width: 22px;
+  height: 52px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0;
+
+  border: 1px solid #302e49;
+  border-radius: 6px;
+
+  background: #1c1b32;
+
+  color: #858297;
+
+  cursor: pointer;
+
+  transform: translateY(-50%);
+
+  transition:
+    background 0.18s ease,
+    color 0.18s ease;
+}
+
+.collapse-button:hover {
+  background: #282641;
+
+  color: #d8d5e5;
+}
+
+.collapse-button:focus-visible {
+  outline: 2px solid #6655ff;
+
+  outline-offset: 2px;
+}
+
+.collapse-button lucide-icon {
+  transition:
+    transform 0.25s ease;
+}
+
+.collapse-button .rotated {
+  transform: rotate(180deg);
+}
+
+
+/* =====================================
+   RESPONSIVE
+   ===================================== */
+
+@media (max-width: 700px) {
+
+  .sidebar {
+    width: 76px;
+  }
+
+  .sidebar .brand {
+    justify-content: center;
+
+    padding: 0;
+  }
+
+  .brand-text {
+    display: none;
+  }
+
+  .navigation-item {
+    justify-content: center;
+
+    padding: 0;
+  }
+
+  .navigation-item span {
+    display: none;
+  }
+
+  .sidebar-footer {
+    justify-content: center;
+
+    padding: 0;
+  }
+
+  .sidebar-footer .version {
+    display: none;
+  }
+
+}

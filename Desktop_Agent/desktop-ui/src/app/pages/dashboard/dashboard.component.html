@@ -1,0 +1,218 @@
+<section class="dashboard-page">
+
+  <!-- ================================
+       Header
+       ================================= -->
+
+  <header class="dashboard-header">
+
+  <div>
+
+    <p class="dashboard-eyebrow">
+      DESKTOP AGENT
+    </p>
+
+    <h1>
+      Dashboard
+    </h1>
+
+    <p class="dashboard-description">
+      Monitor and control your Windows desktop.
+    </p>
+
+  </div>
+
+</header>
+
+
+  <!-- ================================
+       Statistics
+       ================================= -->
+
+  <section class="stats-grid">
+
+
+    <!-- Server Status -->
+
+    <article class="stat-card">
+
+      <div class="stat-label">
+        SERVER STATUS
+      </div>
+
+      <div class="stat-value status-value">
+        {{ serverStatus }}
+      </div>
+
+      <div class="stat-description">
+        http://localhost:{{ port }}
+      </div>
+
+    </article>
+
+
+    <!-- Paired Devices -->
+
+    <article class="stat-card">
+
+      <div class="stat-label">
+        PAIRED DEVICES
+      </div>
+
+      <div class="stat-value">
+        {{ pairedDevices }}
+      </div>
+
+      <div class="stat-description">
+        connected devices
+      </div>
+
+    </article>
+
+
+    <!-- Uptime -->
+
+    <article class="stat-card">
+
+      <div class="stat-label">
+        UPTIME
+      </div>
+
+      <div class="stat-value uptime-value">
+        {{ uptime }}
+      </div>
+
+      <div class="stat-description">
+        since server start
+      </div>
+
+    </article>
+
+
+    <!-- Port -->
+
+    <article class="stat-card">
+
+      <div class="stat-label">
+        PORT
+      </div>
+
+      <div class="stat-value">
+        {{ port }}
+      </div>
+
+      <div class="stat-description">
+        change in Settings
+      </div>
+
+    </article>
+
+  </section>
+
+
+  <!-- ================================
+       Quick Actions
+       ================================= -->
+
+  <section class="quick-actions">
+
+    <h2>
+      Quick Actions
+    </h2>
+
+    <div class="actions-container">
+
+      @for (action of quickActions; track action.label) {
+
+        <button
+          type="button"
+          class="action-button"
+          [class.action-danger]="action.type === 'danger'"
+          [class.chrome-action]="action.type === 'chrome'"
+          [disabled]="action.type === 'chrome' && isExecuting"
+          (click)="executeAction(action)"
+        >
+
+          <lucide-icon
+            [img]="action.icon"
+            [size]="21"
+            [strokeWidth]="1.8"
+          />
+
+          <span>
+            @if (action.type === 'chrome' && isExecuting) {
+              Opening...
+            } @else {
+              {{ action.label }}
+            }
+          </span>
+
+        </button>
+
+      }
+
+    </div>
+
+  </section>
+
+
+  <!-- ================================
+       Confirmation Modal
+       ================================= -->
+
+  @if (showConfirmation) {
+
+    <div
+      class="confirm-overlay"
+      (click)="cancelAction()"
+    >
+
+      <div
+        class="confirm-modal"
+        (click)="$event.stopPropagation()"
+      >
+
+        <div class="confirm-icon-wrapper">
+          <lucide-icon
+            [img]="icons.AlertTriangle"
+            [size]="28"
+            [strokeWidth]="1.8"
+          />
+        </div>
+
+        <h3 class="confirm-title">
+          {{ confirmationTitle }}
+        </h3>
+
+        <p class="confirm-message">
+          {{ confirmationMessage }}
+        </p>
+
+        <div class="confirm-buttons">
+
+          <button
+            type="button"
+            class="confirm-btn confirm-cancel"
+            (click)="cancelAction()"
+          >
+            Cancel
+          </button>
+
+          <button
+            type="button"
+            class="confirm-btn confirm-proceed"
+            [class.confirm-danger]="pendingAction?.type === 'danger'"
+            (click)="confirmAction()"
+          >
+            Yes, {{ confirmationTitle }}
+          </button>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  }
+
+</section>

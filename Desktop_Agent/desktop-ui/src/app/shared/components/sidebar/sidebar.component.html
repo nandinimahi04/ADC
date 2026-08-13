@@ -1,0 +1,151 @@
+<aside
+  class="sidebar"
+  [class.sidebar-collapsed]="isCollapsed"
+>
+
+  <!-- =================================
+       BRAND
+       ================================= -->
+
+  <div class="brand">
+
+    <div class="brand-icon">
+
+      <lucide-icon
+        [img]="icons.MonitorSmartphone"
+        [size]="27"
+        [strokeWidth]="1.9"
+      />
+
+    </div>
+
+    @if (!isCollapsed) {
+
+      <div class="brand-text">
+
+        <span class="brand-name">
+          AI Desktop
+        </span>
+
+        <span class="brand-subtitle">
+          Controller
+        </span>
+
+      </div>
+
+    }
+
+  </div>
+
+
+  <!-- =================================
+       NAVIGATION
+       ================================= -->
+
+  <nav
+    class="navigation"
+    aria-label="Main navigation"
+  >
+
+    @for (
+      item of navigationItems;
+      track item.route
+    ) {
+
+      <a
+        class="navigation-item"
+
+        [routerLink]="item.route"
+
+        routerLinkActive="navigation-item-active"
+
+        [routerLinkActiveOptions]="{
+          exact: true
+        }"
+
+        [attr.title]="
+          isCollapsed
+            ? item.tooltip
+            : null
+        "
+      >
+
+        <lucide-icon
+          [img]="item.icon"
+          [size]="19"
+          [strokeWidth]="1.8"
+        />
+
+        @if (!isCollapsed) {
+
+          <span>
+            {{ item.label }}
+          </span>
+
+        }
+
+      </a>
+
+    }
+
+  </nav>
+
+
+  <!-- =================================
+       FOOTER
+       ================================= -->
+
+  <div class="sidebar-footer">
+
+    <div class="connection-status">
+
+      <span class="status-dot"></span>
+
+      @if (!isCollapsed) {
+
+        <span>
+          Agent Online
+        </span>
+
+      }
+
+    </div>
+
+    @if (!isCollapsed) {
+
+      <span class="version">
+        v1.0.0
+      </span>
+
+    }
+
+  </div>
+
+
+  <!-- =================================
+       COLLAPSE BUTTON
+       ================================= -->
+
+  <button
+    type="button"
+    class="collapse-button"
+
+    (click)="toggleSidebar()"
+
+    [attr.aria-label]="
+      isCollapsed
+        ? 'Expand sidebar'
+        : 'Collapse sidebar'
+    "
+  >
+
+    <lucide-icon
+      [img]="icons.ChevronLeft"
+      [size]="17"
+      [strokeWidth]="2"
+      [class.rotated]="isCollapsed"
+    />
+
+  </button>
+
+</aside>

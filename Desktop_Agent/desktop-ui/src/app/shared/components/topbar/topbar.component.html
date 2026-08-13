@@ -1,0 +1,47 @@
+<header class="topbar">
+
+  <div class="topbar-spacer"></div>
+
+  <div class="topbar-actions">
+
+    <div
+      class="connection-indicator"
+      [class.offline]="!isOnline"
+    >
+
+      <span class="connection-dot"></span>
+
+      <lucide-icon
+        [img]="icons.Wifi"
+        [size]="16"
+        [strokeWidth]="2"
+      />
+
+      <span>
+        {{ isOnline ? 'Online' : 'Offline' }}
+      </span>
+
+    </div>
+
+
+    <button
+      type="button"
+      class="stop-server-button"
+      (click)="stopServer()"
+    >
+
+      <lucide-icon
+        [img]="icons.Power"
+        [size]="16"
+        [strokeWidth]="2"
+      />
+
+      <span>
+        Stop Server
+      </span>
+
+    </button>
+
+  </div>
+
+</header>

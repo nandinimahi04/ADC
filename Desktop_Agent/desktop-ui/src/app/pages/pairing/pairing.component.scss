@@ -1,0 +1,370 @@
+:host {
+  display: block;
+  width: 100%;
+}
+
+.pairing-page {
+  min-height: 100%;
+  padding: 32px 36px 50px;
+}
+
+
+/* =========================================
+   HEADER
+   ========================================= */
+
+.page-header {
+  margin-bottom: 28px;
+}
+
+.eyebrow {
+  margin: 0 0 7px;
+
+  color: #6d61e8;
+
+  font-size: 10px;
+  font-weight: 700;
+
+  letter-spacing: 1.4px;
+}
+
+.page-header h1 {
+  margin: 0;
+
+  color: #f4f3f8;
+
+  font-size: 29px;
+  font-weight: 700;
+}
+
+.description {
+  margin: 8px 0 0;
+
+  color: #68667a;
+
+  font-size: 13px;
+}
+
+
+/* =========================================
+   CONTAINER
+   ========================================= */
+
+.pairing-container {
+  display: grid;
+
+  grid-template-columns:
+    minmax(320px, 0.8fr)
+    minmax(400px, 1.2fr);
+
+  gap: 22px;
+
+  max-width: 1050px;
+}
+
+
+/* =========================================
+   CARDS
+   ========================================= */
+
+.qr-card,
+.device-card {
+  min-height: 500px;
+
+  padding: 26px;
+
+  border: 1px solid #292741;
+  border-radius: 15px;
+
+  background: #17162b;
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  margin-bottom: 24px;
+}
+
+.card-header h2 {
+  margin: 0;
+
+  color: #dddbea;
+
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.qr-status {
+  padding: 5px 9px;
+
+  border-radius: 6px;
+
+  background: #1b3528;
+
+  color: #4ade80;
+
+  font-size: 10px;
+  font-weight: 600;
+}
+
+
+/* =========================================
+   QR
+   ========================================= */
+
+.qr-wrapper {
+  width: 320px;
+  height: 320px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  margin: 15px auto 20px;
+
+  border-radius: 12px;
+
+  background: #ffffff;
+}
+
+.qr-image {
+  width: 300px;
+  height: 300px;
+
+  display: block;
+}
+
+.loading {
+  color: #777;
+
+  font-size: 13px;
+}
+
+.qr-description {
+  max-width: 330px;
+
+  margin: 0 auto 22px;
+
+  color: #77758a;
+
+  font-size: 12px;
+
+  line-height: 1.6;
+
+  text-align: center;
+}
+
+
+/* =========================================
+   BUTTON
+   ========================================= */
+
+.generate-button {
+  width: 100%;
+  height: 42px;
+
+  border-radius: 8px;
+
+  background: #6255e8;
+
+  color: #ffffff;
+
+  font-size: 12px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    transform 0.15s ease;
+}
+
+.generate-button:hover {
+  background: #7064f4;
+}
+
+.generate-button:active {
+  transform: translateY(1px);
+}
+
+.generate-button:disabled {
+  opacity: 0.55;
+
+  cursor: not-allowed;
+}
+
+
+/* =========================================
+   DEVICE INFO
+   ========================================= */
+
+.info-list {
+  display: flex;
+  flex-direction: column;
+
+  gap: 0;
+
+  border-top: 1px solid #292741;
+}
+
+.info-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  min-height: 64px;
+
+  gap: 20px;
+
+  border-bottom: 1px solid #292741;
+}
+
+.info-label {
+  color: #77748a;
+
+  font-size: 12px;
+}
+
+.info-value {
+  color: #e1dfeb;
+
+  font-size: 13px;
+  font-weight: 500;
+
+  text-align: right;
+}
+
+.device-id {
+  max-width: 240px;
+
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+
+  white-space: nowrap;
+}
+
+
+/* =========================================
+   WAITING STATUS
+   ========================================= */
+
+.waiting-status {
+  display: flex;
+  align-items: flex-start;
+
+  gap: 12px;
+
+  margin-top: 28px;
+
+  padding: 17px;
+
+  border: 1px solid #2a2941;
+  border-radius: 10px;
+
+  background: #131225;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+
+  flex-shrink: 0;
+
+  margin-top: 5px;
+
+  border-radius: 50%;
+
+  background: #f59e0b;
+
+  box-shadow:
+    0 0 8px rgba(245, 158, 11, 0.5);
+}
+
+.waiting-status strong {
+  color: #d8d5e3;
+
+  font-size: 12px;
+}
+
+.waiting-status p {
+  margin: 5px 0 0;
+
+  color: #666477;
+
+  font-size: 11px;
+}
+
+
+/* =========================================
+   ERROR
+   ========================================= */
+
+.error-message {
+  margin-bottom: 20px;
+
+  padding: 13px 16px;
+
+  border: 1px solid #5b2834;
+  border-radius: 8px;
+
+  background: #29151c;
+
+  color: #f87171;
+
+  font-size: 12px;
+}
+
+
+/* =========================================
+   RESPONSIVE
+   ========================================= */
+
+@media (max-width: 900px) {
+
+  .pairing-container {
+    grid-template-columns: 1fr;
+  }
+
+  .qr-card,
+  .device-card {
+    min-height: auto;
+  }
+
+}
+
+@media (max-width: 600px) {
+
+  .pairing-page {
+    padding: 24px 18px 40px;
+  }
+
+  .qr-wrapper {
+    width: 280px;
+    height: 280px;
+  }
+
+  .qr-image {
+    width: 260px;
+    height: 260px;
+  }
+
+  .info-row {
+    align-items: flex-start;
+
+    flex-direction: column;
+
+    justify-content: center;
+
+    gap: 5px;
+
+    padding: 14px 0;
+  }
+
+  .info-value {
+    text-align: left;
+  }
+
+}

@@ -1,0 +1,25 @@
+<div class="app-shell">
+
+  <!-- Sidebar -->
+  <app-sidebar
+    (collapsedChange)="onSidebarStateChange($event)"
+  />
+
+
+  <!-- Main application -->
+  <div class="application-area">
+
+    <!-- Topbar -->
+    <app-topbar />
+
+
+    <!-- Page content -->
+    <main class="page-content">
+
+      <router-outlet />
+
+    </main>
+
+  </div>
+
+</div>

@@ -1,0 +1,206 @@
+<div class="pairing-page">
+
+  <!-- Header -->
+
+  <header class="page-header">
+
+    <div>
+
+      <p class="eyebrow">
+        DEVICE CONNECTION
+      </p>
+
+      <h1>
+        QR Pairing
+      </h1>
+
+      <p class="description">
+        Scan this QR code from the Android application
+        to connect to this Desktop Agent.
+      </p>
+
+    </div>
+
+  </header>
+
+
+  <!-- Error -->
+
+  @if (errorMessage) {
+
+    <div class="error-message">
+
+      {{ errorMessage }}
+
+    </div>
+
+  }
+
+
+  <!-- Pairing content -->
+
+  <section class="pairing-container">
+
+
+    <!-- QR -->
+
+    <div class="qr-card">
+
+      <div class="card-header">
+
+        <h2>
+          Scan to Pair
+        </h2>
+
+        <span class="qr-status">
+          Secure
+        </span>
+
+      </div>
+
+
+      <div class="qr-wrapper">
+
+        @if (isLoading) {
+
+          <div class="loading">
+            Generating QR...
+          </div>
+
+        }
+        @else if (qrImage) {
+
+          <img
+            [src]="qrImage"
+            alt="Desktop Agent QR Pairing Code"
+            class="qr-image"
+          />
+
+        }
+
+      </div>
+
+
+      <p class="qr-description">
+
+        Open the AI Desktop Controller Android
+        application and scan this code.
+
+      </p>
+
+
+      <button
+        type="button"
+        class="generate-button"
+        (click)="generateQR()"
+        [disabled]="isLoading"
+      >
+
+        {{ isLoading
+          ? 'Generating...'
+          : 'Generate New QR'
+        }}
+
+      </button>
+
+    </div>
+
+
+    <!-- Device information -->
+
+    <div class="device-card">
+
+      <div class="card-header">
+
+        <h2>
+          Device Information
+        </h2>
+
+      </div>
+
+
+      @if (pairingData) {
+
+        <div class="info-list">
+
+
+          <div class="info-row">
+
+            <span class="info-label">
+              Device Name
+            </span>
+
+            <span class="info-value">
+              {{ pairingData.deviceName }}
+            </span>
+
+          </div>
+
+
+          <div class="info-row">
+
+            <span class="info-label">
+              IP Address
+            </span>
+
+            <span class="info-value">
+              {{ pairingData.ipAddress }}
+            </span>
+
+          </div>
+
+
+          <div class="info-row">
+
+            <span class="info-label">
+              Port
+            </span>
+
+            <span class="info-value">
+              {{ pairingData.port }}
+            </span>
+
+          </div>
+
+
+          <div class="info-row">
+
+            <span class="info-label">
+              Device ID
+            </span>
+
+            <span class="info-value device-id">
+              {{ pairingData.deviceId }}
+            </span>
+
+          </div>
+
+
+        </div>
+
+
+        <div class="waiting-status">
+
+          <span class="status-dot"></span>
+
+          <div>
+
+            <strong>
+              Waiting for device
+            </strong>
+
+            <p>
+              Scan the QR code from your Android device.
+            </p>
+
+          </div>
+
+        </div>
+
+      }
+
+    </div>
+
+  </section>
+
+</div>

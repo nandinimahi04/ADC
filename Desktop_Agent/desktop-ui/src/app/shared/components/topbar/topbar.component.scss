@@ -1,0 +1,192 @@
+:host {
+  display: block;
+  width: 100%;
+  flex-shrink: 0;
+}
+
+.topbar {
+  width: 100%;
+  height: 76px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 0 34px;
+
+  background: #0d0c20;
+
+  border-bottom: 1px solid #25243d;
+}
+
+
+/* =========================================
+   PAGE TITLE
+   ========================================= */
+
+.page-heading {
+  display: flex;
+  align-items: center;
+}
+
+.page-heading h1 {
+  margin: 0;
+
+  color: #f4f3f8;
+
+  font-family:
+    Inter,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+
+  font-size: 21px;
+  font-weight: 600;
+
+  line-height: 1.2;
+
+  letter-spacing: -0.2px;
+}
+
+
+/* =========================================
+   RIGHT SIDE
+   ========================================= */
+
+.topbar-actions {
+  display: flex;
+  align-items: center;
+
+  gap: 18px;
+}
+
+
+/* =========================================
+   ONLINE STATUS
+   ========================================= */
+
+.connection-indicator {
+  height: 36px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 7px;
+
+  color: #aaa8b9;
+
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.connection-dot {
+  width: 8px;
+  height: 8px;
+
+  flex-shrink: 0;
+
+  border-radius: 50%;
+
+  background: #22c55e;
+
+  box-shadow:
+    0 0 8px rgba(34, 197, 94, 0.55);
+}
+
+.connection-indicator lucide-icon {
+  color: #8b879d;
+}
+
+.connection-indicator.offline {
+  color: #f87171;
+}
+
+.connection-indicator.offline .connection-dot {
+  background: #f43f5e;
+
+  box-shadow:
+    0 0 8px rgba(244, 63, 94, 0.55);
+}
+
+
+/* =========================================
+   STOP SERVER
+   ========================================= */
+
+.stop-server-button {
+  height: 38px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 8px;
+
+  padding: 0 18px;
+
+  border: 0;
+  border-radius: 9px;
+
+  background: #f0445d;
+
+  color: #ffffff;
+
+  font-size: 13px;
+  font-weight: 600;
+
+  line-height: 1;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    transform 0.15s ease;
+}
+
+.stop-server-button:hover {
+  background: #f55368;
+
+  transform: translateY(-1px);
+}
+
+.stop-server-button:active {
+  transform: translateY(0);
+}
+
+.stop-server-button:focus-visible {
+  outline: 2px solid #7667ff;
+  outline-offset: 3px;
+}
+
+
+/* =========================================
+   RESPONSIVE
+   ========================================= */
+
+@media (max-width: 700px) {
+
+  .topbar {
+    height: 68px;
+
+    padding: 0 20px;
+  }
+
+  .topbar-actions {
+    gap: 10px;
+  }
+
+  .connection-indicator span:last-child {
+    display: none;
+  }
+
+  .stop-server-button {
+    width: 38px;
+
+    padding: 0;
+  }
+
+  .stop-server-button span {
+    display: none;
+  }
+}
