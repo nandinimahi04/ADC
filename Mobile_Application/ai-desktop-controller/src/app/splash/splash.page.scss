@@ -1,0 +1,247 @@
+:host {
+  --background-start: #08111f;
+  --background-middle: #0f1a2d;
+  --background-end: #07101c;
+
+  --primary: #4f88ff;
+  --primary-light: #8cbcff;
+  --glow: #b7d8ff;
+
+  --text-primary: #ffffff;
+  --text-secondary: #93a4c3;
+}
+
+.splash-page {
+  --background:
+    radial-gradient(
+      circle at 50% 38%,
+      #172a48 0%,
+      var(--background-middle) 38%,
+      var(--background-start) 72%,
+      var(--background-end) 100%
+    );
+
+  color: var(--text-primary);
+}
+
+.splash-container {
+  min-height: 100%;
+  width: 100%;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  text-align: center;
+
+  padding: 32px;
+  box-sizing: border-box;
+}
+
+
+/* =========================
+        LOGO
+========================= */
+
+.logo-wrapper {
+  margin-bottom: 28px;
+
+  animation: logoAppear 0.8s ease-out;
+}
+
+.logo-circle {
+  width: 112px;
+  height: 112px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 32px;
+
+  background:
+    linear-gradient(
+      145deg,
+      #2b4467,
+      #17253b
+    );
+
+  border: 1px solid rgba(255, 255, 255, 0.09);
+
+  box-shadow:
+    0 20px 45px rgba(0, 0, 0, 0.45),
+    0 0 35px rgba(140, 188, 255, 0.12),
+    inset 0 1px 1px rgba(255, 255, 255, 0.08);
+
+  animation:
+    logoFloat 3s ease-in-out infinite;
+}
+
+.logo-circle ion-icon {
+  font-size: 52px;
+  color: var(--primary-light);
+
+  filter:
+    drop-shadow(0 0 8px rgba(140, 188, 255, 0.45));
+}
+
+
+/* =========================
+        TITLE
+========================= */
+
+h1 {
+  margin: 0;
+
+  font-size: 30px;
+  line-height: 1.2;
+
+  font-weight: 700;
+  letter-spacing: -0.5px;
+
+  animation: contentAppear 0.8s ease-out 0.15s both;
+}
+
+.tagline {
+  margin: 12px 0 0;
+
+  color: var(--text-secondary);
+
+  font-size: 15px;
+  line-height: 1.5;
+
+  animation: contentAppear 0.8s ease-out 0.25s both;
+}
+
+
+/* =========================
+      LOADING SECTION
+========================= */
+
+.loading-section {
+  width: min(280px, 80%);
+
+  margin-top: 58px;
+
+  animation: contentAppear 0.8s ease-out 0.35s both;
+}
+
+.loading-bar {
+  width: 100%;
+  height: 4px;
+
+  overflow: hidden;
+
+  border-radius: 10px;
+
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.loading-progress {
+  width: 35%;
+  height: 100%;
+
+  border-radius: 10px;
+
+  background:
+    linear-gradient(
+      90deg,
+      var(--primary),
+      var(--primary-light)
+    );
+
+  box-shadow:
+    0 0 12px rgba(140, 188, 255, 0.6);
+
+  animation: loadingProgress 2s ease-in-out infinite;
+}
+
+.loading-section p {
+  margin: 12px 0 0;
+
+  color: var(--text-secondary);
+
+  font-size: 13px;
+
+  letter-spacing: 0.5px;
+}
+
+
+/* =========================
+        VERSION
+========================= */
+
+.version {
+  position: absolute;
+
+  bottom: 28px;
+
+  color: rgba(147, 164, 195, 0.65);
+
+  font-size: 12px;
+
+  letter-spacing: 0.8px;
+}
+
+
+/* =========================
+        ANIMATIONS
+========================= */
+
+@keyframes logoAppear {
+
+  from {
+    opacity: 0;
+    transform: scale(0.75);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+}
+
+@keyframes logoFloat {
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-5px);
+  }
+
+}
+
+@keyframes contentAppear {
+
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+}
+
+@keyframes loadingProgress {
+
+  0% {
+    transform: translateX(-120%);
+  }
+
+  50% {
+    transform: translateX(120%);
+  }
+
+  100% {
+    transform: translateX(300%);
+  }
+
+}

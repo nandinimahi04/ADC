@@ -1,0 +1,102 @@
+<ion-content [fullscreen]="true">
+
+  <div class="pair-container">
+
+    <!-- Header -->
+    <div class="header-section">
+
+      <ion-button
+        class="back-button"
+        fill="clear"
+        (click)="goBack()">
+
+        <ion-icon
+          slot="icon-only"
+          name="arrow-back-outline">
+        </ion-icon>
+
+      </ion-button>
+
+      <div class="header-icon">
+        <ion-icon name="qr-code-outline"></ion-icon>
+      </div>
+
+      <h1>Pair Your Laptop</h1>
+
+      <p>
+        Scan the QR code displayed on your<br>
+        desktop to connect your device
+      </p>
+
+    </div>
+
+
+    <!-- Scanner Area -->
+    <div class="scanner-wrapper">
+
+      <div class="scanner-frame">
+
+        <div class="corner top-left"></div>
+        <div class="corner top-right"></div>
+        <div class="corner bottom-left"></div>
+        <div class="corner bottom-right"></div>
+
+        <div class="scan-line"></div>
+
+        <ion-icon
+          class="scanner-icon"
+          name="camera-outline">
+        </ion-icon>
+
+      </div>
+
+    </div>
+
+
+    <!-- Instructions -->
+    <div class="instruction-section">
+
+      <div class="instruction-icon">
+        <ion-icon name="information-circle-outline"></ion-icon>
+      </div>
+
+      <div>
+        <h3>How to pair</h3>
+
+        <p>
+          Open the Desktop Controller on your
+          laptop and select <strong>Pair Device</strong>.
+          Then point your camera at the QR code.
+        </p>
+      </div>
+
+    </div>
+
+
+    <!-- Scan Button -->
+    <ion-button
+      class="scan-button"
+      expand="block"
+      (click)="startScanner()">
+
+      <ion-icon
+        slot="start"
+        name="scan-outline">
+      </ion-icon>
+
+      Scan QR Code
+
+    </ion-button>
+
+
+    <p class="security-note">
+
+      <ion-icon name="shield-checkmark-outline"></ion-icon>
+
+      Your connection is securely encrypted
+
+    </p>
+
+  </div>
+
+</ion-content>

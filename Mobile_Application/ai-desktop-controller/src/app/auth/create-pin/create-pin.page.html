@@ -1,0 +1,100 @@
+<ion-content [fullscreen]="true">
+
+  <div class="pin-container">
+
+    <!-- Header -->
+    <div class="header-section">
+
+      <ion-icon
+        name="shield-checkmark-outline"
+        class="security-icon">
+      </ion-icon>
+
+      <h1>Create PIN</h1>
+
+      <p>
+        Create a 6-digit PIN to secure<br>
+        your Desktop Controller
+      </p>
+
+    </div>
+
+
+    <!-- PIN Dots -->
+    <div class="pin-display">
+
+      @for (dot of dots; track $index) {
+
+        <div
+          class="pin-dot"
+          [class.filled]="$index < pin.length">
+        </div>
+
+      }
+
+    </div>
+
+
+    <!-- Keypad -->
+    <div class="keypad">
+
+      @for (number of numbers; track number) {
+
+        <ion-button
+          class="key-button"
+          fill="clear"
+          (click)="pressNumber(number)">
+
+          {{ number }}
+
+        </ion-button>
+
+      }
+
+      <!-- Empty space -->
+      <div></div>
+
+      <!-- Zero -->
+      <ion-button
+        class="key-button"
+        fill="clear"
+        (click)="pressNumber('0')">
+
+        0
+
+      </ion-button>
+
+      <!-- Delete -->
+      <ion-button
+        class="key-button delete-button"
+        fill="clear"
+        (click)="deleteDigit()">
+
+        <ion-icon
+          name="backspace-outline">
+        </ion-icon>
+
+      </ion-button>
+
+    </div>
+
+
+    <!-- Continue -->
+    <ion-button
+      class="continue-button"
+      expand="block"
+      [disabled]="pin.length !== 6"
+      (click)="continue()">
+
+      Continue
+
+      <ion-icon
+        slot="end"
+        name="arrow-forward-outline">
+      </ion-icon>
+
+    </ion-button>
+
+  </div>
+
+</ion-content>

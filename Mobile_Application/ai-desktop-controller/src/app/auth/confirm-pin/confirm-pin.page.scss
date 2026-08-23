@@ -1,0 +1,251 @@
+:host {
+  --background-start: #08111f;
+  --background-middle: #0f1a2d;
+
+  --primary: #4f88ff;
+  --primary-light: #8cbcff;
+
+  --text-primary: #ffffff;
+  --text-secondary: #93a4c3;
+
+  --key-background: #1a2638;
+  --key-pressed: #2d4362;
+  --error: #ef7777;
+}
+
+ion-content {
+  --background:
+    radial-gradient(
+      circle at 50% 25%,
+      #172a48 0%,
+      var(--background-middle) 40%,
+      var(--background-start) 100%
+    );
+}
+
+.pin-container {
+  min-height: 100%;
+  width: 100%;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  padding: 50px 24px 30px;
+  box-sizing: border-box;
+
+  color: var(--text-primary);
+}
+
+/* Header */
+
+.header-section {
+  text-align: center;
+  margin-top: 10px;
+}
+
+.security-icon {
+  font-size: 48px;
+  color: var(--primary-light);
+
+  filter:
+    drop-shadow(0 0 10px rgba(140, 188, 255, 0.35));
+
+  margin-bottom: 18px;
+}
+
+.header-section h1 {
+  margin: 0;
+
+  font-size: 29px;
+  font-weight: 700;
+}
+
+.header-section p {
+  margin: 12px 0 0;
+
+  color: var(--text-secondary);
+
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* PIN dots */
+
+.pin-display {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  gap: 14px;
+
+  margin-top: 38px;
+  margin-bottom: 20px;
+
+  min-height: 22px;
+}
+
+.pin-dot {
+  width: 13px;
+  height: 13px;
+
+  border-radius: 50%;
+
+  background: rgba(255, 255, 255, 0.14);
+
+  border: 1px solid rgba(255, 255, 255, 0.12);
+
+  transition:
+    transform 0.18s ease,
+    background 0.18s ease,
+    box-shadow 0.18s ease;
+}
+
+.pin-dot.filled {
+  background: var(--primary-light);
+
+  border-color: var(--primary-light);
+
+  box-shadow:
+    0 0 7px rgba(140, 188, 255, 0.65),
+    0 0 16px rgba(140, 188, 255, 0.25);
+
+  transform: scale(1.15);
+}
+
+/* Error */
+
+.error-message {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 7px;
+
+  min-height: 24px;
+
+  margin-bottom: 12px;
+
+  color: var(--error);
+
+  font-size: 13px;
+}
+
+.error-message ion-icon {
+  font-size: 17px;
+}
+
+/* Keypad */
+
+.keypad {
+  width: min(320px, 100%);
+
+  display: grid;
+
+  grid-template-columns: repeat(3, 1fr);
+
+  gap: 14px;
+}
+
+.key-button {
+  --background: var(--key-background);
+  --background-hover: #23334b;
+  --background-activated: var(--key-pressed);
+
+  --color: #ffffff;
+
+  --border-radius: 50%;
+
+  width: 76px;
+  height: 76px;
+
+  margin: auto;
+
+  font-size: 24px;
+  font-weight: 500;
+
+  text-transform: none;
+
+  box-shadow:
+    0 7px 15px rgba(0, 0, 0, 0.22);
+}
+
+.key-button:active {
+  transform: scale(0.92);
+}
+
+.delete-button {
+  --color: var(--text-secondary);
+}
+
+.delete-button ion-icon {
+  font-size: 23px;
+}
+
+/* Confirm */
+
+.continue-button {
+  width: min(320px, 100%);
+
+  margin-top: 30px;
+
+  --background: linear-gradient(
+    135deg,
+    #4f88ff,
+    #6d9fff
+  );
+
+  --background-activated: #3f73dc;
+
+  --color: #ffffff;
+
+  --border-radius: 15px;
+
+  height: 54px;
+
+  font-size: 16px;
+  font-weight: 600;
+
+  text-transform: none;
+
+  box-shadow:
+    0 8px 22px rgba(79, 136, 255, 0.25);
+}
+
+.continue-button[disabled] {
+  opacity: 0.45;
+  box-shadow: none;
+}
+
+@media (max-height: 700px) {
+
+  .pin-container {
+    padding-top: 25px;
+  }
+
+  .security-icon {
+    font-size: 40px;
+    margin-bottom: 10px;
+  }
+
+  .header-section h1 {
+    font-size: 25px;
+  }
+
+  .pin-display {
+    margin-top: 25px;
+  }
+
+  .keypad {
+    gap: 8px;
+  }
+
+  .key-button {
+    width: 65px;
+    height: 65px;
+  }
+
+  .continue-button {
+    margin-top: 20px;
+  }
+}

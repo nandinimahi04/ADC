@@ -1,0 +1,137 @@
+<ion-content [fullscreen]="true" class="login-page">
+
+  <!-- Top Header -->
+  <div class="top-header">
+
+    <div class="brand">
+
+      <div class="brand-icon">
+        <ion-icon name="shield-checkmark"></ion-icon>
+      </div>
+
+      <div class="brand-text">
+        <span class="brand-title">SECURITY</span>
+        <span class="brand-subtitle">Desktop Controller</span>
+      </div>
+
+    </div>
+
+    <div class="connection-status">
+      <ion-icon name="wifi"></ion-icon>
+    </div>
+
+  </div>
+
+
+  <!-- Main Content -->
+  <div class="login-container">
+
+    <!-- Lock -->
+    <div class="lock-wrapper">
+
+      <div class="lock-circle">
+
+        <ion-icon
+          class="lock-icon"
+          name="lock-closed">
+        </ion-icon>
+
+      </div>
+
+    </div>
+
+
+    <!-- Heading -->
+    <h1>Identity Required</h1>
+
+    <p class="subtitle">
+      Enter your secure PIN to unlock your desktop
+    </p>
+
+
+    <!-- PIN Dots -->
+    <div
+      class="pin-display"
+      [class.shake]="shake">
+
+      <div
+        *ngFor="let dot of dots; let i = index"
+        class="pin-dot"
+        [class.active]="i < pin.length">
+      </div>
+
+    </div>
+
+
+    <!-- Error Message -->
+    <div
+      class="error-message"
+      *ngIf="errorMessage">
+
+      <ion-icon name="alert-circle"></ion-icon>
+
+      <span>
+        {{ errorMessage }}
+      </span>
+
+    </div>
+
+
+    <!-- Keypad -->
+    <div class="keypad">
+
+      <!-- 1 - 9 -->
+      <button
+        class="key"
+        *ngFor="let number of firstNine"
+        (click)="pressNumber(number)">
+
+        {{ number }}
+
+      </button>
+
+
+      <!-- Fingerprint -->
+      <button
+        class="key action-key"
+        (click)="fingerprintLogin()">
+
+        <ion-icon name="finger-print"></ion-icon>
+
+      </button>
+
+
+      <!-- Zero -->
+      <button
+        class="key"
+        (click)="pressNumber('0')">
+
+        0
+
+      </button>
+
+
+      <!-- Delete -->
+      <button
+        class="key action-key"
+        (click)="deleteDigit()">
+
+        <ion-icon name="backspace"></ion-icon>
+
+      </button>
+
+    </div>
+
+
+    <!-- Authentication Status -->
+    <p class="footer-text">
+
+      <ion-icon name="shield-checkmark"></ion-icon>
+
+      Secure Authentication
+
+    </p>
+
+  </div>
+
+</ion-content>

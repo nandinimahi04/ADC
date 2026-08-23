@@ -1,0 +1,440 @@
+:host {
+  --background-start: #08111f;
+  --background-middle: #0f1a2d;
+
+  --primary: #4f88ff;
+  --primary-light: #8cbcff;
+  --glow: #b7d8ff;
+
+  --text-primary: #ffffff;
+  --text-secondary: #93a4c3;
+
+  --card-background: rgba(24, 35, 56, 0.92);
+}
+
+ion-content {
+  --background:
+    radial-gradient(
+      circle at 50% 20%,
+      #172a48 0%,
+      var(--background-middle) 42%,
+      var(--background-start) 100%
+    );
+}
+
+.pair-container {
+  min-height: 100%;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  padding: 30px 24px;
+
+  box-sizing: border-box;
+
+  color: var(--text-primary);
+}
+
+/* =========================
+        HEADER
+========================= */
+
+.header-section {
+  width: 100%;
+  text-align: center;
+
+  position: relative;
+
+  padding-top: 10px;
+}
+
+.back-button {
+  position: absolute;
+
+  left: -8px;
+  top: 0;
+
+  --color: var(--text-secondary);
+
+  --padding-start: 8px;
+  --padding-end: 8px;
+
+  font-size: 22px;
+}
+
+.header-icon {
+  width: 62px;
+  height: 62px;
+
+  margin: 10px auto 18px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 18px;
+
+  background:
+    linear-gradient(
+      145deg,
+      #2b4467,
+      #17253b
+    );
+
+  border: 1px solid rgba(255, 255, 255, 0.08);
+
+  box-shadow:
+    0 12px 28px rgba(0, 0, 0, 0.3),
+    0 0 22px rgba(140, 188, 255, 0.1);
+}
+
+.header-icon ion-icon {
+  font-size: 32px;
+
+  color: var(--primary-light);
+
+  filter:
+    drop-shadow(
+      0 0 7px rgba(140, 188, 255, 0.35)
+    );
+}
+
+.header-section h1 {
+  margin: 0;
+
+  font-size: 28px;
+  font-weight: 700;
+
+  letter-spacing: -0.4px;
+}
+
+.header-section p {
+  margin: 10px 0 0;
+
+  color: var(--text-secondary);
+
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+
+/* =========================
+       SCANNER
+========================= */
+
+.scanner-wrapper {
+  width: min(310px, 88vw);
+
+  margin-top: 32px;
+
+  padding: 14px;
+
+  border-radius: 26px;
+
+  background:
+    rgba(24, 35, 56, 0.65);
+
+  border: 1px solid rgba(255, 255, 255, 0.07);
+
+  box-shadow:
+    0 18px 40px rgba(0, 0, 0, 0.3);
+}
+
+.scanner-frame {
+  position: relative;
+
+  width: 100%;
+
+  aspect-ratio: 1 / 1;
+
+  overflow: hidden;
+
+  border-radius: 20px;
+
+  background:
+    rgba(5, 13, 25, 0.85);
+
+  border: 1px solid rgba(140, 188, 255, 0.12);
+}
+
+
+/* Scanner corners */
+
+.corner {
+  position: absolute;
+
+  width: 42px;
+  height: 42px;
+
+  border-color: var(--primary-light);
+
+  border-style: solid;
+
+  filter:
+    drop-shadow(
+      0 0 6px rgba(140, 188, 255, 0.35)
+    );
+
+  z-index: 2;
+}
+
+.top-left {
+  top: 24px;
+  left: 24px;
+
+  border-width: 3px 0 0 3px;
+
+  border-radius: 10px 0 0 0;
+}
+
+.top-right {
+  top: 24px;
+  right: 24px;
+
+  border-width: 3px 3px 0 0;
+
+  border-radius: 0 10px 0 0;
+}
+
+.bottom-left {
+  bottom: 24px;
+  left: 24px;
+
+  border-width: 0 0 3px 3px;
+
+  border-radius: 0 0 0 10px;
+}
+
+.bottom-right {
+  bottom: 24px;
+  right: 24px;
+
+  border-width: 0 3px 3px 0;
+
+  border-radius: 0 0 10px 0;
+}
+
+
+/* Scanner line */
+
+.scan-line {
+  position: absolute;
+
+  left: 28px;
+  right: 28px;
+
+  top: 30%;
+
+  height: 2px;
+
+  background:
+    linear-gradient(
+      90deg,
+      transparent,
+      var(--primary-light),
+      transparent
+    );
+
+  box-shadow:
+    0 0 10px rgba(140, 188, 255, 0.8);
+
+  animation: scan 2.4s ease-in-out infinite;
+
+  z-index: 3;
+}
+
+
+/* Camera placeholder */
+
+.scanner-icon {
+  position: absolute;
+
+  top: 50%;
+  left: 50%;
+
+  transform: translate(-50%, -50%);
+
+  font-size: 48px;
+
+  color: rgba(147, 164, 195, 0.45);
+}
+
+
+/* =========================
+      INSTRUCTIONS
+========================= */
+
+.instruction-section {
+  width: 100%;
+
+  display: flex;
+  align-items: flex-start;
+
+  gap: 14px;
+
+  margin-top: 24px;
+
+  padding: 16px;
+
+  box-sizing: border-box;
+
+  border-radius: 16px;
+
+  background:
+    var(--card-background);
+
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.instruction-icon {
+  flex-shrink: 0;
+
+  width: 38px;
+  height: 38px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 12px;
+
+  background: rgba(79, 136, 255, 0.12);
+}
+
+.instruction-icon ion-icon {
+  font-size: 21px;
+
+  color: var(--primary-light);
+}
+
+.instruction-section h3 {
+  margin: 0 0 6px;
+
+  font-size: 15px;
+}
+
+.instruction-section p {
+  margin: 0;
+
+  color: var(--text-secondary);
+
+  font-size: 12.5px;
+
+  line-height: 1.5;
+}
+
+.instruction-section strong {
+  color: var(--primary-light);
+}
+
+
+/* =========================
+        SCAN BUTTON
+========================= */
+
+.scan-button {
+  width: 100%;
+
+  margin-top: 22px;
+
+  --background:
+    linear-gradient(
+      135deg,
+      #4f88ff,
+      #6d9fff
+    );
+
+  --background-activated: #3f73dc;
+
+  --color: #ffffff;
+
+  --border-radius: 15px;
+
+  height: 54px;
+
+  font-size: 16px;
+
+  font-weight: 600;
+
+  text-transform: none;
+
+  box-shadow:
+    0 8px 22px rgba(79, 136, 255, 0.24);
+}
+
+
+/* =========================
+       SECURITY NOTE
+========================= */
+
+.security-note {
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  gap: 7px;
+
+  margin: 18px 0 0;
+
+  color: rgba(147, 164, 195, 0.7);
+
+  font-size: 11.5px;
+}
+
+.security-note ion-icon {
+  color: var(--primary-light);
+
+  font-size: 15px;
+}
+
+
+/* =========================
+        ANIMATION
+========================= */
+
+@keyframes scan {
+
+  0% {
+    top: 25%;
+    opacity: 0.5;
+  }
+
+  50% {
+    top: 70%;
+    opacity: 1;
+  }
+
+  100% {
+    top: 25%;
+    opacity: 0.5;
+  }
+
+}
+
+
+/* =========================
+      SMALL SCREENS
+========================= */
+
+@media (max-height: 700px) {
+
+  .pair-container {
+    padding-top: 18px;
+  }
+
+  .scanner-wrapper {
+    width: min(270px, 82vw);
+
+    margin-top: 22px;
+  }
+
+  .instruction-section {
+    margin-top: 16px;
+  }
+
+  .scan-button {
+    margin-top: 15px;
+  }
+}
