@@ -1,97 +1,93 @@
-const { spawn } = require('child_process');
-
-/**
- * Supported Windows applications.
- *
- * Keeping this list explicit prevents arbitrary
- * commands from being executed through the API.
- */
-const APPLICATIONS = {
-
-    chrome: {
-        command: 'chrome'
-    }
-
-};
+const {
+    exec
+} = require('child_process');
 
 
 /**
- * Open a supported Windows application.
+ * Open Google Chrome on Windows.
  *
- * @param {string} application
  * @returns {Promise<Object>}
  */
-function openApplication(application) {
+function openChrome() {
 
-    return new Promise((resolve, reject) => {
+    return new Promise(
+        (resolve, reject) => {
 
-        const applicationConfig =
-            APPLICATIONS[application];
+            /**
+             * Windows `start` command launches
+             * an application independently.
+             */
+            exec(
+                'start "" chrome',
+                (error) => {
 
-        if (!applicationConfig) {
+                    if (error) {
 
-            return reject(
-                new Error(
-                    `Unsupported application: ${application}`
-                )
+                        console.error(
+                            'Chrome launch error:',
+                            error
+                        );
+
+
+                        return reject(
+                            new Error(
+                                'Unable to open Google Chrome'
+                            )
+                        );
+
+                    }
+
+
+                    resolve({
+
+                        success: true,
+
+                        application:
+                            'chrome',
+
+                        message:
+                            'Google Chrome opened successfully'
+
+                    });
+
+                }
             );
 
         }
+    );
+
+}
 
 
-        /**
-         * Windows command:
-         *
-         * cmd /c start "" chrome
-         *
-         * The empty string is required because
-         * Windows interprets the first quoted
-         * argument as the window title.
-         */
-        const process = spawn(
-            'cmd.exe',
-            [
-                '/c',
-                'start',
-                '""',
-                applicationConfig.command
-            ],
-            {
-                detached: true,
-                windowsHide: true,
-                shell: false
-            }
-        );
+/**
+ * Process application commands.
+ *
+ * @param {string} action
+ * @param {string} application
+ * @returns {Promise<Object>}
+ */
+async function executeApplicationCommand(
+    action,
+    application
+) {
+
+    if (
+        action === 'open' &&
+        application === 'chrome'
+    ) {
+
+        return await openChrome();
+
+    }
 
 
-        process.on('error', (error) => {
-
-            reject(error);
-
-        });
-
-
-        /**
-         * We don't wait for Chrome itself to terminate.
-         *
-         * The command was successfully handed
-         * over to Windows.
-         */
-        process.unref();
-
-        resolve({
-
-            application,
-
-            status: 'started'
-
-        });
-
-    });
+    throw new Error(
+        `Unsupported application command: ${action} ${application}`
+    );
 
 }
 
 
 module.exports = {
-    openApplication
+    executeApplicationCommand
 };

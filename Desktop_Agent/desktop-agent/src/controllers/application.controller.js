@@ -1,20 +1,24 @@
-const applicationService =
-    require('../services/application.service');
+const {
+    executeApplicationCommand
+} = require('../services/application.service');
 
 
 /**
- * Handle application control requests.
+ * Execute an application command.
  *
  * POST /application
  *
- * Body:
+ * Example:
  *
  * {
  *   "action": "open",
  *   "application": "chrome"
  * }
  */
-async function controlApplication(req, res) {
+async function executeApplication(
+    req,
+    res
+) {
 
     try {
 
@@ -24,7 +28,9 @@ async function controlApplication(req, res) {
         } = req.body;
 
 
-        // Validate request
+        /**
+         * Validate request body.
+         */
         if (!action || !application) {
 
             return res.status(400).json({
@@ -39,24 +45,12 @@ async function controlApplication(req, res) {
         }
 
 
-        // Currently only opening applications
-        // is implemented.
-        if (action !== 'open') {
-
-            return res.status(400).json({
-
-                success: false,
-
-                message:
-                    'Only the open action is currently supported'
-
-            });
-
-        }
-
-
+        /**
+         * Execute command.
+         */
         const result =
-            await applicationService.openApplication(
+            await executeApplicationCommand(
+                action,
                 application
             );
 
@@ -66,9 +60,19 @@ async function controlApplication(req, res) {
             success: true,
 
             message:
-                `${application} opened successfully`,
+                result.message,
 
-            data: result
+            data: {
+
+                application:
+                    result.application,
+
+                action
+
+            },
+
+            executedBy:
+                req.device
 
         });
 
@@ -88,7 +92,7 @@ async function controlApplication(req, res) {
 
             message:
                 error.message ||
-                'Failed to execute application command'
+                'Application command failed'
 
         });
 
@@ -98,5 +102,5 @@ async function controlApplication(req, res) {
 
 
 module.exports = {
-    controlApplication
+    executeApplication
 };

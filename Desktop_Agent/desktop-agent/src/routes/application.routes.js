@@ -1,23 +1,33 @@
 const express = require('express');
 
 const {
-    controlApplication
+    executeApplication
 } = require(
     '../controllers/application.controller'
 );
 
+const {
+    authenticateRequest
+} = require(
+    '../middleware/auth.middleware'
+);
 
-const router = express.Router();
+
+const router =
+    express.Router();
 
 
 /**
- * Application control endpoint.
+ * Execute an application command.
+ *
+ * This route is protected.
  *
  * POST /application
  */
 router.post(
     '/',
-    controlApplication
+    authenticateRequest,
+    executeApplication
 );
 
 
