@@ -36,6 +36,19 @@ export interface PairingResponse {
     qrImage: string;
   };
 }
+export interface PairingStatusResponse {
+  success: boolean;
+  message?: string;
+  data: {
+    status: string;
+    paired: boolean;
+    device: {
+      deviceId: string;
+      deviceName: string;
+    } | null;
+    expiresAt: string | null;
+  };
+}
 
 
 /**
@@ -107,4 +120,14 @@ export class DesktopAgentService {
     );
 
   }
+  /**
+ * Check the current pairing status.
+ */
+getPairingStatus(): Observable<PairingStatusResponse> {
+
+  return this.http.get<PairingStatusResponse>(
+    `${this.baseUrl}/pair/status`
+  );
+
+}
 }

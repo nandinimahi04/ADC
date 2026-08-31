@@ -179,19 +179,37 @@
         </div>
 
 
+        <!-- Connection status -->
+
         <div class="waiting-status">
 
           <span class="status-dot"></span>
 
           <div>
 
-            <strong>
-              Waiting for device
-            </strong>
+            @if (!isDeviceConnected) {
 
-            <p>
-              Scan the QR code from your Android device.
-            </p>
+              <span>
+                Waiting for device
+              </span>
+
+              <p>
+                Scan the QR code from your Android device.
+              </p>
+
+            }
+
+            @if (isDeviceConnected) {
+
+              <span>
+                {{ connectedDeviceName }}
+              </span>
+
+              <p>
+                Connected
+              </p>
+
+            }
 
           </div>
 

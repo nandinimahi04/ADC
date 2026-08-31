@@ -34,9 +34,9 @@
 
       </div>
 
-      <h3>DESKTOP-PC</h3>
+      <h3>{{ deviceName }}</h3>
 
-      <p>Windows 11</p>
+      <p>{{ operatingSystem }}</p>
 
     </div>
 
@@ -50,7 +50,40 @@
 
       <ion-button fill="clear">📁<br>Files</ion-button>
 
-      <ion-button fill="clear">🌐<br>Browser</ion-button>
+      <ion-button
+  fill="clear"
+  (click)="openChrome()"
+  [disabled]="isExecuting"
+>
+  🌐<br>
+  {{ isExecuting ? 'Opening...' : 'Browser' }}
+</ion-button>
+      <ion-button
+        fill="clear"
+        (click)="executeSystemCommand('shutdown')"
+        [disabled]="isExecuting"
+      >
+        ⏻<br>
+        Shutdown
+      </ion-button>
+
+      <ion-button
+        fill="clear"
+        (click)="executeSystemCommand('lock')"
+        [disabled]="isExecuting"
+      >
+        🔒<br>
+        Lock
+      </ion-button>
+
+      <ion-button
+        fill="clear"
+        (click)="executeSystemCommand('sleep')"
+        [disabled]="isExecuting"
+      >
+        🌙<br>
+        Sleep
+      </ion-button>
 
       <ion-button fill="clear">🎵<br>Media</ion-button>
 
