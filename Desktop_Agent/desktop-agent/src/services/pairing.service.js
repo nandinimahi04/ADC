@@ -13,71 +13,36 @@ const {
     getLocalIPAddress
 } = require('../utils/network.util');
 
+const {
+    savePairedDevice,
+    getPairedDevice,
+    removePairedDevice
+} = require('./database.service');
 
-/**
- * Desktop Agent port.
- */
+
 const PORT =
     Number(process.env.PORT) || 5000;
 
-
-/**
- * Pairing token validity period.
- *
- * Current value:
- * 5 minutes.
- */
 const PAIRING_TOKEN_TTL =
     5 * 60 * 1000;
 
 
-/**
- * Current pairing state.
- *
- * This is intentionally kept in memory for now.
- *
- * Later this state will move to SQLite.
- */
-let pairingState = {
-
-    status: 'unpaired',
-
-    activePairing: null,
-
-    pairedDevice: null
-
-};
+let activePairing = null;
 
 
-/**
- * Generate a new pairing QR.
- *
- * Every time this function is called:
- *
- * - A new pairing token is generated.
- * - Previous active token becomes invalid.
- * - Token expiry is calculated.
- * - QR code is generated.
- *
- * @returns {Promise<Object>}
- */
 async function generatePairingData() {
 
     const identity =
         getDeviceIdentity();
 
-
     const ipAddress =
         getLocalIPAddress();
-
 
     const pairingToken =
         uuidv4();
 
-
     const timestamp =
         new Date().toISOString();
-
 
     const expiresAt =
         new Date(
@@ -85,14 +50,6 @@ async function generatePairingData() {
             PAIRING_TOKEN_TTL
         ).toISOString();
 
-
-    /**
-     * Data encoded inside QR.
-     *
-     * This information is safe to expose through
-     * the QR because actual verification happens
-     * on the Desktop Agent.
-     */
     const pairingData = {
 
         type:
@@ -117,53 +74,31 @@ async function generatePairingData() {
 
     };
 
-
-    /**
-     * Generate QR image.
-     */
     const qrImage =
         await QRCode.toDataURL(
             JSON.stringify(pairingData),
             {
                 errorCorrectionLevel: 'H',
-
                 margin: 2,
-
                 width: 320
             }
         );
 
+    activePairing = {
 
-    /**
-     * Store the active token.
-     *
-     * Only one QR token is active at a time.
-     */
-    pairingState = {
+        deviceId:
+            identity.deviceId,
 
-        status: 'waiting',
+        pairingToken,
 
-        activePairing: {
+        createdAt:
+            timestamp,
 
-            deviceId:
-                identity.deviceId,
+        expiresAt,
 
-            pairingToken,
-
-            createdAt:
-                timestamp,
-
-            expiresAt,
-
-            used: false
-
-        },
-
-        pairedDevice:
-            pairingState.pairedDevice
+        used: false
 
     };
-
 
     return {
 
@@ -176,12 +111,6 @@ async function generatePairingData() {
 }
 
 
-/**
- * Verify a pairing request.
- *
- * @param {Object} request
- * @returns {Object}
- */
 function verifyPairing(request) {
 
     const {
@@ -191,9 +120,6 @@ function verifyPairing(request) {
     } = request;
 
 
-    /**
-     * Validate required fields.
-     */
     if (!deviceId || !pairingToken) {
 
         return {
@@ -210,10 +136,7 @@ function verifyPairing(request) {
     }
 
 
-    /**
-     * Make sure a QR has been generated.
-     */
-    if (!pairingState.activePairing) {
+    if (!activePairing) {
 
         return {
 
@@ -229,13 +152,6 @@ function verifyPairing(request) {
     }
 
 
-    const activePairing =
-        pairingState.activePairing;
-
-
-    /**
-     * Prevent reuse of a token.
-     */
     if (activePairing.used) {
 
         return {
@@ -252,12 +168,6 @@ function verifyPairing(request) {
     }
 
 
-    /**
-     * Check token expiry.
-     */
-    const currentTime =
-        Date.now();
-
     const expiryTime =
         new Date(
             activePairing.expiresAt
@@ -266,15 +176,10 @@ function verifyPairing(request) {
 
     if (
         Number.isNaN(expiryTime) ||
-        currentTime > expiryTime
+        Date.now() > expiryTime
     ) {
 
-        pairingState.status =
-            'expired';
-
-        pairingState.activePairing =
-            null;
-
+        activePairing = null;
 
         return {
 
@@ -290,9 +195,6 @@ function verifyPairing(request) {
     }
 
 
-    /**
-     * Verify Desktop Agent device ID.
-     */
     if (
         deviceId !==
         activePairing.deviceId
@@ -312,9 +214,6 @@ function verifyPairing(request) {
     }
 
 
-    /**
-     * Verify pairing token.
-     */
     if (
         pairingToken !==
         activePairing.pairingToken
@@ -334,21 +233,9 @@ function verifyPairing(request) {
     }
 
 
-    /**
-     * Mark token as consumed.
-     *
-     * This prevents the same QR code from
-     * being used again.
-     */
     activePairing.used = true;
 
 
-    /**
-     * Generate the paired-device record.
-     *
-     * The Android application will later
-     * provide a real device ID/name.
-     */
     const pairedDevice = {
 
         deviceId,
@@ -363,87 +250,70 @@ function verifyPairing(request) {
     };
 
 
-    pairingState = {
-
-        status: 'paired',
-
-        activePairing: null,
-
-        pairedDevice
-
-    };
-
-
-    /**
- * Create an authenticated session immediately
- * after successful pairing.
- */
-const authentication =
-    createAuthenticationSession(
+    savePairedDevice(
         pairedDevice
     );
 
 
-return {
+    const authentication =
+        createAuthenticationSession(
+            pairedDevice
+        );
 
-    success: true,
 
-    statusCode: 200,
+    activePairing = null;
 
-    message:
-        'Device paired and authenticated successfully',
 
-    data: {
+    return {
 
-        status:
-            'paired',
+        success: true,
 
-        device:
-            pairedDevice,
+        statusCode: 200,
 
-        authentication
+        message:
+            'Device paired and authenticated successfully',
 
-    }
+        data: {
 
-};
+            status:
+                'paired',
+
+            device:
+                pairedDevice,
+
+            authentication
+
+        }
+
+    };
 
 }
 
 
-/**
- * Return the current pairing status.
- *
- * @returns {Object}
- */
 function getPairingStatus() {
 
-    /**
-     * If a waiting token exists, check whether
-     * it has expired before returning the state.
-     */
-    if (
-        pairingState.status === 'waiting' &&
-        pairingState.activePairing
-    ) {
-
-        const expiresAt =
-            new Date(
-                pairingState.activePairing.expiresAt
-            ).getTime();
+    const storedDevice =
+        getPairedDevice();
 
 
-        if (
-            Number.isNaN(expiresAt) ||
-            Date.now() > expiresAt
-        ) {
+    if (!storedDevice) {
 
-            pairingState.status =
-                'expired';
+        return {
 
-            pairingState.activePairing =
-                null;
+            status:
+                activePairing
+                    ? 'waiting'
+                    : 'unpaired',
 
-        }
+            paired: false,
+
+            device: null,
+
+            expiresAt:
+                activePairing?.expiresAt ||
+                null
+
+        };
 
     }
 
@@ -451,40 +321,43 @@ function getPairingStatus() {
     return {
 
         status:
-            pairingState.status,
+            'paired',
 
-        paired:
-            pairingState.status === 'paired',
+        paired: true,
 
-        device:
-            pairingState.pairedDevice,
+        device: {
+
+            deviceId:
+                storedDevice.deviceId,
+
+            deviceName:
+                storedDevice.deviceName,
+
+            pairedAt:
+                storedDevice.pairedAt,
+
+            lastSeenAt:
+                storedDevice.lastSeenAt,
+
+            status:
+                storedDevice.status
+
+        },
 
         expiresAt:
-            pairingState.activePairing?.expiresAt
-            || null
+            activePairing?.expiresAt ||
+            null
 
     };
 
 }
 
 
-/**
- * Clear the current pairing.
- *
- * This will be useful later from the Settings
- * page when implementing "Unpair Device".
- */
 function unpairDevice() {
 
-    pairingState = {
+    removePairedDevice();
 
-        status: 'unpaired',
-
-        activePairing: null,
-
-        pairedDevice: null
-
-    };
+    activePairing = null;
 
 
     return {

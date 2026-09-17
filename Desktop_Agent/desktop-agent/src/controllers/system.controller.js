@@ -1,4 +1,4 @@
-const systemService =
+const {systemService,cleanupTempFiles} =
     require('../services/system.service');
 
 
@@ -97,7 +97,30 @@ async function controlSystem(req, res) {
 
 }
 
+async function cleanupTemp(req, res) {
+    try {
+        const result = await cleanupTempFiles();
+
+        return res.status(200).json({
+            success: true,
+            data: result
+        });
+    } catch (error) {
+        console.error(
+            'Temporary file cleanup error:',
+            error
+        );
+
+        return res.status(500).json({
+            success: false,
+            message:
+                error.message ||
+                'Failed to clean temporary files'
+        });
+    }
+}
 
 module.exports = {
-    controlSystem
+    controlSystem,
+    cleanupTemp
 };

@@ -1,20 +1,17 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import {
+  HttpClient
+} from '@angular/common/http';
+import {
+  Observable
+} from 'rxjs';
 
-/**
- * Response returned by the Desktop Agent.
- */
 export interface DesktopAgentResponse {
   success: boolean;
   message: string;
-  data?: unknown;
+  data?: any;
 }
 
-/**
- * Pairing information returned by
- * the Desktop Agent.
- */
 export interface PairingData {
   type: string;
   deviceName: string;
@@ -23,11 +20,9 @@ export interface PairingData {
   port: number;
   pairingToken: string;
   timestamp: string;
+  expiresAt: string;
 }
 
-/**
- * QR pairing response.
- */
 export interface PairingResponse {
   success: boolean;
   message: string;
@@ -36,53 +31,78 @@ export interface PairingResponse {
     qrImage: string;
   };
 }
+
 export interface PairingStatusResponse {
   success: boolean;
-  message?: string;
   data: {
     status: string;
     paired: boolean;
+    authenticated?: boolean;
     device: {
       deviceId: string;
       deviceName: string;
+      pairedAt: string;
+      lastSeen: string;
+      status: string;
     } | null;
     expiresAt: string | null;
   };
 }
 
-
-/**
- * Service responsible for communication
- * between Angular and the Windows Desktop Agent.
- */
 @Injectable({
   providedIn: 'root'
 })
 export class DesktopAgentService {
 
-  private readonly http = inject(HttpClient);
+  private readonly http =
+    inject(HttpClient);
+
+  private readonly baseUrl =
+    'http://localhost:5000';
 
   /**
-   * Desktop Agent base URL.
-   *
-   * During development the Node.js server
-   * will run on localhost:5000.
-   *
-   * Later this will dynamically use the
-   * paired computer's IP address.
+   * ============================
+   * CONNECTION / DEVICE
+   * ============================
    */
-  private readonly baseUrl = 'http://localhost:5000';
 
+  getConnectionStatus():
+    Observable<PairingStatusResponse> {
+
+    return this.http.get<PairingStatusResponse>(
+      `${this.baseUrl}/pair/status`
+    );
+  }
+
+  getDevices():
+    Observable<DesktopAgentResponse> {
+
+    return this.http.get<DesktopAgentResponse>(
+      `${this.baseUrl}/admin/devices`
+    );
+  }
+
+  disconnectAdminDevice():
+    Observable<DesktopAgentResponse> {
+
+    return this.http.post<DesktopAgentResponse>(
+      `${this.baseUrl}/admin/devices/disconnect`,
+      {}
+    );
+  }
 
   /**
-   * Open an application on Windows.
+   * ============================
+   * APPLICATION
+   * ============================
    */
+
   openApplication(
     application: string
   ): Observable<DesktopAgentResponse> {
 
     return this.http.post<DesktopAgentResponse>(
-      `${this.baseUrl}/application`,
+      `${this.baseUrl}/local/application`,
       {
         action: 'open',
         application
@@ -90,44 +110,124 @@ export class DesktopAgentService {
     );
   }
 
-
   /**
-   * Execute a system command on Windows.
-   *
-   * Supported: shutdown, restart, lock, sleep
+   * ============================
+   * SYSTEM
+   * ============================
    */
+
   executeSystemCommand(
     command: string
   ): Observable<DesktopAgentResponse> {
 
     return this.http.post<DesktopAgentResponse>(
-      `${this.baseUrl}/system`,
+      `${this.baseUrl}/local/system`,
       {
         command
       }
     );
   }
 
+  getSystemInfo():
+    Observable<DesktopAgentResponse> {
+
+    return this.http.get<DesktopAgentResponse>(
+      `${this.baseUrl}/local/system/info`
+    );
+  }
 
   /**
-   * Generate a new QR pairing code.
+   * ============================
+   * PAIRING
+   * ============================
    */
-  generatePairingQR(): Observable<PairingResponse> {
+
+  generatePairingQR():
+    Observable<PairingResponse> {
 
     return this.http.post<PairingResponse>(
       `${this.baseUrl}/pair`,
       {}
     );
-
   }
+
+  getPairingStatus():
+    Observable<PairingStatusResponse> {
+
+    return this.getConnectionStatus();
+  }
+
   /**
- * Check the current pairing status.
- */
-getPairingStatus(): Observable<PairingStatusResponse> {
+   * ============================
+   * SERVER
+   * ============================
+   */
 
-  return this.http.get<PairingStatusResponse>(
-    `${this.baseUrl}/pair/status`
-  );
+  disconnectDevice():
+    Observable<DesktopAgentResponse> {
 
-}
+    return this.http.post<DesktopAgentResponse>(
+      `${this.baseUrl}/server/disconnect-local`,
+      {}
+    );
+  }
+
+  stopServer():
+    Observable<DesktopAgentResponse> {
+
+    return this.http.post<DesktopAgentResponse>(
+      `${this.baseUrl}/server/stop`,
+      {}
+    );
+  }
+
+  /**
+   * ============================
+   * LOGS
+   * ============================
+   */
+
+  getLogs(
+    limit = 100
+  ): Observable<DesktopAgentResponse> {
+
+    return this.http.get<DesktopAgentResponse>(
+      `${this.baseUrl}/admin/logs?limit=${limit}`
+    );
+  }
+
+  clearLogs():
+    Observable<DesktopAgentResponse> {
+
+    return this.http.delete<DesktopAgentResponse>(
+      `${this.baseUrl}/admin/logs`
+    );
+  }
+
+  /**
+   * ============================
+   * SETTINGS
+   * ============================
+   */
+
+  getSettings():
+    Observable<DesktopAgentResponse> {
+
+    return this.http.get<DesktopAgentResponse>(
+      `${this.baseUrl}/admin/settings`
+    );
+  }
+
+  saveSettings(
+    settings: Record<
+      string,
+      string | number | boolean
+    >
+  ): Observable<DesktopAgentResponse> {
+
+    return this.http.put<DesktopAgentResponse>(
+      `${this.baseUrl}/admin/settings`,
+      settings
+    );
+  }
 }

@@ -1,52 +1,163 @@
-require('dotenv').config();
-
 const express = require('express');
 const cors = require('cors');
 
-const applicationRoutes =
-    require('./src/routes/application.routes');
+const app = express();
 
-const systemRoutes =
-    require('./src/routes/system.routes');
+const PORT = process.env.PORT || 5000;
+
+
+// ============================================================
+// CORS
+// ============================================================
+
+app.use(
+    cors({
+        origin: true,
+
+        methods: [
+            'GET',
+            'POST',
+            'PUT',
+            'DELETE',
+            'OPTIONS'
+        ],
+
+        allowedHeaders: [
+            'Content-Type',
+            'Authorization'
+        ],
+
+        credentials: false,
+
+        optionsSuccessStatus: 204
+    })
+);
+
+
+
+// ============================================================
+// BODY PARSING
+// ============================================================
+
+app.use(
+    express.json({
+        limit: '1mb'
+    })
+);
+
+app.use(
+    express.urlencoded({
+        extended: true
+    })
+);
+
+
+// ============================================================
+// REQUEST LOGGER
+// ============================================================
+
+app.use((req, res, next) => {
+
+    console.log(
+        `[REQUEST] ${req.method} ${req.originalUrl}`
+    );
+
+    next();
+});
+
+
+// ============================================================
+// EXISTING ROUTES
+// ============================================================
 
 const pairingRoutes =
     require('./src/routes/pairing.routes');
 
+const systemRoutes =
+    require('./src/routes/system.routes');
 
-const app = express();
+const applicationRoutes =
+    require('./src/routes/application.routes');
 
-const PORT =
-    process.env.PORT || 5000;
+const deviceRoutes =
+    require('./src/routes/device.routes');
+
+const localRoutes =
+    require('./src/routes/local.routes');
+
+const logsRoutes =
+    require('./src/routes/logs.routes');
+
+const settingsRoutes =
+    require('./src/routes/settings.routes');
+
+const adminRoutes =
+    require('./src/routes/admin.routes');
 
 
-/**
- * =========================================
- * MIDDLEWARE
- * =========================================
- */
+// ============================================================
+// ROUTE MOUNTS
+// ============================================================
 
 app.use(
-    cors()
+    '/pair',
+    pairingRoutes
 );
 
 app.use(
-    express.json()
+    '/system',
+    systemRoutes
+);
+
+app.use(
+    '/application',
+    applicationRoutes
+);
+
+app.use(
+    '/device',
+    deviceRoutes
+);
+
+app.use(
+    '/local',
+    localRoutes
+);
+
+app.use(
+    '/logs',
+    logsRoutes
+);
+
+app.use(
+    '/settings',
+    settingsRoutes
+);
+
+app.use(
+    '/admin',
+    adminRoutes
 );
 
 
-/**
- * =========================================
- * HEALTH CHECK
- * =========================================
- */
+// ============================================================
+// HEALTH CHECK
+// ============================================================
 
 app.get(
-    '/',
+    '/health',
     (req, res) => {
 
-        res.json({
+        return res.status(200).json({
 
-            status: 'Running'
+            success: true,
+
+            status: 'online',
+
+            service:
+                'AI Desktop Controller Desktop Agent',
+
+            port: PORT
 
         });
 
@@ -54,60 +165,95 @@ app.get(
 );
 
 
-/**
- * =========================================
- * APPLICATION ROUTES
- * =========================================
- */
+// ============================================================
+// 404 HANDLER
+// ============================================================
 
 app.use(
-    '/application',
-    applicationRoutes
+    (req, res) => {
+
+        console.log(
+            `[404] ${req.method} ${req.originalUrl}`
+        );
+
+        return res.status(404).json({
+
+            success: false,
+
+            message:
+                'Endpoint not found',
+
+            path:
+                req.originalUrl
+
+        });
+
+    }
 );
 
 
-/**
- * =========================================
- * SYSTEM ROUTES
- * =========================================
- */
+// ============================================================
+// ERROR HANDLER
+// ============================================================
 
 app.use(
-    '/system',
-    systemRoutes
+    (error, req, res, next) => {
+
+        console.error(
+            '[SERVER ERROR]',
+            error
+        );
+
+        if (res.headersSent) {
+            return next(error);
+        }
+
+        return res.status(500).json({
+
+            success: false,
+
+            message:
+                error.message ||
+                'Internal server error'
+
+        });
+
+    }
 );
 
 
-/**
- * =========================================
- * PAIRING ROUTES
- * =========================================
- */
-
-app.use(
-    '/pair',
-    pairingRoutes
-);
-
-
-
-/**
- * =========================================
- * START SERVER
- * =========================================
- */
+// ============================================================
+// START SERVER
+// ============================================================
 
 app.listen(
     PORT,
+    '0.0.0.0',
     () => {
 
+        console.log('');
         console.log(
-            `Desktop Agent running on port ${PORT}`
+            '=========================================='
         );
-
         console.log(
-            `http://localhost:${PORT}`
+            '   AI DESKTOP CONTROLLER - DESKTOP AGENT'
         );
+        console.log(
+            '=========================================='
+        );
+        console.log(
+            `Server running on port ${PORT}`
+        );
+        console.log(
+            `Local: http://localhost:${PORT}`
+        );
+        console.log(
+            `LAN:   http://0.0.0.0:${PORT}`
+        );
+        console.log(
+            '=========================================='
+        );
+        console.log('');
 
     }
 );

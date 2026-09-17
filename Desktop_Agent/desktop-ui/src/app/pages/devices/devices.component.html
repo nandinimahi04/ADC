@@ -1,1 +1,278 @@
-<p>devices works!</p>
+<section class="page devices-page">
+
+  <header class="page-head">
+
+    <div>
+      <span class="eyebrow">
+        DEVICE MANAGEMENT
+      </span>
+
+      <h1>
+        Connected Devices
+      </h1>
+
+      <p>
+        Manage the Android controller trusted by this
+        Windows Desktop Agent.
+      </p>
+    </div>
+
+    <button
+      class="ghost"
+      type="button"
+      (click)="load()"
+      [disabled]="loading"
+    >
+
+      <lucide-icon
+        [img]="icons.RefreshCw"
+        [size]="15"
+      />
+
+      {{ loading ? 'Refreshing…' : 'Refresh' }}
+
+    </button>
+
+  </header>
+
+
+  @if (message) {
+
+    <div class="notice">
+      {{ message }}
+    </div>
+
+  }
+
+
+  @if (loading) {
+
+    <div class="loading-card">
+
+      <div class="skeleton avatar"></div>
+
+      <div class="skeleton title"></div>
+
+      <div class="skeleton line"></div>
+
+      <div class="skeleton line short"></div>
+
+    </div>
+
+  }
+
+
+  @else if (device) {
+
+    <section class="device-card">
+
+      <div class="device-card-header">
+
+        <div class="device-identity">
+
+          <div class="device-avatar">
+
+            <lucide-icon
+              [img]="icons.MonitorSmartphone"
+              [size]="32"
+            />
+
+          </div>
+
+          <div>
+
+            <div class="name-line">
+
+              <h2>
+                {{ device.deviceName }}
+              </h2>
+
+              <span class="connected-badge">
+
+                <lucide-icon
+                  [img]="icons.CheckCircle2"
+                  [size]="13"
+                />
+
+                Connected
+
+              </span>
+
+            </div>
+
+            <p>
+              Android Controller
+            </p>
+
+          </div>
+
+        </div>
+
+
+        <button
+          class="disconnect"
+          type="button"
+          (click)="disconnect()"
+        >
+
+          <lucide-icon
+            [img]="icons.Unplug"
+            [size]="15"
+          />
+
+          Disconnect
+
+        </button>
+
+      </div>
+
+
+      <div class="device-details">
+
+        <div class="detail">
+
+          <span>
+            DEVICE ID
+          </span>
+
+          <div class="id-row">
+
+            <code>
+              {{ device.deviceId }}
+            </code>
+
+            <button
+              type="button"
+              class="copy-button"
+              (click)="copyDeviceId()"
+              title="Copy device ID"
+            >
+
+              <lucide-icon
+                [img]="icons.Copy"
+                [size]="14"
+              />
+
+            </button>
+
+          </div>
+
+          @if (copied) {
+
+            <small class="copied">
+              Device ID copied
+            </small>
+
+          }
+
+        </div>
+
+
+        <div class="detail">
+
+          <span>
+            STATUS
+          </span>
+
+          <strong class="status-active">
+
+            <i></i>
+
+            {{ device.status }}
+
+          </strong>
+
+        </div>
+
+
+        <div class="detail">
+
+          <span>
+            PAIRED
+          </span>
+
+          <strong>
+            {{ device.pairedAt | date:'medium' }}
+          </strong>
+
+        </div>
+
+
+        <div class="detail">
+
+          <span>
+            LAST SEEN
+          </span>
+
+          <strong>
+            {{ device.lastSeen | date:'medium' }}
+          </strong>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <section class="security-panel">
+
+      <div class="security-icon">
+
+        <lucide-icon
+          [img]="icons.ShieldCheck"
+          [size]="20"
+        />
+
+      </div>
+
+      <div>
+
+        <strong>
+          Trusted device
+        </strong>
+
+        <p>
+          This Android controller is persisted in the
+          Desktop Agent SQLite database. Protected
+          commands continue to require authentication.
+        </p>
+
+      </div>
+
+    </section>
+
+  }
+
+
+  @else {
+
+    <section class="empty-device">
+
+      <div class="empty-icon">
+
+        <lucide-icon
+          [img]="icons.MonitorSmartphone"
+          [size]="34"
+        />
+
+      </div>
+
+      <span>
+        NO DEVICE CONNECTED
+      </span>
+
+      <h2>
+        No Android controller
+      </h2>
+
+      <p>
+        Generate a QR code from QR Pairing and scan it
+        using the Android application.
+      </p>
+
+    </section>
+
+  }
+
+</section>

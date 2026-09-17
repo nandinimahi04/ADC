@@ -1,1 +1,542 @@
-<p>settings works!</p>
+<section class="page settings-page">
+
+
+  <!-- ============================= -->
+  <!-- HEADER -->
+  <!-- ============================= -->
+
+  <header class="page-head">
+
+    <div class="heading-copy">
+
+      <span class="eyebrow">
+        AGENT CONFIGURATION
+      </span>
+
+      <h1>
+        Settings
+      </h1>
+
+      <p>
+        Configure your Desktop Agent and local data preferences.
+      </p>
+
+    </div>
+
+
+    <button
+      class="reload-button"
+      type="button"
+      (click)="load()"
+      [disabled]="loading || saving"
+    >
+
+      <lucide-icon
+        [img]="icons.RotateCcw"
+        [size]="15"
+      />
+
+      Reload
+
+    </button>
+
+  </header>
+
+
+  <!-- ============================= -->
+  <!-- MESSAGE -->
+  <!-- ============================= -->
+
+  @if (message) {
+
+    <div
+      class="notice"
+      [class.success]="messageType === 'success'"
+      [class.error]="messageType === 'error'"
+    >
+
+      @if (
+        messageType === 'success'
+      ) {
+
+        <lucide-icon
+          [img]="icons.ShieldCheck"
+          [size]="16"
+        />
+
+      }
+
+      @else {
+
+        <lucide-icon
+          [img]="icons.Info"
+          [size]="16"
+        />
+
+      }
+
+      <span>
+        {{ message }}
+      </span>
+
+    </div>
+
+  }
+
+
+  <!-- ============================= -->
+  <!-- MAIN GRID -->
+  <!-- ============================= -->
+
+  <div class="settings-layout">
+
+
+    <!-- =========================== -->
+    <!-- LEFT -->
+    <!-- =========================== -->
+
+    <main class="settings-main">
+
+
+      <!-- GENERAL -->
+
+      <article class="settings-card">
+
+        <div class="card-icon purple">
+
+          <lucide-icon
+            [img]="icons.MonitorCog"
+            [size]="20"
+          />
+
+        </div>
+
+
+        <div class="card-body">
+
+          <div class="section-heading">
+
+            <span>
+              GENERAL
+            </span>
+
+            <h2>
+              Agent identity
+            </h2>
+
+            <p>
+              Configure how this Windows Desktop Agent identifies itself.
+            </p>
+
+          </div>
+
+
+          <div class="field">
+
+            <label
+              for="agentName"
+            >
+              Agent name
+            </label>
+
+            <input
+              id="agentName"
+              type="text"
+              [(ngModel)]="settings.agentName"
+              maxlength="80"
+              placeholder="AI Desktop Controller"
+            />
+
+            <small>
+              This name is stored locally and can be used as the
+              Desktop Agent identity.
+            </small>
+
+          </div>
+
+        </div>
+
+      </article>
+
+
+      <!-- DATA -->
+
+      <article class="settings-card">
+
+        <div class="card-icon blue">
+
+          <lucide-icon
+            [img]="icons.Database"
+            [size]="20"
+          />
+
+        </div>
+
+
+        <div class="card-body">
+
+          <div class="section-heading">
+
+            <span>
+              DATA & STORAGE
+            </span>
+
+            <h2>
+              Command history
+            </h2>
+
+            <p>
+              Configure how many command records are retained locally.
+            </p>
+
+          </div>
+
+
+          <div class="field">
+
+            <label
+              for="logRetention"
+            >
+              Maximum records
+            </label>
+
+            <div class="input-suffix">
+
+              <input
+                id="logRetention"
+                type="number"
+                min="100"
+                max="10000"
+                step="100"
+                [(ngModel)]="settings.logRetention"
+              />
+
+              <span>
+                records
+              </span>
+
+            </div>
+
+            <small>
+              Allowed range: 100–10,000 command records.
+            </small>
+
+          </div>
+
+
+          <div class="info-row">
+
+            <lucide-icon
+              [img]="icons.Database"
+              [size]="15"
+            />
+
+            <div>
+
+              <strong>
+                Local SQLite storage
+              </strong>
+
+              <span>
+                Command history and agent settings are stored
+                on this Windows computer.
+              </span>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </article>
+
+
+      <!-- RUNTIME -->
+
+      <article class="settings-card">
+
+        <div class="card-icon green">
+
+          <lucide-icon
+            [img]="icons.Settings2"
+            [size]="20"
+          />
+
+        </div>
+
+
+        <div class="card-body">
+
+          <div class="section-heading">
+
+            <span>
+              RUNTIME
+            </span>
+
+            <h2>
+              Startup behaviour
+            </h2>
+
+            <p>
+              Control the Desktop Agent startup preference.
+            </p>
+
+          </div>
+
+
+          <label
+            class="toggle-setting"
+          >
+
+            <div class="toggle-copy">
+
+              <strong>
+                Start with Windows
+              </strong>
+
+              <span>
+                Store the startup preference for this agent.
+              </span>
+
+            </div>
+
+
+            <div
+              class="toggle"
+              [class.enabled]="
+                settings.autoStart === 'true'
+              "
+            >
+
+              <input
+                type="checkbox"
+                [ngModel]="
+                  settings.autoStart === 'true'
+                "
+                (ngModelChange)="
+                  settings.autoStart =
+                    $event ? 'true' : 'false'
+                "
+              />
+
+              <span class="slider"></span>
+
+            </div>
+
+          </label>
+
+        </div>
+
+      </article>
+
+
+      <!-- SAVE BAR -->
+
+      <div class="save-bar">
+
+        <div>
+
+          <strong>
+            Changes are saved locally
+          </strong>
+
+          <span>
+            Your configuration is stored by the Desktop Agent.
+          </span>
+
+        </div>
+
+
+        <div class="save-actions">
+
+          <button
+            class="reset-button"
+            type="button"
+            (click)="reset()"
+            [disabled]="saving"
+          >
+
+            <lucide-icon
+              [img]="icons.RotateCcw"
+              [size]="15"
+            />
+
+            Reset
+
+          </button>
+
+
+          <button
+            class="save-button"
+            type="button"
+            (click)="save()"
+            [disabled]="saving || loading"
+          >
+
+            <lucide-icon
+              [img]="icons.Save"
+              [size]="15"
+            />
+
+            {{
+              saving
+                ? 'Saving...'
+                : 'Save settings'
+            }}
+
+          </button>
+
+        </div>
+
+      </div>
+
+    </main>
+
+
+    <!-- =========================== -->
+    <!-- RIGHT SIDEBAR -->
+    <!-- =========================== -->
+
+    <aside class="settings-side">
+
+
+      <!-- AGENT STATUS -->
+
+      <article class="side-card">
+
+        <div class="live-label">
+
+          <span></span>
+
+          DESKTOP AGENT
+
+        </div>
+
+
+        <h3>
+          Local configuration
+        </h3>
+
+        <p>
+          These settings apply to this Windows Desktop Agent.
+        </p>
+
+
+        <div class="status-list">
+
+          <div>
+
+            <span>
+              Storage
+            </span>
+
+            <strong>
+              SQLite
+            </strong>
+
+          </div>
+
+
+          <div>
+
+            <span>
+              Platform
+            </span>
+
+            <strong>
+              Windows
+            </strong>
+
+          </div>
+
+
+          <div>
+
+            <span>
+              API
+            </span>
+
+            <strong>
+              REST / Local Wi-Fi
+            </strong>
+
+          </div>
+
+
+          <div>
+
+            <span>
+              Authentication
+            </span>
+
+            <strong>
+              Bearer Token
+            </strong>
+
+          </div>
+
+        </div>
+
+      </article>
+
+
+      <!-- SECURITY -->
+
+      <article class="security-card">
+
+        <div class="security-icon">
+
+          <lucide-icon
+            [img]="icons.LockKeyhole"
+            [size]="18"
+          />
+
+        </div>
+
+
+        <div>
+
+          <strong>
+            Security
+          </strong>
+
+          <p>
+            Remote commands remain protected by the
+            Desktop Agent authentication layer.
+          </p>
+
+        </div>
+
+      </article>
+
+
+      <!-- INFORMATION -->
+
+      <article class="info-card">
+
+        <lucide-icon
+          [img]="icons.Info"
+          [size]="17"
+        />
+
+        <div>
+
+          <strong>
+            About settings
+          </strong>
+
+          <p>
+            Changing the agent name does not change the
+            Windows computer name.
+          </p>
+
+        </div>
+
+      </article>
+
+
+    </aside>
+
+  </div>
+
+</section>

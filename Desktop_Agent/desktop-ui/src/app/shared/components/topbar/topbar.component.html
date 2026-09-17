@@ -1,46 +1,80 @@
 <header class="topbar">
 
-  <div class="topbar-spacer"></div>
+  <div class="page-heading">
+
+    <span class="crumb">
+      AI DESKTOP CONTROLLER
+    </span>
+
+    <h1>
+      {{ pageTitle }}
+    </h1>
+
+  </div>
+
 
   <div class="topbar-actions">
 
     <div
-      class="connection-indicator"
+      class="connected-device"
+      [class.connected]="isConnected"
+      [class.empty-state]="!isConnected"
+    >
+
+      <span class="device-icon-wrap">
+        <lucide-icon
+          [img]="icons.MonitorSmartphone"
+          [size]="17"
+        />
+      </span>
+
+      <div class="device-copy">
+
+        <span class="device-label">
+          {{ isConnected
+            ? 'CONNECTED DEVICE'
+            : 'DEVICE STATUS'
+          }}
+        </span>
+
+        <strong>
+          {{ deviceName }}
+        </strong>
+
+      </div>
+
+    </div>
+
+
+    <div
+      class="connection-pill"
       [class.offline]="!isOnline"
+      [class.disconnected]="
+        isOnline && !isConnected
+      "
+      [class.connected]="
+        isOnline && isConnected
+      "
     >
 
       <span class="connection-dot"></span>
 
       <lucide-icon
         [img]="icons.Wifi"
-        [size]="16"
-        [strokeWidth]="2"
+        [size]="14"
       />
 
       <span>
-        {{ isOnline ? 'Online' : 'Offline' }}
+        {{
+          !isOnline
+            ? 'Agent Offline'
+            : isConnected
+              ? 'Connected'
+              : 'Disconnected'
+        }}
       </span>
 
     </div>
-
-
-    <button
-      type="button"
-      class="stop-server-button"
-      (click)="stopServer()"
-    >
-
-      <lucide-icon
-        [img]="icons.Power"
-        [size]="16"
-        [strokeWidth]="2"
-      />
-
-      <span>
-        Stop Server
-      </span>
-
-    </button>
 
   </div>
 

@@ -1,93 +1,163 @@
-import { Component, inject } from '@angular/core';
-import { Router, NavigationEnd } from '@angular/router';
-import { filter } from 'rxjs';
+import {
+  Component,
+  OnDestroy,
+  OnInit,
+  inject
+} from '@angular/core';
+
+import {
+  Router,
+  NavigationEnd
+} from '@angular/router';
+
+import {
+  filter
+} from 'rxjs';
 
 import {
   LucideAngularModule,
-  Power,
   Wifi,
+  MonitorSmartphone
 } from 'lucide-angular';
 
-/**
- * Topbar component.
- *
- * Displays:
- * - Current page title
- * - Desktop Agent connection status
- * - Stop Server button
- */
+import {
+  DesktopAgentService
+} from '../../../core/services/desktop-agent.service';
+
 @Component({
   selector: 'app-topbar',
   standalone: true,
   imports: [
-    LucideAngularModule,
+    LucideAngularModule
   ],
   templateUrl: './topbar.component.html',
-  styleUrl: './topbar.component.scss',
+  styleUrl: './topbar.component.scss'
 })
-export class TopbarComponent {
+export class TopbarComponent
+  implements OnInit, OnDestroy {
 
-  private readonly router = inject(Router);
+  private readonly router =
+    inject(Router);
 
-  /**
-   * Current page title.
-   */
+  private readonly agent =
+    inject(DesktopAgentService);
+
   pageTitle = 'Dashboard';
 
-  /**
-   * Mock connection status.
-   *
-   * This will later come from the Desktop Agent.
-   */
-  isOnline = true;
+  isOnline = false;
 
-  /**
-   * Lucide icons.
-   */
+  isConnected = false;
+
+  deviceName =
+    'No device connected';
+
+  deviceId = '';
+
+  private timer?:
+    ReturnType<typeof setInterval>;
+
   readonly icons = {
-    Power,
     Wifi,
+    MonitorSmartphone
   };
 
-  /**
-   * Page title mapping.
-   */
-  private readonly pageTitles: Record<string, string> = {
-    '/dashboard': 'Dashboard',
-    '/pairing': 'QR Pairing',
-    '/devices': 'Devices',
-    '/logs': 'Command Logs',
-    '/settings': 'Settings',
-  };
+  private readonly pageTitles:
+    Record<string, string> = {
 
-  constructor() {
+      '/dashboard':
+        'Dashboard',
+
+      '/pairing':
+        'QR Pairing',
+
+      '/devices':
+        'Devices',
+
+      '/logs':
+        'Command Logs',
+
+      '/settings':
+        'Settings'
+    };
+
+  ngOnInit(): void {
+
+    this.refresh();
+
+    this.timer =
+      setInterval(
+        () => this.refresh(),
+        2000
+      );
+
     this.router.events
       .pipe(
         filter(
-          (event) => event instanceof NavigationEnd
+          event =>
+            event instanceof NavigationEnd
         )
       )
-      .subscribe((event) => {
+      .subscribe(event => {
 
-        const navigationEnd =
+        const navigation =
           event as NavigationEnd;
 
         this.pageTitle =
-          this.pageTitles[navigationEnd.urlAfterRedirects]
-          ?? 'AI Desktop Controller';
-
+          this.pageTitles[
+            navigation.urlAfterRedirects
+          ] ||
+          'AI Desktop Controller';
       });
   }
 
-  /**
-   * Temporary stop-server handler.
-   *
-   * Actual server control will be implemented
-   * during backend integration.
-   */
-  stopServer(): void {
-    alert(
-      'Stop Server will be connected to the Node.js Desktop Agent later.'
-    );
+  ngOnDestroy(): void {
+
+    if (this.timer) {
+      clearInterval(this.timer);
+    }
+  }
+
+  refresh(): void {
+
+    this.agent
+      .getConnectionStatus()
+      .subscribe({
+
+        next: response => {
+
+          this.isOnline = true;
+
+          const device =
+            response.data?.device;
+
+          this.isConnected =
+            !!device &&
+            device.status === 'connected';
+
+          this.deviceName =
+            device?.deviceName ||
+            'No device connected';
+
+          this.deviceId =
+            device?.deviceId || '';
+        },
+
+        error: error => {
+
+          console.error(
+            'Desktop Agent status error:',
+            error
+          );
+
+          this.isOnline = false;
+
+          this.isConnected = false;
+
+          this.deviceName =
+            'Agent unavailable';
+
+          this.deviceId = '';
+        }
+      });
   }
 }

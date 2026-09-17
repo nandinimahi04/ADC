@@ -54,20 +54,21 @@
     <!-- Paired Devices -->
 
     <article class="stat-card">
+  <div class="stat-label">
+    CONNECTED DEVICE
+  </div>
 
-      <div class="stat-label">
-        PAIRED DEVICES
-      </div>
+  <div
+    class="stat-value compact"
+    [class.good]="pairedDevices === 1"
+  >
+    {{ pairedDevices === 1 ? '1' : '0' }}
+  </div>
 
-      <div class="stat-value">
-        {{ pairedDevices }}
-      </div>
-
-      <div class="stat-description">
-        connected devices
-      </div>
-
-    </article>
+  <div class="stat-description">
+    {{ connectedDeviceName || 'No Android controller paired' }}
+  </div>
+</article>
 
 
     <!-- Uptime -->

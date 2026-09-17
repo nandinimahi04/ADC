@@ -1,45 +1,15 @@
 const crypto = require('crypto');
 
+const {
+    saveAuthSession,
+    getAuthSession,
+    removeAuthSession
+} = require('./database.service');
 
-/**
- * Authentication state.
- *
- * Temporary in-memory storage for the current phase.
- *
- * Later this will be persisted in SQLite.
- */
-let authenticationState = {
-
-    accessToken: null,
-
-    deviceId: null,
-
-    deviceName: null,
-
-    issuedAt: null,
-
-    expiresAt: null
-
-};
-
-
-/**
- * Access token lifetime.
- *
- * 24 hours for the current development phase.
- *
- * Later this should be configurable.
- */
 const ACCESS_TOKEN_TTL =
     24 * 60 * 60 * 1000;
 
 
-/**
- * Generate a cryptographically secure
- * authentication token.
- *
- * @returns {string}
- */
 function generateAccessToken() {
 
     return crypto
@@ -49,22 +19,13 @@ function generateAccessToken() {
 }
 
 
-/**
- * Create an authentication session
- * after successful device pairing.
- *
- * @param {Object} device
- * @returns {Object}
- */
 function createAuthenticationSession(device) {
 
     const accessToken =
         generateAccessToken();
 
-
     const issuedAt =
         new Date();
-
 
     const expiresAt =
         new Date(
@@ -72,8 +33,7 @@ function createAuthenticationSession(device) {
             ACCESS_TOKEN_TTL
         );
 
-
-    authenticationState = {
+    const session = {
 
         accessToken,
 
@@ -91,6 +51,7 @@ function createAuthenticationSession(device) {
 
     };
 
+    saveAuthSession(session);
 
     return {
 
@@ -99,15 +60,15 @@ function createAuthenticationSession(device) {
         tokenType: 'Bearer',
 
         expiresAt:
-            expiresAt.toISOString(),
+            session.expiresAt,
 
         device: {
 
             deviceId:
-                device.deviceId,
+                session.deviceId,
 
             deviceName:
-                device.deviceName
+                session.deviceName
 
         }
 
@@ -116,105 +77,59 @@ function createAuthenticationSession(device) {
 }
 
 
-/**
- * Validate an access token.
- *
- * @param {string} token
- * @returns {Object}
- */
 function validateAccessToken(token) {
 
     if (!token) {
 
         return {
-
             valid: false,
-
-            message:
-                'Access token is required'
-
+            message: 'Access token is required'
         };
 
     }
 
+    const session =
+        getAuthSession();
 
-    if (
-        !authenticationState.accessToken
-    ) {
+    if (!session) {
 
         return {
-
             valid: false,
-
-            message:
-                'No authenticated device exists'
-
+            message: 'No authenticated device exists'
         };
 
     }
 
-
-    /**
-     * Check token equality.
-     */
     if (
         token !==
-        authenticationState.accessToken
+        session.accessToken
     ) {
 
         return {
-
             valid: false,
-
-            message:
-                'Invalid access token'
-
+            message: 'Invalid access token'
         };
 
     }
 
-
-    /**
-     * Check expiry.
-     */
     const expiresAt =
         new Date(
-            authenticationState.expiresAt
+            session.expiresAt
         ).getTime();
-
 
     if (
         Number.isNaN(expiresAt) ||
         Date.now() > expiresAt
     ) {
 
-        authenticationState =
-            {
-
-                accessToken: null,
-
-                deviceId: null,
-
-                deviceName: null,
-
-                issuedAt: null,
-
-                expiresAt: null
-
-            };
-
+        removeAuthSession();
 
         return {
-
             valid: false,
-
-            message:
-                'Access token has expired'
-
+            message: 'Access token has expired'
         };
 
     }
-
 
     return {
 
@@ -223,10 +138,10 @@ function validateAccessToken(token) {
         device: {
 
             deviceId:
-                authenticationState.deviceId,
+                session.deviceId,
 
             deviceName:
-                authenticationState.deviceName
+                session.deviceName
 
         }
 
@@ -235,59 +150,53 @@ function validateAccessToken(token) {
 }
 
 
-/**
- * Return the current authenticated device.
- *
- * @returns {Object|null}
- */
 function getAuthenticatedDevice() {
 
+    const session =
+        getAuthSession();
+
+    if (!session) {
+        return null;
+    }
+
+    const expiresAt =
+        new Date(
+            session.expiresAt
+        ).getTime();
+
     if (
-        !authenticationState.accessToken
+        Number.isNaN(expiresAt) ||
+        Date.now() > expiresAt
     ) {
+
+        removeAuthSession();
 
         return null;
 
     }
 
-
     return {
 
         deviceId:
-            authenticationState.deviceId,
+            session.deviceId,
 
         deviceName:
-            authenticationState.deviceName,
+            session.deviceName,
 
         issuedAt:
-            authenticationState.issuedAt,
+            session.issuedAt,
 
         expiresAt:
-            authenticationState.expiresAt
+            session.expiresAt
 
     };
 
 }
 
 
-/**
- * Revoke the current authentication token.
- */
 function revokeAuthentication() {
 
-    authenticationState = {
-
-        accessToken: null,
-
-        deviceId: null,
-
-        deviceName: null,
-
-        issuedAt: null,
-
-        expiresAt: null
-
-    };
+    removeAuthSession();
 
 }
 

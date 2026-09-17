@@ -1,1 +1,503 @@
-<p>logs works!</p>
+<section class="page logs-page">
+
+  <!-- ============================= -->
+  <!-- PAGE HEADER -->
+  <!-- ============================= -->
+
+  <header class="page-head">
+
+    <div class="heading-copy">
+
+      <span class="eyebrow">
+        AUDIT TRAIL
+      </span>
+
+      <h1>
+        Command Logs
+      </h1>
+
+      <p>
+        Monitor commands executed through the Windows Desktop Agent.
+      </p>
+
+    </div>
+
+    <div class="head-actions">
+
+      <button
+        class="button secondary"
+        type="button"
+        (click)="load()"
+        [disabled]="loading"
+      >
+        <lucide-icon
+          [img]="icons.RefreshCw"
+          [size]="15"
+        ></lucide-icon>
+
+        Refresh
+      </button>
+
+      <button
+        class="button danger"
+        type="button"
+        (click)="clear()"
+        [disabled]="!logs.length"
+      >
+        <lucide-icon
+          [img]="icons.Trash2"
+          [size]="15"
+        ></lucide-icon>
+
+        Clear Logs
+      </button>
+
+    </div>
+
+  </header>
+
+
+  <!-- ============================= -->
+  <!-- MESSAGE -->
+  <!-- ============================= -->
+
+  @if (message) {
+
+    <div
+      class="notice"
+      [class.success]="messageType === 'success'"
+      [class.error]="messageType === 'error'"
+    >
+
+      @if (messageType === 'success') {
+
+        <lucide-icon
+          [img]="icons.CheckCircle2"
+          [size]="15"
+        ></lucide-icon>
+
+      } @else {
+
+        <lucide-icon
+          [img]="icons.AlertCircle"
+          [size]="15"
+        ></lucide-icon>
+
+      }
+
+      <span>
+        {{ message }}
+      </span>
+
+    </div>
+
+  }
+
+
+  <!-- ============================= -->
+  <!-- STATISTICS -->
+  <!-- ============================= -->
+
+  <section class="stats-grid">
+
+    <article class="stat-card">
+
+      <div class="stat-icon total">
+
+        <lucide-icon
+          [img]="icons.Activity"
+          [size]="18"
+        ></lucide-icon>
+
+      </div>
+
+      <div class="stat-copy">
+
+        <span>
+          TOTAL COMMANDS
+        </span>
+
+        <strong>
+          {{ logs.length }}
+        </strong>
+
+        <small>
+          Stored locally
+        </small>
+
+      </div>
+
+    </article>
+
+
+    <article class="stat-card">
+
+      <div class="stat-icon success">
+
+        <lucide-icon
+          [img]="icons.CheckCircle2"
+          [size]="18"
+        ></lucide-icon>
+
+      </div>
+
+      <div class="stat-copy">
+
+        <span>
+          SUCCESSFUL
+        </span>
+
+        <strong>
+          {{ successCount }}
+        </strong>
+
+        <small>
+          Executed successfully
+        </small>
+
+      </div>
+
+    </article>
+
+
+    <article class="stat-card">
+
+      <div class="stat-icon failed">
+
+        <lucide-icon
+          [img]="icons.XCircle"
+          [size]="18"
+        ></lucide-icon>
+
+      </div>
+
+      <div class="stat-copy">
+
+        <span>
+          FAILED
+        </span>
+
+        <strong>
+          {{ failureCount }}
+        </strong>
+
+        <small>
+          Requires attention
+        </small>
+
+      </div>
+
+    </article>
+
+  </section>
+
+
+  <!-- ============================= -->
+  <!-- FILTER BAR -->
+  <!-- ============================= -->
+
+  <section class="filter-bar">
+
+    <div class="filter-tabs">
+
+      <button
+        type="button"
+        [class.active]="filter === 'all'"
+        (click)="setFilter('all')"
+      >
+        All
+      </button>
+
+
+      <button
+        type="button"
+        [class.active]="filter === 'success'"
+        (click)="setFilter('success')"
+      >
+
+        <span class="tiny-dot success-dot"></span>
+
+        Success
+
+      </button>
+
+
+      <button
+        type="button"
+        [class.active]="filter === 'failed'"
+        (click)="setFilter('failed')"
+
+      >
+
+        <span class="tiny-dot failed-dot"></span>
+
+        Failed
+
+      </button>
+
+    </div>
+
+
+    <div class="search-box">
+
+      <lucide-icon
+        [img]="icons.Search"
+        [size]="15"
+      ></lucide-icon>
+
+      <input
+        type="text"
+        placeholder="Search commands or messages..."
+        [(ngModel)]="search"
+        (ngModelChange)="applyFilter()"
+      />
+
+      @if (search) {
+
+        <button
+          type="button"
+          class="clear-search"
+          (click)="search = ''; applyFilter()"
+        >
+          ×
+        </button>
+
+      }
+
+    </div>
+
+  </section>
+
+
+  <!-- ============================= -->
+  <!-- LOG TABLE -->
+  <!-- ============================= -->
+
+  <section class="log-card">
+
+    @if (loading) {
+
+      <div class="state">
+
+        <div class="spinner"></div>
+
+        <strong>
+          Loading command history
+        </strong>
+
+        <span>
+          Reading logs from the Desktop Agent...
+        </span>
+
+      </div>
+
+    }
+
+    @else if (!filteredLogs.length) {
+
+      <div class="state empty">
+
+        <div class="empty-icon">
+
+          <lucide-icon
+            [img]="icons.TerminalSquare"
+            [size]="30"
+          ></lucide-icon>
+
+        </div>
+
+        <strong>
+
+          @if (logs.length) {
+            No matching commands
+          } @else {
+            No command history yet
+          }
+
+        </strong>
+
+        <span>
+
+          @if (logs.length) {
+            Try changing the filter or search term.
+          } @else {
+            Commands executed through the controller will appear here.
+          }
+
+        </span>
+
+      </div>
+
+    }
+
+    @else {
+
+      <div class="table-scroll">
+
+        <div class="log-table">
+
+
+          <!-- TABLE HEADER -->
+
+          <div class="log-head">
+
+            <span>
+              TIME
+            </span>
+
+            <span>
+              TYPE
+            </span>
+
+            <span>
+              COMMAND
+            </span>
+
+            <span>
+              RESULT
+            </span>
+
+            <span>
+              STATUS
+            </span>
+
+          </div>
+
+
+          <!-- TABLE ROWS -->
+
+          @for (
+            log of filteredLogs;
+            track log.id
+          ) {
+
+            <div class="log-row">
+
+
+              <!-- TIME -->
+
+              <div class="time-cell">
+
+                <strong>
+                  {{ log.createdAt | date:'MMM d, y' }}
+                </strong>
+
+                <small>
+                  {{ log.createdAt | date:'h:mm:ss a' }}
+                </small>
+
+              </div>
+
+
+              <!-- TYPE -->
+
+              <div>
+
+                <span class="type-badge">
+
+                  {{ log.commandType || 'system' }}
+
+                </span>
+
+              </div>
+
+
+              <!-- COMMAND -->
+
+              <div class="command-cell">
+
+                <code>
+                  {{ log.command }}
+                </code>
+
+              </div>
+
+
+              <!-- RESULT -->
+
+              <div class="result-cell">
+
+                {{ log.message || 'Command executed.' }}
+
+              </div>
+
+
+              <!-- STATUS -->
+
+              <div>
+
+                @if (log.status === 'success') {
+
+                  <span class="status success">
+
+                    <lucide-icon
+                      [img]="icons.CheckCircle2"
+                      [size]="13"
+                    ></lucide-icon>
+
+                    Success
+
+                  </span>
+
+                } @else {
+
+                  <span class="status failed">
+
+                    <lucide-icon
+                      [img]="icons.XCircle"
+                      [size]="13"
+                    ></lucide-icon>
+
+                    Failed
+
+                  </span>
+
+                }
+
+              </div>
+
+            </div>
+
+          }
+
+        </div>
+
+      </div>
+
+    }
+
+  </section>
+
+
+  <!-- ============================= -->
+  <!-- FOOTER -->
+  <!-- ============================= -->
+
+  <div class="page-footer">
+
+    <span>
+
+      Showing
+
+      <strong>
+        {{ filteredLogs.length }}
+      </strong>
+
+      of
+
+      <strong>
+        {{ logs.length }}
+      </strong>
+
+      commands
+
+    </span>
+
+
+    <span>
+      Local SQLite audit storage
+    </span>
+
+  </div>
+
+</section>

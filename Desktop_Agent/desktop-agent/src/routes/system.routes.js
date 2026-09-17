@@ -1,7 +1,7 @@
 const express = require('express');
 
 const {
-    controlSystem
+    controlSystem,cleanupTemp
 } = require('../controllers/system.controller');
 
 const {
@@ -72,6 +72,11 @@ router.get(
 router.post(
     '/',
     controlSystem
+);
+
+router.post(
+    '/cleanup-temp',
+    cleanupTemp
 );
 
 
