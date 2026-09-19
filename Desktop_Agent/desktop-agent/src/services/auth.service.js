@@ -3,6 +3,7 @@ const crypto = require('crypto');
 const {
     saveAuthSession,
     getAuthSession,
+    touchPairedDevice,
     removeAuthSession
 } = require('./database.service');
 

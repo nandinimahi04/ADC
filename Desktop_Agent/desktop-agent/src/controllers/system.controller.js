@@ -1,4 +1,4 @@
-const {systemService,cleanupTempFiles} =
+const {executeSystemCommand,cleanupTempFiles} =
     require('../services/system.service');
 
 
@@ -57,7 +57,7 @@ async function controlSystem(req, res) {
 
 
         const result =
-            await systemService.executeSystemCommand(
+            await executeSystemCommand(
                 command
             );
 

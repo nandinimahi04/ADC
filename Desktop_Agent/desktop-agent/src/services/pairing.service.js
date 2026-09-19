@@ -16,6 +16,7 @@ const {
 const {
     savePairedDevice,
     getPairedDevice,
+    touchPairedDevice,
     removePairedDevice
 } = require('./database.service');
 
@@ -293,7 +294,7 @@ function verifyPairing(request) {
 function getPairingStatus() {
 
     const storedDevice =
-        getPairedDevice();
+        touchPairedDevice();
 
 
     if (!storedDevice) {

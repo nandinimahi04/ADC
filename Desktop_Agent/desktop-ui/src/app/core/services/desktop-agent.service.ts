@@ -42,7 +42,7 @@ export interface PairingStatusResponse {
       deviceId: string;
       deviceName: string;
       pairedAt: string;
-      lastSeen: string;
+      lastSeenAt : string;
       status: string;
     } | null;
     expiresAt: string | null;

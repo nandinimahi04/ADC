@@ -60,6 +60,7 @@ function savePairedDevice(device) {
         ON CONFLICT(device_id)
         DO UPDATE SET
             device_name = excluded.device_name,
+            paired_at = excluded.paired_at,
             last_seen_at = excluded.last_seen_at,
             status = 'connected'
     `).run(
@@ -85,6 +86,18 @@ function getPairedDevice() {
         ORDER BY id DESC
         LIMIT 1
     `).get() || null;
+}
+
+function touchPairedDevice() {
+    const now = new Date().toISOString();
+
+    db.prepare(`
+        UPDATE paired_devices
+        SET last_seen_at = ?
+        WHERE status = 'connected'
+    `).run(now);
+
+    return getPairedDevice();
 }
 
 function removePairedDevice() {
@@ -207,6 +220,7 @@ module.exports = {
     databasePath,
     savePairedDevice,
     getPairedDevice,
+    touchPairedDevice,
     removePairedDevice,
     saveAuthSession,
     getAuthSession,

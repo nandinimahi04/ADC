@@ -4,6 +4,10 @@ const {
     executeApplicationCommand
 } = require('../services/application.service');
 
+const {
+    controlSystem
+} = require('../controllers/system.controller');
+
 const router = express.Router();
 
 
@@ -46,6 +50,12 @@ router.post(
             });
         }
     }
+);
+
+
+router.post(
+    '/system',
+    controlSystem
 );
 
 

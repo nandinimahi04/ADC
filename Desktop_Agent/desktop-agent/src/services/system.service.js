@@ -14,13 +14,13 @@ const {
  */
 const SYSTEM_COMMANDS = {
     shutdown: {
-        command: 'shutdown',
+        command: 'shutdown.exe',
         args: ['/s', '/t', '0'],
         description: 'Shut down the computer'
     },
 
     restart: {
-        command: 'shutdown',
+        command: 'shutdown.exe',
         args: ['/r', '/t', '0'],
         description: 'Restart the computer'
     },
@@ -76,7 +76,7 @@ function executeSystemCommand(command) {
             }
         );
 
-        process.on('error', (error) => {
+        process.once('error', (error) => {
             addCommandHistory(
                 'system',
                 command,
@@ -87,20 +87,22 @@ function executeSystemCommand(command) {
             reject(error);
         });
 
-        process.unref();
+        process.once('spawn', () => {
+    process.unref();
 
-        addCommandHistory(
-            'system',
-            command,
-            'success',
-            `System command "${command}" executed successfully`
-        );
+    addCommandHistory(
+        'system',
+        command,
+        'success',
+        `System command "${command}" started successfully`
+    );
 
-        resolve({
-            command,
-            description: config.description,
-            status: 'executed'
-        });
+    resolve({
+        command,
+        description: config.description,
+        status: 'executed'
+    });
+});
     });
 }
 
