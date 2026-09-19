@@ -2,6 +2,10 @@ const fs = require('fs');
 const path = require('path');
 const { execFile, spawn } = require('child_process');
 
+const {
+    addCommandHistory
+} = require('./database.service');
+
 const BROWSER_CANDIDATES = {
     chrome: [
         path.join(
@@ -69,6 +73,20 @@ const BROWSER_DISPLAY_NAMES = {
     chrome: 'Google Chrome',
     edge: 'Microsoft Edge',
     firefox: 'Mozilla Firefox'
+};
+
+const APPLICATION_CANDIDATES = {
+    notepad: [
+        path.join(
+            process.env.WINDIR || 'C:\\Windows',
+            'System32',
+            'notepad.exe'
+        )
+    ]
+};
+
+const APPLICATION_DISPLAY_NAMES = {
+    notepad: 'Notepad'
 };
 
 function firstExistingPath(paths) {
@@ -191,55 +209,113 @@ async function launchBrowser(browser) {
     await launchRegisteredBrowser(browser);
 }
 
+async function launchApplication(application) {
+
+    if (process.platform !== 'win32') {
+        throw new Error(
+            'Application control is supported on Windows only.'
+        );
+    }
+
+    const executable =
+        firstExistingPath(
+            APPLICATION_CANDIDATES[application] || []
+        );
+
+    if (!executable) {
+        throw new Error(
+            `${APPLICATION_DISPLAY_NAMES[application]} was not found.`
+        );
+    }
+
+    await launchExecutable(executable);
+}
+
 async function executeApplicationCommand(
     action,
     application
 ) {
 
     if (action !== 'open') {
-        throw new Error(
-            `Unsupported application action: ${action}`
-        );
-    }
+    throw new Error(
+        `Unsupported application action: ${action}`
+    );
+}
 
-    const normalized =
-        String(application || '')
-            .trim()
-            .toLowerCase();
+const normalized =
+    String(application || '')
+        .trim()
+        .toLowerCase();
 
-    if (
-        !Object.prototype.hasOwnProperty.call(
-            BROWSER_CANDIDATES,
-            normalized
-        )
-    ) {
-        throw new Error(
-            `Unsupported application: ${normalized}`
-        );
-    }
+const isBrowser =
+    Object.prototype.hasOwnProperty.call(
+        BROWSER_CANDIDATES,
+        normalized
+    );
 
-    try {
+const isApplication =
+    Object.prototype.hasOwnProperty.call(
+        APPLICATION_CANDIDATES,
+        normalized
+    );
 
+if (!isBrowser && !isApplication) {
+    throw new Error(
+        `Unsupported application: ${normalized}`
+    );
+}
+
+try {
+
+    if (isBrowser) {
         await launchBrowser(normalized);
-
-    } catch (error) {
-
-        console.error(
-            `${normalized} launch error:`,
-            error
-        );
-
-        throw new Error(
-            `Unable to open ${BROWSER_DISPLAY_NAMES[normalized]}.`
-        );
+    } else {
+        await launchApplication(normalized);
     }
 
-    return {
-        success: true,
-        application: normalized,
-        message:
-            `${BROWSER_DISPLAY_NAMES[normalized]} opened successfully`
-    };
+} catch (error) {
+
+    console.error(
+        `${normalized} launch error:`,
+        error
+    );
+
+    const displayName =
+        isBrowser
+            ? BROWSER_DISPLAY_NAMES[normalized]
+            : APPLICATION_DISPLAY_NAMES[normalized];
+
+    addCommandHistory(
+        'application',
+        `open:${normalized}`,
+        'failed',
+        error?.message ||
+            `Unable to open ${displayName}.`
+    );
+
+    throw new Error(
+        `Unable to open ${displayName}.`
+    );
+}
+
+const displayName =
+    isBrowser
+        ? BROWSER_DISPLAY_NAMES[normalized]
+        : APPLICATION_DISPLAY_NAMES[normalized];
+
+addCommandHistory(
+    'application',
+    `open:${normalized}`,
+    'success',
+    `${displayName} opened successfully`
+);
+
+return {
+    success: true,
+    application: normalized,
+    message:
+        `${displayName} opened successfully`
+};
 }
 
 module.exports = {

@@ -91,6 +91,13 @@ export class DesktopAgentService {
     );
   }
 
+  async cleanupTempFiles(): Promise<any> {
+  return this.http.post(
+    `${this.baseUrl}/system/cleanup-temp`,
+    {}
+  ).toPromise();
+}
+
   /**
    * ============================
    * APPLICATION

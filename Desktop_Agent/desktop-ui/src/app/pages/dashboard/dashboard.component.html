@@ -129,8 +129,17 @@
           type="button"
           class="action-button"
           [class.action-danger]="action.type === 'danger'"
-          [class.chrome-action]="action.type === 'chrome'"
-          [disabled]="action.type === 'chrome' && isExecuting"
+          [class.chrome-action]="
+  action.type === 'chrome' ||
+  action.type === 'notepad'
+"
+[disabled]="
+  (
+    action.type === 'chrome' ||
+    action.type === 'notepad'
+  ) &&
+  isExecuting
+"
           (click)="executeAction(action)"
         >
 
@@ -141,11 +150,17 @@
           />
 
           <span>
-            @if (action.type === 'chrome' && isExecuting) {
-              Opening...
-            } @else {
-              {{ action.label }}
-            }
+           @if (
+  (
+    action.type === 'chrome' ||
+    action.type === 'notepad'
+  ) &&
+  isExecuting
+) {
+  Opening...
+} @else {
+  {{ action.label }}
+}
           </span>
 
         </button>
@@ -206,6 +221,57 @@
             (click)="confirmAction()"
           >
             Yes, {{ confirmationTitle }}
+          </button>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  }
+
+    <!-- ================================
+       Success Modal
+       ================================= -->
+  @if (showSuccessModal) {
+
+    <div
+      class="confirm-overlay"
+      (click)="closeSuccessModal()"
+    >
+
+      <div
+        class="confirm-modal success-modal"
+        (click)="$event.stopPropagation()"
+      >
+
+        <div class="success-icon-wrapper">
+
+          <lucide-icon
+            [img]="icons.CheckCircle2"
+            [size]="32"
+            [strokeWidth]="1.8"
+          />
+
+        </div>
+
+        <h3 class="confirm-title">
+          {{ successTitle }}
+        </h3>
+
+        <p class="confirm-message">
+          {{ successMessage }}
+        </p>
+
+        <div class="confirm-buttons">
+
+          <button
+            type="button"
+            class="confirm-btn success-button"
+            (click)="closeSuccessModal()"
+          >
+            OK
           </button>
 
         </div>

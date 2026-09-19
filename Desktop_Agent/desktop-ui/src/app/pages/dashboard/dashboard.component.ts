@@ -12,6 +12,9 @@ import {
   Lock,
   Moon,
   Globe,
+  FileText,
+  Trash2,
+  CheckCircle2,
   AlertTriangle,
   Server,
   Smartphone,
@@ -30,8 +33,14 @@ import {
 interface QuickAction {
   label: string;
   icon: any;
-  type: 'danger' | 'default' | 'chrome';
+  type:
+    | 'danger'
+    | 'default'
+    | 'chrome'
+    | 'notepad'
+    | 'cleanup-temp';
   systemCommand?: string;
+  application?: string;
 }
 
 
@@ -119,6 +128,9 @@ export class DashboardComponent
     Lock,
     Moon,
     Globe,
+    FileText,
+    Trash2,
+    CheckCircle2,
     AlertTriangle,
     Server,
     Smartphone,
@@ -164,6 +176,19 @@ export class DashboardComponent
 
   /**
    * ================================
+   * SUCCESS MODAL
+   * ================================
+   */
+
+  showSuccessModal = false;
+
+  successTitle = '';
+
+  successMessage = '';
+
+
+  /**
+   * ================================
    * QUICK ACTIONS
    * ================================
    */
@@ -203,6 +228,20 @@ export class DashboardComponent
       label: 'Open Chrome',
       icon: Globe,
       type: 'chrome',
+      application: 'chrome',
+    },
+
+    {
+      label: 'Notepad',
+      icon: FileText,
+      type: 'notepad',
+      application: 'notepad',
+    },
+
+    {
+      label: 'Clean Temp Files',
+      icon: Trash2,
+      type: 'cleanup-temp',
     },
 
   ];
@@ -276,17 +315,9 @@ export class DashboardComponent
    * LOAD DESKTOP AGENT STATE
    * ================================
    *
-   * IMPORTANT:
-   *
-   * This is the method that was missing
-   * from your original dashboard.
-   *
    * Device information comes from:
    *
    * GET /pair/status
-   *
-   * which reads the persisted Desktop
-   * Agent device state.
    */
   refreshDashboard(): void {
 
@@ -294,7 +325,7 @@ export class DashboardComponent
       .getConnectionStatus()
       .subscribe({
 
-        next: response => {
+        next: (response: any) => {
 
           /**
            * Desktop Agent is reachable.
@@ -352,7 +383,7 @@ export class DashboardComponent
         },
 
 
-        error: error => {
+        error: (error: any) => {
 
           console.error(
             'Desktop Agent status error:',
@@ -456,7 +487,7 @@ export class DashboardComponent
       .stopServer()
       .subscribe({
 
-        next: response => {
+        next: (response: any) => {
 
           console.log(
             'Stop server response:',
@@ -469,7 +500,7 @@ export class DashboardComponent
             'Stopping...';
         },
 
-        error: error => {
+        error: (error: any) => {
 
           console.error(
             'Failed to stop Desktop Agent:',
@@ -500,6 +531,23 @@ export class DashboardComponent
     action: QuickAction
   ): void {
 
+    if (this.isExecuting) {
+      return;
+    }
+
+    /**
+     * Clean temporary files.
+     */
+    if (
+      action.type === 'cleanup-temp'
+    ) {
+
+      this.cleanTempFiles();
+
+      return;
+    }
+
+
     /**
      * Chrome does not require
      * confirmation.
@@ -508,7 +556,25 @@ export class DashboardComponent
       action.type === 'chrome'
     ) {
 
-      this.openChrome();
+      this.openApplication(
+        action.application || 'chrome'
+      );
+
+      return;
+    }
+
+
+    /**
+     * Notepad does not require
+     * confirmation.
+     */
+    if (
+      action.type === 'notepad'
+    ) {
+
+      this.openApplication(
+        action.application || 'notepad'
+      );
 
       return;
     }
@@ -576,7 +642,7 @@ export class DashboardComponent
       )
       .subscribe({
 
-        next: response => {
+        next: (response: any) => {
 
           console.log(
             `${action.label} response:`,
@@ -587,14 +653,14 @@ export class DashboardComponent
             false;
 
           /**
-           * Refresh logs/device state after
+           * Refresh dashboard after
            * successful command.
            */
           this.refreshDashboard();
         },
 
 
-        error: error => {
+        error: (error: any) => {
 
           console.error(
             `Failed to ${action.label}:`,
@@ -634,29 +700,106 @@ export class DashboardComponent
 
   /**
    * ================================
-   * OPEN CHROME
+   * CLEAN TEMP FILES
    * ================================
    */
 
-  openChrome(): void {
+  async cleanTempFiles(): Promise<void> {
 
     if (this.isExecuting) {
       return;
     }
 
+    this.isExecuting =
+      true;
+
+    try {
+
+      const response =
+        await this.desktopAgent
+          .cleanupTempFiles();
+
+      console.log(
+        'Temp cleanup response:',
+        response
+      );
+
+      this.isExecuting =
+        false;
+
+      this.successTitle =
+        'Clean Temp Files';
+
+      this.successMessage =
+        'Temporary files cleaned successfully.';
+
+      this.showSuccessModal =
+        true;
+
+    } catch (error: any) {
+
+      console.error(
+        'Temp cleanup failed:',
+        error
+      );
+
+      this.isExecuting =
+        false;
+
+      alert(
+        this.getErrorMessage(
+          error,
+          'Unable to clean temporary files.'
+        )
+      );
+    }
+  }
+
+
+  /**
+   * ================================
+   * CLOSE SUCCESS MODAL
+   * ================================
+   */
+
+  closeSuccessModal(): void {
+
+    this.showSuccessModal =
+      false;
+
+    this.successTitle =
+      '';
+
+    this.successMessage =
+      '';
+  }
+
+
+  /**
+   * ================================
+   * OPEN APPLICATION
+   * ================================
+   */
+
+  openApplication(
+    application: string
+  ): void {
+
+    if (this.isExecuting) {
+      return;
+    }
 
     this.isExecuting =
       true;
 
-
     this.desktopAgent
-      .openApplication('chrome')
+      .openApplication(application)
       .subscribe({
 
-        next: response => {
+        next: (response: any) => {
 
           console.log(
-            'Chrome command response:',
+            `${application} command response:`,
             response
           );
 
@@ -664,21 +807,25 @@ export class DashboardComponent
             false;
         },
 
-
-        error: error => {
+        error: (error: any) => {
 
           console.error(
-            'Failed to open Chrome:',
+            `Failed to open ${application}:`,
             error
           );
 
           this.isExecuting =
             false;
 
+          const displayName =
+            application === 'notepad'
+              ? 'Notepad'
+              : 'Google Chrome';
+
           alert(
             this.getErrorMessage(
               error,
-              'Unable to open Google Chrome.'
+              `Unable to open ${displayName}.`
             )
           );
         }
@@ -691,12 +838,8 @@ export class DashboardComponent
    * ================================
    * ERROR MESSAGE
    * ================================
-   *
-   * Prevents every backend error from
-   * being incorrectly shown as:
-   *
-   * "Unable to connect to Desktop Agent."
    */
+
   private getErrorMessage(
     error: any,
     fallback: string
