@@ -95,19 +95,20 @@ export class DashboardComponent
   deviceStatus =
     'Disconnected';
 
+    /**
+ * ================================
+ * DESKTOP AGENT UPTIME
+ * ================================
+ */
 
-  /**
-   * ================================
-   * UPTIME
-   * ================================
-   */
+uptime = '00:00:00';
 
-  private startedAt = Date.now();
+private agentStartedAt = 0;
 
-  uptime = '00:00:00';
+private uptimeInterval?:
+  ReturnType<typeof setInterval>;
 
-  private uptimeInterval?:
-    ReturnType<typeof setInterval>;
+  
 
   /**
    * Refresh Desktop Agent state.
@@ -255,36 +256,30 @@ export class DashboardComponent
 
   ngOnInit(): void {
 
-    /**
-     * Load Desktop Agent state immediately.
-     */
-    this.refreshDashboard();
+  /**
+   * Load Desktop Agent state immediately.
+   */
+  this.refreshDashboard();
 
-    /**
-     * Keep uptime updated.
-     */
-    this.updateUptime();
+  /**
+   * Update actual Desktop Agent uptime
+   * every second.
+   */
+  this.uptimeInterval =
+    setInterval(
+      () => this.updateAgentUptime(),
+      1000
+    );
 
-    this.uptimeInterval =
-      setInterval(
-        () => this.updateUptime(),
-        1000
-      );
-
-    /**
-     * Refresh device connection state.
-     *
-     * This makes the dashboard and navbar
-     * automatically update after pairing,
-     * disconnecting, or reconnecting.
-     */
-    this.statusInterval =
-      setInterval(
-        () => this.refreshDashboard(),
-        2000
-      );
-  }
-
+  /**
+   * Refresh device connection state.
+   */
+  this.statusInterval =
+    setInterval(
+      () => this.refreshDashboard(),
+      2000
+    );
+}
 
   /**
    * ================================
@@ -294,21 +289,18 @@ export class DashboardComponent
 
   ngOnDestroy(): void {
 
-    if (this.uptimeInterval) {
-
-      clearInterval(
-        this.uptimeInterval
-      );
-    }
-
-    if (this.statusInterval) {
-
-      clearInterval(
-        this.statusInterval
-      );
-    }
+  if (this.statusInterval) {
+    clearInterval(
+      this.statusInterval
+    );
   }
 
+  if (this.uptimeInterval) {
+    clearInterval(
+      this.uptimeInterval
+    );
+  }
+}
 
   /**
    * ================================
@@ -320,146 +312,103 @@ export class DashboardComponent
    * GET /pair/status
    */
   refreshDashboard(): void {
+  // -----------------------------
+  // 1. CHECK DESKTOP AGENT
+  // -----------------------------
+  this.desktopAgent.getAgentStatus().subscribe({
+    next: (response: any) => {
+      console.log('Agent status:', response);
 
-    this.desktopAgent
-      .getConnectionStatus()
-      .subscribe({
+      this.serverStatus = 'Running';
 
-        next: (response: any) => {
+      if (response?.port) {
+        this.port = response.port;
+      }
 
-          /**
-           * Desktop Agent is reachable.
-           */
-          this.serverStatus =
-            'Running';
+      if (response?.startedAt) {
+  this.agentStartedAt =
+    new Date(response.startedAt).getTime();
 
+  this.updateAgentUptime();
+}
 
-          /**
-           * Get persisted device.
-           */
-          const device =
-            response.data?.device;
+      
+    },
 
+    error: (error) => {
+      console.error('Agent status error:', error);
 
-          /**
-           * Device exists.
-           */
-          if (device) {
+      this.serverStatus = 'Offline';
+      this.port = 5000;
+      this.uptime = '00:00:00';
 
-            this.pairedDevices = 1;
-
-            this.connectedDeviceName =
-              device.deviceName ||
-              'Android Phone';
-
-            this.connectedDeviceId =
-              device.deviceId ||
-              '';
-
-            this.deviceStatus =
-              device.status === 'connected'
-                ? 'Connected'
-                : 'Disconnected';
-
-          }
+      this.pairedDevices = 0;
+      this.connectedDeviceName = 'Agent unavailable';
+      this.connectedDeviceId = '';
+      this.deviceStatus = 'Agent unavailable';
+    }
+  });
 
 
-          /**
-           * No persisted device.
-           */
-          else {
+  // -----------------------------
+  // 2. CHECK PAIRED DEVICE
+  // -----------------------------
+  this.desktopAgent.getConnectionStatus().subscribe({
+    next: (response: any) => {
+      console.log('Pair status:', response);
 
-            this.pairedDevices = 0;
+      const data = response?.data;
+      const device = data?.device;
 
-            this.connectedDeviceName =
-              'No device connected';
+      // No paired device
+      if (!data || !device) {
+        this.pairedDevices = 0;
+        this.connectedDeviceName = 'No device connected';
+        this.connectedDeviceId = '';
+        this.deviceStatus = 'Disconnected';
+        return;
+      }
 
-            this.connectedDeviceId =
-              '';
+      // Device exists
+      this.connectedDeviceName =
+        device.deviceName || 'Android Phone';
 
-            this.deviceStatus =
-              'Disconnected';
-          }
-        },
+      this.connectedDeviceId =
+        device.deviceId || '';
 
+      // IMPORTANT:
+      // Count only actually connected devices
+      const isConnected =
+        device.status === 'connected';
 
-        error: (error: any) => {
+      this.pairedDevices = isConnected ? 1 : 0;
 
-          console.error(
-            'Desktop Agent status error:',
-            error
-          );
+      this.deviceStatus =
+        isConnected
+          ? 'Connected'
+          : 'Disconnected';
 
-
-          /**
-           * Agent cannot be reached.
-           */
-          this.serverStatus =
-            'Offline';
-
-          this.pairedDevices = 0;
-
-          this.connectedDeviceName =
-            'Agent unavailable';
-
-          this.connectedDeviceId =
-            '';
-
-          this.deviceStatus =
-            'Agent unavailable';
-        }
-
+      console.log('Connected device:', {
+        name: this.connectedDeviceName,
+        id: this.connectedDeviceId,
+        status: device.status,
+        count: this.pairedDevices
       });
-  }
+    },
+
+    error: (error) => {
+      console.error('Pair status error:', error);
+
+      this.pairedDevices = 0;
+      this.connectedDeviceName = 'No device connected';
+      this.connectedDeviceId = '';
+      this.deviceStatus = 'Disconnected';
+    }
+  });
+}
 
 
-  /**
-   * ================================
-   * UPTIME
-   * ================================
-   */
-
-  private updateUptime(): void {
-
-    const elapsed =
-      Date.now() -
-      this.startedAt;
-
-    const totalSeconds =
-      Math.floor(
-        elapsed / 1000
-      );
-
-    const hours =
-      Math.floor(
-        totalSeconds / 3600
-      );
-
-    const minutes =
-      Math.floor(
-        (totalSeconds % 3600) / 60
-      );
-
-    const seconds =
-      totalSeconds % 60;
-
-    this.uptime = [
-
-      hours
-        .toString()
-        .padStart(2, '0'),
-
-      minutes
-        .toString()
-        .padStart(2, '0'),
-
-      seconds
-        .toString()
-        .padStart(2, '0'),
-
-    ].join(':');
-  }
-
+ 
 
   /**
    * ================================
@@ -851,5 +800,84 @@ export class DashboardComponent
       fallback
     );
   }
+  
+
+  /**
+ * ================================
+ * UPDATE AGENT UPTIME
+ * ================================
+ */
+
+private updateAgentUptime(): void {
+
+  if (!this.agentStartedAt) {
+    return;
+  }
+
+  const elapsed =
+    Date.now() -
+    this.agentStartedAt;
+
+  const totalSeconds =
+    Math.max(
+      0,
+      Math.floor(
+        elapsed / 1000
+      )
+    );
+
+  this.uptime =
+    this.formatUptime(
+      totalSeconds
+    );
+}
+
+
+/**
+ * ================================
+ * FORMAT UPTIME
+ * ================================
+ */
+
+private formatUptime(
+  totalSeconds: number
+): string {
+
+  const seconds =
+    Math.max(
+      0,
+      Math.floor(
+        Number(totalSeconds) || 0
+      )
+    );
+
+  const hours =
+    Math.floor(
+      seconds / 3600
+    );
+
+  const minutes =
+    Math.floor(
+      (seconds % 3600) / 60
+    );
+
+  const remainingSeconds =
+    seconds % 60;
+
+  return [
+    hours
+      .toString()
+      .padStart(2, '0'),
+
+    minutes
+      .toString()
+      .padStart(2, '0'),
+
+    remainingSeconds
+      .toString()
+      .padStart(2, '0'),
+
+  ].join(':');
+}
 
 }

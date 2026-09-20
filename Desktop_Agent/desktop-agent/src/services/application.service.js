@@ -210,25 +210,75 @@ async function launchBrowser(browser) {
 }
 
 async function launchApplication(application) {
+  const normalized = String(application)
+    .trim()
+    .toLowerCase();
 
-    if (process.platform !== 'win32') {
-        throw new Error(
-            'Application control is supported on Windows only.'
-        );
+  const candidates =
+    APPLICATION_CANDIDATES[normalized];
+
+  if (!candidates) {
+    throw new Error(
+      `Unsupported application: ${normalized}`
+    );
+  }
+
+  const executable =
+    firstExistingPath(candidates);
+
+  if (!executable) {
+    throw new Error(
+      `${normalized} executable was not found.`
+    );
+  }
+
+  /*
+   * NOTEPAD
+   *
+   * Open as a normal separate Windows application window.
+   * Do NOT use /min.
+   */
+  if (normalized === 'notepad') {
+
+    const child = spawn(
+      executable,
+      [],
+      {
+        detached: true,
+        windowsHide: false,
+        stdio: 'ignore'
+      }
+    );
+
+    child.unref();
+
+    return {
+      success: true,
+      application: 'notepad',
+      message: 'Notepad opened successfully'
+    };
+  }
+
+  /*
+   * CHROME / OTHER APPLICATIONS
+   */
+  const child = spawn(
+    executable,
+    [],
+    {
+      detached: true,
+      windowsHide: false,
+      stdio: 'ignore'
     }
+  );
 
-    const executable =
-        firstExistingPath(
-            APPLICATION_CANDIDATES[application] || []
-        );
+  child.unref();
 
-    if (!executable) {
-        throw new Error(
-            `${APPLICATION_DISPLAY_NAMES[application]} was not found.`
-        );
-    }
-
-    await launchExecutable(executable);
+  return {
+    success: true,
+    application: normalized,
+    message: `${normalized} opened successfully`
+  };
 }
 
 async function executeApplicationCommand(

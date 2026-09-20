@@ -74,6 +74,16 @@ export class DesktopAgentService {
     );
   }
 
+  getAgentStatus() {
+  return this.http.get<{
+    success: boolean;
+    message: string;
+    port: number;
+    uptimeSeconds: number;
+    startedAt: string;
+  }>(`${this.baseUrl}/`);
+}
+
   getDevices():
     Observable<DesktopAgentResponse> {
 

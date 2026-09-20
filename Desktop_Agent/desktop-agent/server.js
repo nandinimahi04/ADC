@@ -140,6 +140,21 @@ app.use(
 );
 
 
+// Root health/status endpoint
+app.get('/', (req, res) => {
+  const uptimeSeconds = Math.floor(process.uptime());
+
+  res.json({
+    success: true,
+    message: 'AI Desktop Controller - Desktop Agent is running',
+    port: 5000,
+    uptimeSeconds,
+    startedAt: new Date(
+      Date.now() - (uptimeSeconds * 1000)
+    ).toISOString()
+  });
+});
+
 // ============================================================
 // HEALTH CHECK
 // ============================================================
@@ -220,6 +235,8 @@ app.use(
 
     }
 );
+
+
 
 
 // ============================================================
