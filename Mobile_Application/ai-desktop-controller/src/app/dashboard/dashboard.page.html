@@ -26,11 +26,23 @@
 
     <div class="device-card">
 
-      <div class="status">
+      <div class="device-card-top">
 
-        <span class="status-dot"></span>
+        <div class="status">
+          <span class="status-dot"></span>
+          Connected
+        </div>
 
-        Connected
+        <ion-button
+          fill="outline"
+          size="small"
+          class="disconnect-btn"
+          [disabled]="isExecuting"
+          (click)="disconnect()"
+        >
+          <ion-icon slot="start" name="close-circle-outline"></ion-icon>
+          Disconnect
+        </ion-button>
 
       </div>
 
