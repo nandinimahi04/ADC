@@ -1,12 +1,9 @@
 .app-shell {
   width: 100%;
   height: 100vh;
-
   display: flex;
-
   overflow: hidden;
-
-  background: #0d0c20;
+  background: var(--app-background);
 }
 
 
@@ -16,17 +13,12 @@
 
 .application-area {
   min-width: 0;
-
   flex: 1;
-
   height: 100vh;
-
   display: flex;
   flex-direction: column;
-
   overflow: hidden;
-
-  background: #0d0c20;
+  background: var(--app-background);
 }
 
 
@@ -36,11 +28,8 @@
 
 .page-content {
   min-width: 0;
-
   flex: 1;
-
   overflow-x: hidden;
   overflow-y: auto;
-
-  background: #0d0c20;
+  background: var(--app-background);
 }

@@ -1,3 +1,123 @@
+
+/* =========================================
+   GLOBAL THEME TOKENS
+   ========================================= */
+
+/*
+ * DARK THEME IS THE DEFAULT
+ *
+ * ThemeService sets:
+ *
+ * <html data-theme="dark">
+ *
+ * or
+ *
+ * <html data-theme="light">
+ *
+ * When no theme has been saved, the application
+ * uses these dark values.
+ */
+
+:root {
+
+  color-scheme: dark;
+
+  --app-background: #0d0c20;
+
+  --surface-primary: #1a192f;
+  --surface-secondary: #15142a;
+  --surface-tertiary: #18172d;
+  --surface-hover: #222140;
+  --surface-overlay: rgba(13, 12, 32, 0.96);
+
+  --surface-gradient-start: #1e1d38;
+  --surface-gradient-end: #16152c;
+
+  --border-color: #25243d;
+  --border-strong-color: #2e2d4a;
+  --border-hover-color: #373453;
+
+  --text-primary: #f4f3f8;
+  --text-secondary: #aaa8b7;
+  --text-muted: #8a88a0;
+  --text-subtle: #68667a;
+
+  --accent-color: #6d61e8;
+  --accent-hover-color: #7d72f0;
+  --accent-soft-color: #242046;
+  --accent-border-color: #4a4d8a;
+  --accent-text-color: #9d94ff;
+
+  --success-color: #22d267;
+  --success-soft-color: #131f1a;
+  --success-border-color: #28523d;
+
+  --warning-color: #f5a623;
+  --warning-soft-color: #241d12;
+  --warning-border-color: #57472b;
+
+  --danger-color: #f0445d;
+  --danger-hover-color: #f55269;
+  --danger-soft-color: #29151c;
+  --danger-border-color: #552936;
+
+  --modal-overlay: rgba(5, 4, 18, 0.75);
+  --shadow-color: rgba(0, 0, 0, 0.5);
+}
+
+
+/* =========================================
+   LIGHT THEME
+   ========================================= */
+
+html[data-theme="light"] {
+
+  color-scheme: light;
+
+  --app-background: #f7f7fb;
+
+  --surface-primary: #ffffff;
+  --surface-secondary: #f3f2f8;
+  --surface-tertiary: #eceaf4;
+  --surface-hover: #e8e6f0;
+  --surface-overlay: rgba(255, 255, 255, 0.96);
+
+  --surface-gradient-start: #ffffff;
+  --surface-gradient-end: #f1eff7;
+
+  --border-color: #dedbe8;
+  --border-strong-color: #cbc6dc;
+  --border-hover-color: #b9b2d0;
+
+  --text-primary: #201d2e;
+  --text-secondary: #585368;
+  --text-muted: #777184;
+  --text-subtle: #918b9d;
+
+  --accent-color: #6257c0;
+  --accent-hover-color: #554bb0;
+  --accent-soft-color: #ece9ff;
+  --accent-border-color: #bcb5f0;
+  --accent-text-color: #4e459f;
+
+  --success-color: #168a4d;
+  --success-soft-color: #e5f7ed;
+  --success-border-color: #9bd8b4;
+
+  --warning-color: #a96a0b;
+  --warning-soft-color: #fff4df;
+  --warning-border-color: #e8c47f;
+
+  --danger-color: #d52f4d;
+  --danger-hover-color: #c62542;
+  --danger-soft-color: #ffeaee;
+  --danger-border-color: #f1a6b5;
+
+  --modal-overlay: rgba(31, 27, 48, 0.42);
+  --shadow-color: rgba(31, 27, 48, 0.16);
+}
+
+
 /* =========================================
    GLOBAL RESET
    ========================================= */
@@ -5,6 +125,7 @@
 * {
   box-sizing: border-box;
 }
+
 
 html,
 body {
@@ -15,7 +136,9 @@ body {
   padding: 0;
 }
 
+
 body {
+
   font-family:
     Inter,
     -apple-system,
@@ -26,11 +149,40 @@ body {
     Arial,
     sans-serif;
 
-  background: #0d0c20;
-  color: #f4f3f8;
+  background: var(--app-background);
+  color: var(--text-primary);
 
   overflow: hidden;
+
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
 }
+
+
+/* =========================================
+   ROOT APPLICATION
+   ========================================= */
+
+app-root {
+
+  display: block;
+
+  width: 100%;
+  height: 100%;
+
+  background: var(--app-background);
+  color: var(--text-primary);
+
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
+}
+
+
+/* =========================================
+   FORM ELEMENTS
+   ========================================= */
 
 button,
 input,
@@ -39,11 +191,74 @@ select {
   font: inherit;
 }
 
+
 button {
   border: 0;
 }
 
+
 a {
   color: inherit;
   text-decoration: none;
+}
+
+
+/* =========================================
+   SCROLLBAR
+   ========================================= */
+
+::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-strong-color);
+  border-radius: 999px;
+}
+
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--border-hover-color);
+}
+
+
+/* =========================================
+   TEXT SELECTION
+   ========================================= */
+
+::selection {
+  background: var(--accent-soft-color);
+  color: var(--text-primary);
+}
+
+
+/* =========================================
+   GLOBAL THEME TRANSITION
+   ========================================= */
+
+body,
+app-root,
+button,
+input,
+textarea,
+select,
+.card,
+.panel,
+.sidebar,
+.topbar,
+.modal,
+.dropdown {
+
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease,
+    box-shadow 0.2s ease;
 }

@@ -1,3 +1,4 @@
+
 import {
   Component,
   OnDestroy,
@@ -24,6 +25,10 @@ import {
   DesktopAgentService
 } from '../../../core/services/desktop-agent.service';
 
+import {
+  ThemeService
+} from '../../../core/services/theme.service';
+
 @Component({
   selector: 'app-topbar',
   standalone: true,
@@ -41,6 +46,9 @@ export class TopbarComponent
 
   private readonly agent =
     inject(DesktopAgentService);
+
+  readonly themeService =
+    inject(ThemeService);
 
   pageTitle = 'Dashboard';
 
@@ -159,5 +167,9 @@ export class TopbarComponent
           this.deviceId = '';
         }
       });
+  }
+
+  toggleTheme(): void {
+    this.themeService.toggleTheme();
   }
 }

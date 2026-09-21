@@ -76,6 +76,27 @@
 
     </div>
 
+
+    <button
+      type="button"
+      class="theme-toggle"
+      (click)="toggleTheme()"
+      [attr.aria-label]="
+        themeService.isDarkTheme()
+          ? 'Switch to light theme'
+          : 'Switch to dark theme'
+      "
+      [title]="
+        themeService.isDarkTheme()
+          ? 'Switch to Light Theme'
+          : 'Switch to Dark Theme'
+      "
+    >
+      <span class="theme-toggle-label">
+        {{ themeService.isDarkTheme() ? 'Light' : 'Dark' }}
+      </span>
+    </button>
+
   </div>
 
 </header>

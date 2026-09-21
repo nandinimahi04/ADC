@@ -18,12 +18,18 @@ import {
   MonitorCog,
   Settings2,
   Server,
-  LockKeyhole
+  LockKeyhole,
+  Sun,
+  Moon
 } from 'lucide-angular';
 
 import {
   DesktopAgentService
 } from '../../core/services/desktop-agent.service';
+
+import {
+  ThemeService
+} from '../../core/services/theme.service';
 
 
 @Component({
@@ -48,6 +54,9 @@ export class SettingsComponent
   private readonly agent =
     inject(DesktopAgentService);
 
+  readonly themeService =
+    inject(ThemeService);
+
 
   settings = {
 
@@ -61,6 +70,16 @@ export class SettingsComponent
       'false'
 
   };
+
+
+  /**
+   * Current UI theme.
+   *
+   * Dark is the default.
+   */
+  theme:
+    'dark' | 'light' =
+    'dark';
 
 
   loading = true;
@@ -93,13 +112,27 @@ export class SettingsComponent
 
     Server,
 
-    LockKeyhole
+    LockKeyhole,
+
+    Sun,
+
+    Moon
 
   };
 
 
   ngOnInit(): void {
 
+    /*
+     * Get the current global theme.
+     */
+    this.theme =
+      this.themeService.getTheme();
+
+
+    /*
+     * Load Desktop Agent settings.
+     */
     this.load();
 
   }
@@ -150,6 +183,7 @@ export class SettingsComponent
             error
           );
 
+
           this.loading = false;
 
           this.message =
@@ -167,7 +201,26 @@ export class SettingsComponent
 
 
   /**
-   * Save settings.
+   * Change UI theme.
+   *
+   * The same ThemeService is used by
+   * the Topbar theme toggle.
+   */
+  changeTheme(
+    theme: 'dark' | 'light'
+  ): void {
+
+    this.theme = theme;
+
+    this.themeService.setTheme(
+      theme
+    );
+
+  }
+
+
+  /**
+   * Save Desktop Agent settings.
    */
   save(): void {
 
@@ -239,6 +292,7 @@ export class SettingsComponent
             error
           );
 
+
           this.saving = false;
 
           this.message =
@@ -256,7 +310,10 @@ export class SettingsComponent
 
 
   /**
-   * Restore UI defaults.
+   * Restore default settings.
+   *
+   * Dark theme is also restored as
+   * the default UI theme.
    */
   reset(): void {
 
@@ -272,6 +329,17 @@ export class SettingsComponent
         'false'
 
     };
+
+
+    /*
+     * Restore default theme.
+     */
+    this.theme =
+      'dark';
+
+    this.themeService.setTheme(
+      'dark'
+    );
 
 
     this.message =

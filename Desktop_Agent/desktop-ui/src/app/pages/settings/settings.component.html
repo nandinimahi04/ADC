@@ -159,7 +159,153 @@
       </article>
 
 
+      <!-- =========================== -->
+      <!-- APPEARANCE -->
+      <!-- =========================== -->
+
+      <article class="settings-card appearance-card">
+
+        <div class="card-icon purple">
+
+          <lucide-icon
+            [img]="
+              theme === 'dark'
+                ? icons.Moon
+                : icons.Sun
+            "
+            [size]="20"
+          />
+
+        </div>
+
+
+        <div class="card-body">
+
+          <div class="section-heading">
+
+            <span>
+              APPEARANCE
+            </span>
+
+            <h2>
+              Theme
+            </h2>
+
+            <p>
+              Choose how the Desktop Controller interface appears.
+            </p>
+
+          </div>
+
+
+          <div class="theme-options">
+
+
+            <!-- DARK THEME -->
+
+            <button
+              type="button"
+              class="theme-option"
+              [class.active]="theme === 'dark'"
+              (click)="changeTheme('dark')"
+            >
+
+              <div class="theme-option-icon">
+
+                <lucide-icon
+                  [img]="icons.Moon"
+                  [size]="19"
+                />
+
+              </div>
+
+
+              <div class="theme-option-copy">
+
+                <strong>
+                  Dark
+                </strong>
+
+                <span>
+                  Dark interface for comfortable viewing.
+                </span>
+
+              </div>
+
+
+              <span
+                class="theme-radio"
+                [class.selected]="theme === 'dark'"
+              ></span>
+
+            </button>
+
+
+            <!-- LIGHT THEME -->
+
+            <button
+              type="button"
+              class="theme-option"
+              [class.active]="theme === 'light'"
+              (click)="changeTheme('light')"
+            >
+
+              <div class="theme-option-icon">
+
+                <lucide-icon
+                  [img]="icons.Sun"
+                  [size]="19"
+                />
+
+              </div>
+
+
+              <div class="theme-option-copy">
+
+                <strong>
+                  Light
+                </strong>
+
+                <span>
+                  Light interface for brighter environments.
+                </span>
+
+              </div>
+
+
+              <span
+                class="theme-radio"
+                [class.selected]="theme === 'light'"
+              ></span>
+
+            </button>
+
+
+          </div>
+
+
+          <div class="theme-info">
+
+            <lucide-icon
+              [img]="icons.Info"
+              [size]="15"
+            />
+
+            <span>
+              Theme changes are applied immediately and saved
+              on this computer.
+            </span>
+
+          </div>
+
+        </div>
+
+      </article>
+
+
+      <!-- =========================== -->
       <!-- DATA -->
+      <!-- =========================== -->
 
       <article class="settings-card">
 
@@ -251,7 +397,9 @@
       </article>
 
 
+      <!-- =========================== -->
       <!-- RUNTIME -->
+      <!-- =========================== -->
 
       <article class="settings-card">
 
@@ -330,7 +478,9 @@
       </article>
 
 
+      <!-- =========================== -->
       <!-- SAVE BAR -->
+      <!-- =========================== -->
 
       <div class="save-bar">
 
