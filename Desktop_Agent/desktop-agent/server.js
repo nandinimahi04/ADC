@@ -95,6 +95,9 @@ const adminRoutes =
     require('./src/routes/admin.routes');
 
 
+const fileRoutes = require('./src/routes/file.routes');
+
+
 // ============================================================
 // ROUTE MOUNTS
 // ============================================================
@@ -138,6 +141,8 @@ app.use(
     '/admin',
     adminRoutes
 );
+
+app.use('/files', fileRoutes);
 
 
 // Root health/status endpoint
