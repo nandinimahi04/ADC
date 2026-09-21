@@ -24,192 +24,118 @@ interface DesktopAuthentication {
 })
 export class DesktopAgentService {
 
-  /**
-   * Get the paired Desktop Agent information.
-   */
   private getPairedDevice(): PairedDevice {
-
-    const stored =
-      localStorage.getItem('paired_device');
-
+    const stored = localStorage.getItem('paired_device');
     if (!stored) {
       throw new Error('No paired desktop found.');
     }
-
     return JSON.parse(stored);
   }
 
-
-  /**
-   * Get the authentication token
-   * created during pairing.
-   */
   private getAuthentication(): DesktopAuthentication {
-
-    const stored =
-      localStorage.getItem('desktop_authentication');
-
+    const stored = localStorage.getItem('desktop_authentication');
     if (!stored) {
-      throw new Error(
-        'Desktop authentication not found. Please pair again.'
-      );
+      throw new Error('Desktop authentication not found. Please pair again.');
     }
-
     return JSON.parse(stored);
   }
 
+  async openApplication(application: string): Promise<DesktopResponse> {
+    const device = this.getPairedDevice();
+    const authentication = this.getAuthentication();
+    const url = `http://${device.ipAddress}:${device.port}/application`;
 
-  /**
-   * Open an application on the Windows PC.
-   */
-  async openApplication(
-    application: string
-  ): Promise<DesktopResponse> {
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${authentication.accessToken}`
+      },
+      body: JSON.stringify({ action: 'open', application })
+    });
 
-    const device =
-      this.getPairedDevice();
-
-    const authentication =
-      this.getAuthentication();
-
-    const url =
-      `http://${device.ipAddress}:${device.port}/application`;
-
-    console.log(
-      'Sending application command:',
-      url
-    );
-
-    const response =
-      await fetch(url, {
-
-        method: 'POST',
-
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization':
-            `Bearer ${authentication.accessToken}`
-        },
-
-        body: JSON.stringify({
-          action: 'open',
-          application
-        })
-
-      });
-
-    const result =
-      await response.json();
-
-    console.log(
-      'Desktop Agent response:',
-      result
-    );
-
+    const result = await response.json();
     if (!response.ok) {
-
-      throw new Error(
-        result?.message ||
-        `Command failed (${response.status})`
-      );
-
+      throw new Error(result?.message || `Command failed (${response.status})`);
     }
-
     return result;
   }
-    /**
-   * Execute a system command on the Windows PC.
-   */
+
   async executeSystemCommand(
     command: 'shutdown' | 'restart' | 'lock' | 'sleep'
   ): Promise<DesktopResponse> {
+    const device = this.getPairedDevice();
+    const authentication = this.getAuthentication();
+    const url = `http://${device.ipAddress}:${device.port}/system`;
 
-    const device =
-      this.getPairedDevice();
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${authentication.accessToken}`
+      },
+      body: JSON.stringify({ command })
+    });
 
-    const authentication =
-      this.getAuthentication();
+    const result = await response.json();
+    if (!response.ok) {
+      throw new Error(result?.message || `System command failed (${response.status})`);
+    }
+    return result;
+  }
 
-    const url =
-      `http://${device.ipAddress}:${device.port}/system`;
+  async getSystemInfo(): Promise<DesktopResponse> {
+    const device = this.getPairedDevice();
+    const authentication = this.getAuthentication();
+    const url = `http://${device.ipAddress}:${device.port}/system/info`;
 
-    console.log(
-      'Sending system command:',
-      command,
-      url
-    );
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: { 'Authorization': `Bearer ${authentication.accessToken}` }
+    });
 
-    const response =
+    const result = await response.json();
+    if (!response.ok) {
+      throw new Error(result?.message || `Failed to get system information (${response.status})`);
+    }
+    return result;
+  }
+
+  /**
+   * Disconnect from the currently paired Desktop Agent.
+   * Notifies the desktop (best-effort) and always clears
+   * local pairing/auth data so the user can pair again.
+   */
+  async disconnect(): Promise<void> {
+
+    try {
+
+      const device = this.getPairedDevice();
+      const url = `http://${device.ipAddress}:${device.port}/pair/unpair`;
+
+      console.log('Notifying Desktop Agent of disconnect:', url);
+
       await fetch(url, {
-
         method: 'POST',
-
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization':
-            `Bearer ${authentication.accessToken}`
-        },
-
-        body: JSON.stringify({
-          command
-        })
-
+        headers: { 'Content-Type': 'application/json' }
       });
 
-    const result =
-      await response.json();
+    } catch (error) {
 
-    console.log(
-      'System command response:',
-      result
-    );
-
-    if (!response.ok) {
-
-      throw new Error(
-        result?.message ||
-        `System command failed (${response.status})`
+      console.warn(
+        'Could not notify Desktop Agent (continuing local disconnect):',
+        error
       );
+
+    } finally {
+
+      localStorage.removeItem('paired_device');
+      localStorage.removeItem('desktop_authentication');
+
+      console.log('Local pairing data cleared.');
 
     }
 
-    return result;
-  }
-  async getSystemInfo(): Promise<DesktopResponse> {
-
-  const device =
-    this.getPairedDevice();
-
-  const authentication =
-    this.getAuthentication();
-
-  const url =
-    `http://${device.ipAddress}:${device.port}/system/info`;
-
-  const response =
-    await fetch(url, {
-
-      method: 'GET',
-
-      headers: {
-        'Authorization':
-          `Bearer ${authentication.accessToken}`
-      }
-
-    });
-
-  const result =
-    await response.json();
-
-  if (!response.ok) {
-
-    throw new Error(
-      result?.message ||
-      `Failed to get system information (${response.status})`
-    );
-
   }
 
-  return result;
-}
 }
