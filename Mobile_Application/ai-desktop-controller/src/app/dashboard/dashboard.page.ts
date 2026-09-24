@@ -1,6 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
+import { App, AppState } from '@capacitor/app';
+import type { PluginListenerHandle } from '@capacitor/core';
 
 import {
   IonContent,
@@ -9,13 +11,39 @@ import {
   IonTitle,
   IonButtons,
   IonButton,
-  IonIcon
+  IonIcon,
+  IonFooter
 } from '@ionic/angular/standalone';
 
 import { addIcons } from 'ionicons';
-import { closeCircleOutline, notificationsOutline } from 'ionicons/icons';
+import {
+  closeCircleOutline,
+  notificationsOutline,
+  gridOutline,
+  chatbubbleEllipsesOutline,
+  appsOutline,
+  timeOutline,
+  settingsOutline,
+  hardwareChipOutline,
+  radioOutline,
+  laptopOutline,
+  checkmarkCircleOutline,
+  flashOutline,
+  powerOutline,
+  lockClosedOutline,
+  moonOutline,
+  refreshOutline
+} from 'ionicons/icons';
 
 import { DesktopAgentService } from '../services/desktop-agent.service';
+
+interface SystemInfoData {
+  deviceName?: string;
+  operatingSystem?: string;
+  hasBattery?: boolean;
+  batteryPercentage?: number | null;
+  isCharging?: boolean | null;
+}
 
 @Component({
   selector: 'app-dashboard',
@@ -30,14 +58,25 @@ import { DesktopAgentService } from '../services/desktop-agent.service';
     IonTitle,
     IonButtons,
     IonButton,
-    IonIcon
+    IonIcon,
+    IonFooter
   ]
 })
-export class DashboardPage implements OnInit {
+export class DashboardPage implements OnInit, OnDestroy {
 
   isExecuting = false;
   deviceName = 'Unknown Device';
   operatingSystem = 'Unknown';
+
+  hasBattery = false;
+  batteryPercentage: number | null = null;
+  isCharging: boolean | null = null;
+
+  batteryLoaded = false;
+
+  private readonly REFRESH_INTERVAL_MS = 15000;
+  private refreshHandle: ReturnType<typeof setInterval> | null = null;
+  private appStateListener: PluginListenerHandle | null = null;
 
   constructor(
     private desktopAgent: DesktopAgentService,
@@ -45,23 +84,92 @@ export class DashboardPage implements OnInit {
   ) {
     addIcons({
       closeCircleOutline,
-      notificationsOutline
+      notificationsOutline,
+      gridOutline,
+      chatbubbleEllipsesOutline,
+      appsOutline,
+      timeOutline,
+      settingsOutline,
+      hardwareChipOutline,
+      radioOutline,
+      laptopOutline,
+      checkmarkCircleOutline,
+      flashOutline,
+      powerOutline,
+      lockClosedOutline,
+      moonOutline,
+      refreshOutline
     });
   }
 
   ngOnInit(): void {
     this.loadSystemInfo();
+    this.startAutoRefresh();
+    this.listenForAppStateChanges();
+  }
+
+  ngOnDestroy(): void {
+    this.stopAutoRefresh();
+
+    if (this.appStateListener) {
+      this.appStateListener.remove();
+      this.appStateListener = null;
+    }
+  }
+
+  private startAutoRefresh(): void {
+    this.stopAutoRefresh();
+    this.refreshHandle = setInterval(() => {
+      this.loadSystemInfo();
+    }, this.REFRESH_INTERVAL_MS);
+  }
+
+  private stopAutoRefresh(): void {
+    if (this.refreshHandle !== null) {
+      clearInterval(this.refreshHandle);
+      this.refreshHandle = null;
+    }
+  }
+
+  private listenForAppStateChanges(): void {
+    App.addListener('appStateChange', (state: AppState) => {
+      if (state.isActive) {
+        this.loadSystemInfo();
+        this.startAutoRefresh();
+      } else {
+        this.stopAutoRefresh();
+      }
+    }).then((handle) => {
+      this.appStateListener = handle;
+    });
   }
 
   async loadSystemInfo(): Promise<void> {
     try {
       const response = await this.desktopAgent.getSystemInfo();
-      const data = response.data as { deviceName?: string; operatingSystem?: string; };
+      const data = response.data as SystemInfoData;
+
       this.deviceName = data.deviceName || 'Unknown Device';
       this.operatingSystem = data.operatingSystem || 'Unknown';
+
+      this.hasBattery = !!data.hasBattery;
+      this.batteryPercentage =
+        typeof data.batteryPercentage === 'number'
+          ? data.batteryPercentage
+          : null;
+      this.isCharging = data.isCharging ?? null;
+
+      this.batteryLoaded = true;
+
     } catch (error) {
       console.error('Failed to load system information:', error);
     }
+  }
+
+  get batteryDotClass(): string {
+    if (this.isCharging) return 'charging';
+    if (this.batteryPercentage !== null && this.batteryPercentage <= 20) return 'low';
+    return 'normal';
   }
 
   async openChrome(): Promise<void> {
@@ -77,13 +185,14 @@ export class DashboardPage implements OnInit {
     }
   }
 
-  async executeSystemCommand(command: 'shutdown' | 'lock' | 'sleep'): Promise<void> {
+  async executeSystemCommand(command: 'shutdown' | 'lock' | 'sleep' | 'restart'): Promise<void> {
     if (this.isExecuting) return;
 
     let message = '';
     if (command === 'shutdown') message = 'Are you sure you want to shut down the PC?';
     if (command === 'lock') message = 'Are you sure you want to lock the PC?';
     if (command === 'sleep') message = 'Are you sure you want to put the PC to sleep?';
+    if (command === 'restart') message = 'Are you sure you want to restart the PC?';
 
     if (!confirm(message)) return;
 
@@ -98,10 +207,6 @@ export class DashboardPage implements OnInit {
     }
   }
 
-  /**
-   * Disconnect from the currently paired PC and
-   * return to the QR pairing screen.
-   */
   async disconnect(): Promise<void> {
 
     if (this.isExecuting) return;
@@ -115,6 +220,8 @@ export class DashboardPage implements OnInit {
     try {
 
       console.log('Disconnecting from Desktop Agent...');
+
+      this.stopAutoRefresh();
 
       await this.desktopAgent.disconnect();
 
@@ -132,6 +239,15 @@ export class DashboardPage implements OnInit {
 
     }
 
+  }
+
+  onNavClick(tab: 'dashboard' | 'ai-chat' | 'control' | 'history' | 'settings'): void {
+    if (tab === 'dashboard') return;
+    if (tab === 'control') {
+      this.router.navigate(['/control']);
+      return;
+    }
+    alert('This page is not developed yet.');
   }
 
 }

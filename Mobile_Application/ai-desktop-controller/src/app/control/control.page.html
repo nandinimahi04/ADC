@@ -5,7 +5,7 @@
       <ion-icon name="hardware-chip-outline" class="header-icon"></ion-icon>
     </ion-buttons>
 
-    <ion-title>Dashboard</ion-title>
+    <ion-title>Control</ion-title>
 
     <ion-buttons slot="end">
       <ion-button>
@@ -18,61 +18,9 @@
 
 <ion-content>
 
-  <div class="dashboard-container">
+  <div class="control-container">
 
-    <div class="device-card">
-
-      <div class="device-card-top">
-
-        <div class="status">
-          <span class="status-dot"></span>
-          Connected
-        </div>
-
-        <ion-button
-          fill="outline"
-          size="small"
-          class="disconnect-btn"
-          [disabled]="isExecuting"
-          (click)="disconnect()"
-        >
-          <ion-icon slot="start" name="close-circle-outline"></ion-icon>
-          Disconnect
-        </ion-button>
-
-      </div>
-
-      <h3>{{ deviceName }}</h3>
-
-      <p>{{ operatingSystem }}</p>
-
-    </div>
-
-    <div class="battery-card" *ngIf="!batteryLoaded || hasBattery" [class.loading]="!batteryLoaded">
-
-      <div class="battery-icon-box">
-        <ion-icon name="laptop-outline"></ion-icon>
-      </div>
-
-      <div class="battery-text">
-        <p class="battery-label">BATTERY STATUS</p>
-        <h3 *ngIf="!batteryLoaded">Loading...</h3>
-        <h3 *ngIf="batteryLoaded">
-          {{ batteryPercentage !== null ? batteryPercentage + '% Battery' : 'Unavailable' }}
-        </h3>
-      </div>
-
-      <div
-        class="battery-status-icon"
-        *ngIf="batteryLoaded"
-        [class.charging]="isCharging"
-      >
-        <ion-icon [name]="isCharging ? 'flash-outline' : 'checkmark-circle-outline'"></ion-icon>
-      </div>
-
-    </div>
-
-    <h3 class="section-title">Quick Actions</h3>
+    <h3 class="section-title">All Controls</h3>
 
     <div class="actions-grid">
 
@@ -120,6 +68,18 @@
         </div>
       </ion-button>
 
+      <ion-button
+        class="full-width"
+        fill="clear"
+        (click)="openChrome()"
+        [disabled]="isExecuting"
+      >
+        <div class="action-content">
+          <ion-icon name="globe-outline"></ion-icon>
+          <span>{{ isExecuting ? 'Working...' : 'Browser' }}</span>
+        </div>
+      </ion-button>
+
     </div>
 
   </div>
@@ -131,7 +91,7 @@
   <div class="bottom-nav">
 
     <button
-      class="nav-item active"
+      class="nav-item"
       type="button"
       (click)="onNavClick('dashboard')"
     >
@@ -149,7 +109,7 @@
     </button>
 
     <button
-      class="nav-item"
+      class="nav-item active"
       type="button"
       (click)="onNavClick('control')"
     >

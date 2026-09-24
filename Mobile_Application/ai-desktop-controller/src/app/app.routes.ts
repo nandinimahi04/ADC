@@ -81,6 +81,19 @@ export const routes: Routes = [
 
 
   // ===============================
+  // CONTROL
+  // ===============================
+
+  {
+    path: 'control',
+    loadComponent: () =>
+      import('./control/control.page').then(
+        (m) => m.ControlPage
+      )
+  },
+
+
+  // ===============================
   // DEFAULT ROUTE
   // ===============================
 

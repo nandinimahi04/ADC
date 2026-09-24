@@ -5,7 +5,8 @@ const {
 } = require('../controllers/system.controller');
 
 const {
-    getWindowsDeviceName
+    getWindowsDeviceNameAsync,
+    getBatteryInfoAsync
 } = require('../config/device.config');
 
 const router = express.Router();
@@ -18,16 +19,37 @@ const router = express.Router();
  *
  * GET /system/info
  *
- * Returns the actual Windows computer name.
+ * Returns the actual Windows computer name
+ * and the current battery status.
+ *
+ * Uses the async (non-blocking) versions of these
+ * lookups — this route is polled every 15 seconds,
+ * and the old execSync-based versions were freezing
+ * the whole server (including button commands like
+ * Shutdown/Browser) while PowerShell ran.
+ *
+ * Cache-Control headers ensure the mobile app (or any
+ * network layer in between) never serves a stale
+ * cached copy of this response.
  */
 router.get(
     '/info',
-    (req, res) => {
+    async (req, res) => {
+
+        res.set(
+            'Cache-Control',
+            'no-store, no-cache, must-revalidate, proxy-revalidate'
+        );
+        res.set('Pragma', 'no-cache');
+        res.set('Expires', '0');
 
         try {
 
-            const deviceName =
-                getWindowsDeviceName();
+            const [deviceName, battery] =
+                await Promise.all([
+                    getWindowsDeviceNameAsync(),
+                    getBatteryInfoAsync()
+                ]);
 
             return res.status(200).json({
 
@@ -35,7 +57,10 @@ router.get(
 
                 data: {
                     deviceName,
-                    operatingSystem: 'Windows'
+                    operatingSystem: 'Windows',
+                    hasBattery: battery.hasBattery,
+                    batteryPercentage: battery.batteryPercentage,
+                    isCharging: battery.isCharging
                 }
 
             });

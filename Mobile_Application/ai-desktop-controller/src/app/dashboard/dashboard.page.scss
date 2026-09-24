@@ -9,9 +9,21 @@ ion-content {
   --background: radial-gradient(circle at top, #162744 0%, #0f1a2d 45%, #08111f 100%);
 }
 
+ion-header {
+  --background: var(--card-bg);
+}
+
 ion-toolbar {
-  --background: transparent;
+  --background: var(--card-bg);
   --color: white;
+  --min-height: 64px;
+  border-bottom: 1px solid rgba(255,255,255,.08);
+}
+
+.header-icon {
+  font-size: 28px;
+  margin-left: 8px;
+  color: var(--primary);
 }
 
 .dashboard-container {
@@ -19,28 +31,11 @@ ion-toolbar {
   color: white;
 }
 
-.welcome-section {
-  margin-top: 10px;
-  margin-bottom: 25px;
-}
-
-.welcome-section h2 {
-  margin: 0;
-  font-size: 28px;
-  font-weight: 700;
-}
-
-.welcome-section p {
-  margin-top: 8px;
-  color: var(--text-secondary);
-  font-size: 15px;
-}
-
 .device-card {
   background: linear-gradient(145deg, rgba(40, 60, 95, 0.95), rgba(22, 32, 50, 0.95));
   border-radius: 22px;
   padding: 20px;
-  margin-bottom: 30px;
+  margin-bottom: 20px;
   border: 1px solid rgba(255,255,255,.08);
   box-shadow: 0 12px 25px rgba(0,0,0,.35);
 }
@@ -72,6 +67,97 @@ ion-toolbar {
   color: var(--text-secondary);
 }
 
+// ============================================================
+// BATTERY CARD
+// ============================================================
+
+.battery-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: linear-gradient(145deg, rgba(40, 60, 95, 0.95), rgba(22, 32, 50, 0.95));
+  border-radius: 22px;
+  padding: 16px 20px;
+  margin-bottom: 30px;
+  border: 1px solid rgba(255,255,255,.08);
+  box-shadow: 0 12px 25px rgba(0,0,0,.35);
+}
+
+.battery-card.loading {
+  animation: battery-card-pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes battery-card-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.65; }
+}
+
+.battery-icon-box {
+  width: 46px;
+  height: 46px;
+  flex-shrink: 0;
+  border-radius: 14px;
+  background: rgba(140, 188, 255, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.battery-icon-box ion-icon {
+  font-size: 24px;
+  color: var(--primary);
+}
+
+.battery-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.battery-label {
+  margin: 0 0 4px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+}
+
+.battery-text h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: white;
+}
+
+.battery-card.loading .battery-text h3 {
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+.battery-status-icon {
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  border: 2px solid #22c55e;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.battery-status-icon ion-icon {
+  font-size: 17px;
+  color: #22c55e;
+}
+
+.battery-status-icon.charging {
+  border-color: #facc15;
+}
+
+.battery-status-icon.charging ion-icon {
+  color: #facc15;
+}
+
 .section-title {
   margin-bottom: 18px;
   font-size: 22px;
@@ -89,17 +175,35 @@ ion-toolbar {
   --background-activated: rgba(60,90,135,.95);
   --border-radius: 18px;
   --color: white;
-  height: 90px;
-  font-size: 17px;
+  height: 72px;
+  font-size: 15px;
   font-weight: 600;
   text-transform: none;
-  white-space: pre-line;
   box-shadow: 0 8px 18px rgba(0,0,0,.25);
   transition: transform .2s ease;
 }
 
 .actions-grid ion-button:active {
   transform: scale(.97);
+}
+
+.action-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.action-content ion-icon {
+  font-size: 26px;
+  color: var(--text-secondary);
+}
+
+.action-content span {
+  font-size: 13px;
+  font-weight: 600;
+  color: white;
 }
 
 .device-card-top {
@@ -122,4 +226,65 @@ ion-toolbar {
 .disconnect-btn ion-icon {
   font-size: 16px;
   margin-right: 4px;
+}
+
+// ============================================================
+// BOTTOM NAV BAR
+// ============================================================
+
+ion-footer {
+  --background: transparent;
+}
+
+.bottom-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  background: var(--card-bg);
+  border-top: 1px solid rgba(255,255,255,.08);
+  box-shadow: 0 -8px 20px rgba(0,0,0,.35);
+  padding: 8px 4px calc(8px + env(safe-area-inset-bottom, 0px));
+}
+
+.nav-item {
+  background: transparent;
+  border: none;
+  outline: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  flex: 1;
+  padding: 6px 2px;
+  color: var(--text-secondary);
+  font-size: 10.5px;
+  font-weight: 600;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.nav-item ion-icon {
+  font-size: 21px;
+  color: var(--text-secondary);
+  transition: color .2s ease, filter .2s ease;
+}
+
+.nav-item span {
+  transition: color .2s ease;
+}
+
+.nav-item:active {
+  transform: scale(.95);
+}
+
+.nav-item.active {
+  color: var(--primary);
+}
+
+.nav-item.active ion-icon {
+  color: var(--primary);
+  filter: drop-shadow(0 0 6px var(--primary));
+}
+
+.nav-item.active span {
+  color: var(--primary);
 }
