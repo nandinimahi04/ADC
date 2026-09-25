@@ -35,7 +35,6 @@ app.use(
 );
 
 
-
 // ============================================================
 // BODY PARSING
 // ============================================================
@@ -95,8 +94,17 @@ const settingsRoutes =
 const adminRoutes =
     require('./src/routes/admin.routes');
 
+const fileRoutes =
+    require('./src/routes/file.routes');
 
-const fileRoutes = require('./src/routes/file.routes');
+
+// ============================================================
+// NEW INPUT ROUTE
+// Keyboard + Mouse
+// ============================================================
+
+const inputRoutes =
+    require('./src/routes/input.routes');
 
 
 // ============================================================
@@ -143,29 +151,57 @@ app.use(
     adminRoutes
 );
 
-app.use('/files', fileRoutes);
+app.use(
+    '/files',
+    fileRoutes
+);
 
 
-// Root health/status endpoint
+// ============================================================
+// INPUT ROUTES
+// Keyboard + Mouse
+// ============================================================
+
+app.use(
+    '/input',
+    inputRoutes
+);
+
+
+// ============================================================
+// ROOT HEALTH / STATUS ENDPOINT
+// ============================================================
+
 app.get('/', (req, res) => {
-  const uptimeSeconds = Math.floor(process.uptime());
 
-  res.json({
-    success: true,
-    message: 'AI Desktop Controller - Desktop Agent is running',
-    port: 5000,
-    uptimeSeconds,
-    startedAt: new Date(
-      Date.now() - (uptimeSeconds * 1000)
-    ).toISOString()
-  });
+    const uptimeSeconds =
+        Math.floor(process.uptime());
+
+    res.json({
+        success: true,
+
+        message:
+            'AI Desktop Controller - Desktop Agent is running',
+
+        port: 5000,
+
+        uptimeSeconds,
+
+        startedAt:
+            new Date(
+                Date.now() -
+                (uptimeSeconds * 1000)
+            ).toISOString()
+    });
 });
+
 
 // ============================================================
 // HEALTH CHECK
 // ============================================================
 
 app.get('/health', (req, res) => {
+
     execFile(
         'powershell.exe',
         [
@@ -175,6 +211,7 @@ app.get('/health', (req, res) => {
             $cpu = (Get-Counter '\\Processor(_Total)\\% Processor Time').CounterSamples[0].CookedValue
 
             $temp = $null
+
             try {
                 $thermal = Get-CimInstance -Namespace root/wmi -ClassName MSAcpi_ThermalZoneTemperature -ErrorAction Stop |
                     Where-Object { $_.CurrentTemperature -gt 0 } |
@@ -183,6 +220,7 @@ app.get('/health', (req, res) => {
                 if ($thermal) {
                     $temp = [math]::Round(($thermal.CurrentTemperature / 10) - 273.15, 1)
                 }
+
             } catch {}
 
             [PSCustomObject]@{
@@ -196,40 +234,64 @@ app.get('/health', (req, res) => {
             timeout: 5000
         },
         (error, stdout) => {
+
             if (error) {
+
                 return res.status(503).json({
                     success: false,
+
                     status: 'unhealthy',
+
                     cpu: {
                         utilization: null,
                         temperature: null
                     },
-                    timestamp: new Date().toISOString()
+
+                    timestamp:
+                        new Date().toISOString()
                 });
             }
 
             try {
-                const data = JSON.parse(stdout.trim());
+
+                const data =
+                    JSON.parse(stdout.trim());
 
                 return res.json({
+
                     success: true,
+
                     status: 'healthy',
+
                     cpu: {
-                        utilization: data.cpuUtilization,
-                        temperature: data.cpuTemperature,
+                        utilization:
+                            data.cpuUtilization,
+
+                        temperature:
+                            data.cpuTemperature,
+
                         unit: '°C'
                     },
-                    timestamp: new Date().toISOString()
+
+                    timestamp:
+                        new Date().toISOString()
                 });
+
             } catch (parseError) {
+
                 return res.status(503).json({
+
                     success: false,
+
                     status: 'unhealthy',
+
                     cpu: {
                         utilization: null,
                         temperature: null
                     },
-                    timestamp: new Date().toISOString()
+
+                    timestamp:
+                        new Date().toISOString()
                 });
             }
         }
@@ -257,9 +319,7 @@ app.use(
 
             path:
                 req.originalUrl
-
         });
-
     }
 );
 
@@ -287,13 +347,9 @@ app.use(
             message:
                 error.message ||
                 'Internal server error'
-
         });
-
     }
 );
-
-
 
 
 // ============================================================
@@ -306,28 +362,35 @@ app.listen(
     () => {
 
         console.log('');
+
         console.log(
             '=========================================='
         );
+
         console.log(
             '   AI DESKTOP CONTROLLER - DESKTOP AGENT'
         );
+
         console.log(
             '=========================================='
         );
+
         console.log(
             `Server running on port ${PORT}`
         );
+
         console.log(
             `Local: http://localhost:${PORT}`
         );
+
         console.log(
             `LAN:   http://0.0.0.0:${PORT}`
         );
+
         console.log(
             '=========================================='
         );
-        console.log('');
 
+        console.log('');
     }
 );

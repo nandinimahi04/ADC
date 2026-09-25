@@ -6,54 +6,52 @@
 
   <header class="dashboard-header">
 
-  <div>
+<div>
 
-    <p class="dashboard-eyebrow">
-      DESKTOP AGENT
-    </p>
+  <p class="dashboard-eyebrow">
+    DESKTOP AGENT
+  </p>
 
-    <h1>
-      Dashboard
-    </h1>
+  <h1>
+    Dashboard
+  </h1>
 
-    <p class="dashboard-description">
-      Monitor and control your Windows desktop.
-    </p>
+  <p class="dashboard-description">
+    Monitor and control your Windows desktop.
+  </p>
 
-  </div>
+</div>
 
-</header>
-
+  </header>
 
   <!-- ================================
        Statistics
        ================================= -->
 
   <section class="stats-grid">
+<!-- Server Status -->
+
+<article class="stat-card">
+
+  <div class="stat-label">
+    SERVER STATUS
+  </div>
+
+  <div class="stat-value status-value">
+    {{ serverStatus }}
+  </div>
+
+  <div class="stat-description">
+    http://localhost:{{ port }}
+  </div>
+
+</article>
 
 
-    <!-- Server Status -->
+<!-- Connected Device -->
 
-    <article class="stat-card">
+<article class="stat-card">
 
-      <div class="stat-label">
-        SERVER STATUS
-      </div>
-
-      <div class="stat-value status-value">
-        {{ serverStatus }}
-      </div>
-
-      <div class="stat-description">
-        http://localhost:{{ port }}
-      </div>
-
-    </article>
-
-
-    <!-- Paired Devices -->
-
-    <article class="stat-card">
   <div class="stat-label">
     CONNECTED DEVICE
   </div>
@@ -68,48 +66,48 @@
   <div class="stat-description">
     {{ connectedDeviceName || 'No Android controller paired' }}
   </div>
+
 </article>
 
 
-    <!-- Uptime -->
+<!-- Uptime -->
 
-    <article class="stat-card">
+<article class="stat-card">
 
-      <div class="stat-label">
-        UPTIME
-      </div>
+  <div class="stat-label">
+    UPTIME
+  </div>
 
-      <div class="stat-value uptime-value">
-        {{ uptime }}
-      </div>
+  <div class="stat-value uptime-value">
+    {{ uptime }}
+  </div>
 
-      <div class="stat-description">
-        since server start
-      </div>
+  <div class="stat-description">
+    since server start
+  </div>
 
-    </article>
+</article>
 
 
-    <!-- Port -->
+<!-- Port -->
 
-    <article class="stat-card">
+<article class="stat-card">
 
-      <div class="stat-label">
-        PORT
-      </div>
+  <div class="stat-label">
+    PORT
+  </div>
 
-      <div class="stat-value">
-        {{ port }}
-      </div>
+  <div class="stat-value">
+    {{ port }}
+  </div>
 
-      <div class="stat-description">
-        change in Settings
-      </div>
+  <div class="stat-description">
+    change in Settings
+  </div>
 
-    </article>
+</article>
 
   </section>
-
 
   <!-- ================================
        Quick Actions
@@ -117,169 +115,183 @@
 
   <section class="quick-actions">
 
-    <h2>
-      Quick Actions
-    </h2>
+<h2>
+  Quick Actions
+</h2>
 
-    <div class="actions-container">
+<div class="actions-container">
 
-      @for (action of quickActions; track action.label) {
+  @for (action of quickActions; track action.label) {
 
-        <button
-          type="button"
-          class="action-button"
-          [class.action-danger]="action.type === 'danger'"
-          [class.chrome-action]="
-  action.type === 'chrome' ||
-  action.type === 'notepad'
-"
-[disabled]="
-  (
-    action.type === 'chrome' ||
-    action.type === 'notepad'
-  ) &&
-  isExecuting
-"
-          (click)="executeAction(action)"
-        >
+    <button
+      type="button"
+      class="action-button"
+      [class.action-danger]="action.type === 'danger'"
+      [class.chrome-action]="
+        action.type === 'chrome' ||
+        action.type === 'notepad' ||
+        action.type === 'vscode' ||
+        action.type === 'calculator'
+      "
+      [disabled]="
+        (
+          action.type === 'chrome' ||
+          action.type === 'notepad' ||
+          action.type === 'vscode' ||
+          action.type === 'calculator'
+        ) &&
+        isExecuting
+      "
+      (click)="executeAction(action)"
+    >
 
-          <lucide-icon
-            [img]="action.icon"
-            [size]="21"
-            [strokeWidth]="1.8"
-          />
+      <lucide-icon
+        [img]="action.icon"
+        [size]="21"
+        [strokeWidth]="1.8"
+      />
 
-          <span>
-           @if (
-  (
-    action.type === 'chrome' ||
-    action.type === 'notepad'
-  ) &&
-  isExecuting
-) {
-  Opening...
-} @else {
-  {{ action.label }}
-}
-          </span>
+      <span>
 
-        </button>
+        @if (
+          (
+            action.type === 'chrome' ||
+            action.type === 'notepad' ||
+            action.type === 'vscode' ||
+            action.type === 'calculator'
+          ) &&
+          isExecuting
+        ) {
 
-      }
+          Opening...
 
-    </div>
+        } @else {
+
+          {{ action.label }}
+
+        }
+
+      </span>
+
+    </button>
+
+  }
+
+</div>
 
   </section>
-
 
   <!-- ================================
        Confirmation Modal
        ================================= -->
 
-  @if (showConfirmation) {
+@if (showConfirmation) {
 
-    <div
-      class="confirm-overlay"
-      (click)="cancelAction()"
-    >
+<div
+  class="confirm-overlay"
+  (click)="cancelAction()"
+>
 
-      <div
-        class="confirm-modal"
-        (click)="$event.stopPropagation()"
-      >
+  <div
+    class="confirm-modal"
+    (click)="$event.stopPropagation()"
+  >
 
-        <div class="confirm-icon-wrapper">
-          <lucide-icon
-            [img]="icons.AlertTriangle"
-            [size]="28"
-            [strokeWidth]="1.8"
-          />
-        </div>
+    <div class="confirm-icon-wrapper">
 
-        <h3 class="confirm-title">
-          {{ confirmationTitle }}
-        </h3>
-
-        <p class="confirm-message">
-          {{ confirmationMessage }}
-        </p>
-
-        <div class="confirm-buttons">
-
-          <button
-            type="button"
-            class="confirm-btn confirm-cancel"
-            (click)="cancelAction()"
-          >
-            Cancel
-          </button>
-
-          <button
-            type="button"
-            class="confirm-btn confirm-proceed"
-            [class.confirm-danger]="pendingAction?.type === 'danger'"
-            (click)="confirmAction()"
-          >
-            Yes, {{ confirmationTitle }}
-          </button>
-
-        </div>
-
-      </div>
+      <lucide-icon
+        [img]="icons.AlertTriangle"
+        [size]="28"
+        [strokeWidth]="1.8"
+      />
 
     </div>
 
-  }
+    <h3 class="confirm-title">
+      {{ confirmationTitle }}
+    </h3>
 
-    <!-- ================================
+    <p class="confirm-message">
+      {{ confirmationMessage }}
+    </p>
+
+    <div class="confirm-buttons">
+
+      <button
+        type="button"
+        class="confirm-btn confirm-cancel"
+        (click)="cancelAction()"
+      >
+        Cancel
+      </button>
+
+      <button
+        type="button"
+        class="confirm-btn confirm-proceed"
+        [class.confirm-danger]="pendingAction?.type === 'danger'"
+        (click)="confirmAction()"
+      >
+        Yes, {{ confirmationTitle }}
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+}
+
+  <!-- ================================
        Success Modal
        ================================= -->
-  @if (showSuccessModal) {
 
-    <div
-      class="confirm-overlay"
-      (click)="closeSuccessModal()"
-    >
+@if (showSuccessModal) {
 
-      <div
-        class="confirm-modal success-modal"
-        (click)="$event.stopPropagation()"
-      >
+```
+<div
+  class="confirm-overlay"
+  (click)="closeSuccessModal()"
+>
 
-        <div class="success-icon-wrapper">
+  <div
+    class="confirm-modal success-modal"
+    (click)="$event.stopPropagation()"
+  >
 
-          <lucide-icon
-            [img]="icons.CheckCircle2"
-            [size]="32"
-            [strokeWidth]="1.8"
-          />
+    <div class="success-icon-wrapper">
 
-        </div>
-
-        <h3 class="confirm-title">
-          {{ successTitle }}
-        </h3>
-
-        <p class="confirm-message">
-          {{ successMessage }}
-        </p>
-
-        <div class="confirm-buttons">
-
-          <button
-            type="button"
-            class="confirm-btn success-button"
-            (click)="closeSuccessModal()"
-          >
-            OK
-          </button>
-
-        </div>
-
-      </div>
+      <lucide-icon
+        [img]="icons.CheckCircle2"
+        [size]="32"
+        [strokeWidth]="1.8"
+      />
 
     </div>
 
-  }
+    <h3 class="confirm-title">
+      {{ successTitle }}
+    </h3>
+
+    <p class="confirm-message">
+      {{ successMessage }}
+    </p>
+
+    <div class="confirm-buttons">
+
+      <button
+        type="button"
+        class="confirm-btn success-button"
+        (click)="closeSuccessModal()"
+      >
+        OK
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+}
 
 </section>

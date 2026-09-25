@@ -20,6 +20,8 @@ import {
   Smartphone,
   Clock3,
   Network,
+  Code2,
+  Calculator,
 } from 'lucide-angular';
 
 import {
@@ -38,6 +40,8 @@ interface QuickAction {
     | 'default'
     | 'chrome'
     | 'notepad'
+    | 'vscode'
+    | 'calculator'
     | 'cleanup-temp';
   systemCommand?: string;
   application?: string;
@@ -95,20 +99,20 @@ export class DashboardComponent
   deviceStatus =
     'Disconnected';
 
-    /**
- * ================================
- * DESKTOP AGENT UPTIME
- * ================================
- */
 
-uptime = '00:00:00';
+  /**
+   * ================================
+   * DESKTOP AGENT UPTIME
+   * ================================
+   */
 
-private agentStartedAt = 0;
+  uptime = '00:00:00';
 
-private uptimeInterval?:
-  ReturnType<typeof setInterval>;
+  private agentStartedAt = 0;
 
-  
+  private uptimeInterval?:
+    ReturnType<typeof setInterval>;
+
 
   /**
    * Refresh Desktop Agent state.
@@ -137,6 +141,8 @@ private uptimeInterval?:
     Smartphone,
     Clock3,
     Network,
+    Code2,
+    Calculator,
   };
 
 
@@ -240,6 +246,20 @@ private uptimeInterval?:
     },
 
     {
+      label: 'VS Code',
+      icon: Code2,
+      type: 'vscode',
+      application: 'vscode',
+    },
+
+    {
+      label: 'Calculator',
+      icon: Calculator,
+      type: 'calculator',
+      application: 'calculator',
+    },
+
+    {
       label: 'Clean Temp Files',
       icon: Trash2,
       type: 'cleanup-temp',
@@ -256,30 +276,31 @@ private uptimeInterval?:
 
   ngOnInit(): void {
 
-  /**
-   * Load Desktop Agent state immediately.
-   */
-  this.refreshDashboard();
+    /**
+     * Load Desktop Agent state immediately.
+     */
+    this.refreshDashboard();
 
-  /**
-   * Update actual Desktop Agent uptime
-   * every second.
-   */
-  this.uptimeInterval =
-    setInterval(
-      () => this.updateAgentUptime(),
-      1000
-    );
+    /**
+     * Update actual Desktop Agent uptime
+     * every second.
+     */
+    this.uptimeInterval =
+      setInterval(
+        () => this.updateAgentUptime(),
+        1000
+      );
 
-  /**
-   * Refresh device connection state.
-   */
-  this.statusInterval =
-    setInterval(
-      () => this.refreshDashboard(),
-      2000
-    );
-}
+    /**
+     * Refresh device connection state.
+     */
+    this.statusInterval =
+      setInterval(
+        () => this.refreshDashboard(),
+        2000
+      );
+  }
+
 
   /**
    * ================================
@@ -289,18 +310,19 @@ private uptimeInterval?:
 
   ngOnDestroy(): void {
 
-  if (this.statusInterval) {
-    clearInterval(
-      this.statusInterval
-    );
+    if (this.statusInterval) {
+      clearInterval(
+        this.statusInterval
+      );
+    }
+
+    if (this.uptimeInterval) {
+      clearInterval(
+        this.uptimeInterval
+      );
+    }
   }
 
-  if (this.uptimeInterval) {
-    clearInterval(
-      this.uptimeInterval
-    );
-  }
-}
 
   /**
    * ================================
@@ -312,103 +334,176 @@ private uptimeInterval?:
    * GET /pair/status
    */
   refreshDashboard(): void {
-  // -----------------------------
-  // 1. CHECK DESKTOP AGENT
-  // -----------------------------
-  this.desktopAgent.getAgentStatus().subscribe({
-    next: (response: any) => {
-      console.log('Agent status:', response);
 
-      this.serverStatus = 'Running';
+    // -----------------------------
+    // 1. CHECK DESKTOP AGENT
+    // -----------------------------
 
-      if (response?.port) {
-        this.port = response.port;
+    this.desktopAgent.getAgentStatus().subscribe({
+
+      next: (response: any) => {
+
+        console.log(
+          'Agent status:',
+          response
+        );
+
+        this.serverStatus =
+          'Running';
+
+        if (response?.port) {
+          this.port =
+            response.port;
+        }
+
+        if (response?.startedAt) {
+
+          this.agentStartedAt =
+            new Date(
+              response.startedAt
+            ).getTime();
+
+          this.updateAgentUptime();
+        }
+      },
+
+      error: (error) => {
+
+        console.error(
+          'Agent status error:',
+          error
+        );
+
+        this.serverStatus =
+          'Offline';
+
+        this.port =
+          5000;
+
+        this.uptime =
+          '00:00:00';
+
+        this.pairedDevices =
+          0;
+
+        this.connectedDeviceName =
+          'Agent unavailable';
+
+        this.connectedDeviceId =
+          '';
+
+        this.deviceStatus =
+          'Agent unavailable';
       }
-
-      if (response?.startedAt) {
-  this.agentStartedAt =
-    new Date(response.startedAt).getTime();
-
-  this.updateAgentUptime();
-}
-
-      
-    },
-
-    error: (error) => {
-      console.error('Agent status error:', error);
-
-      this.serverStatus = 'Offline';
-      this.port = 5000;
-      this.uptime = '00:00:00';
-
-      this.pairedDevices = 0;
-      this.connectedDeviceName = 'Agent unavailable';
-      this.connectedDeviceId = '';
-      this.deviceStatus = 'Agent unavailable';
-    }
-  });
+    });
 
 
-  // -----------------------------
-  // 2. CHECK PAIRED DEVICE
-  // -----------------------------
-  this.desktopAgent.getConnectionStatus().subscribe({
-    next: (response: any) => {
-      console.log('Pair status:', response);
+    // -----------------------------
+    // 2. CHECK PAIRED DEVICE
+    // -----------------------------
 
-      const data = response?.data;
-      const device = data?.device;
+    this.desktopAgent.getConnectionStatus().subscribe({
 
-      // No paired device
-      if (!data || !device) {
-        this.pairedDevices = 0;
-        this.connectedDeviceName = 'No device connected';
-        this.connectedDeviceId = '';
-        this.deviceStatus = 'Disconnected';
-        return;
+      next: (response: any) => {
+
+        console.log(
+          'Pair status:',
+          response
+        );
+
+        const data =
+          response?.data;
+
+        const device =
+          data?.device;
+
+
+        // No paired device
+        if (!data || !device) {
+
+          this.pairedDevices =
+            0;
+
+          this.connectedDeviceName =
+            'No device connected';
+
+          this.connectedDeviceId =
+            '';
+
+          this.deviceStatus =
+            'Disconnected';
+
+          return;
+        }
+
+
+        // Device exists
+        this.connectedDeviceName =
+          device.deviceName ||
+          'Android Phone';
+
+        this.connectedDeviceId =
+          device.deviceId ||
+          '';
+
+
+        // IMPORTANT:
+        // Count only actually connected devices
+        const isConnected =
+          device.status ===
+          'connected';
+
+        this.pairedDevices =
+          isConnected
+            ? 1
+            : 0;
+
+        this.deviceStatus =
+          isConnected
+            ? 'Connected'
+            : 'Disconnected';
+
+
+        console.log(
+          'Connected device:',
+          {
+            name:
+              this.connectedDeviceName,
+
+            id:
+              this.connectedDeviceId,
+
+            status:
+              device.status,
+
+            count:
+              this.pairedDevices
+          }
+        );
+      },
+
+      error: (error) => {
+
+        console.error(
+          'Pair status error:',
+          error
+        );
+
+        this.pairedDevices =
+          0;
+
+        this.connectedDeviceName =
+          'No device connected';
+
+        this.connectedDeviceId =
+          '';
+
+        this.deviceStatus =
+          'Disconnected';
       }
+    });
+  }
 
-      // Device exists
-      this.connectedDeviceName =
-        device.deviceName || 'Android Phone';
-
-      this.connectedDeviceId =
-        device.deviceId || '';
-
-      // IMPORTANT:
-      // Count only actually connected devices
-      const isConnected =
-        device.status === 'connected';
-
-      this.pairedDevices = isConnected ? 1 : 0;
-
-      this.deviceStatus =
-        isConnected
-          ? 'Connected'
-          : 'Disconnected';
-
-      console.log('Connected device:', {
-        name: this.connectedDeviceName,
-        id: this.connectedDeviceId,
-        status: device.status,
-        count: this.pairedDevices
-      });
-    },
-
-    error: (error) => {
-      console.error('Pair status error:', error);
-
-      this.pairedDevices = 0;
-      this.connectedDeviceName = 'No device connected';
-      this.connectedDeviceId = '';
-      this.deviceStatus = 'Disconnected';
-    }
-  });
-}
-
-
- 
 
   /**
    * ================================
@@ -430,7 +525,8 @@ private uptimeInterval?:
       return;
     }
 
-    this.isExecuting = true;
+    this.isExecuting =
+      true;
 
     this.desktopAgent
       .stopServer()
@@ -443,7 +539,8 @@ private uptimeInterval?:
             response
           );
 
-          this.isExecuting = false;
+          this.isExecuting =
+            false;
 
           this.serverStatus =
             'Stopping...';
@@ -456,7 +553,8 @@ private uptimeInterval?:
             error
           );
 
-          this.isExecuting = false;
+          this.isExecuting =
+            false;
 
           alert(
             this.getErrorMessage(
@@ -484,11 +582,13 @@ private uptimeInterval?:
       return;
     }
 
+
     /**
      * Clean temporary files.
      */
     if (
-      action.type === 'cleanup-temp'
+      action.type ===
+      'cleanup-temp'
     ) {
 
       this.cleanTempFiles();
@@ -498,31 +598,19 @@ private uptimeInterval?:
 
 
     /**
-     * Chrome does not require
+     * Applications do not require
      * confirmation.
      */
     if (
-      action.type === 'chrome'
+      action.type === 'chrome' ||
+      action.type === 'notepad' ||
+      action.type === 'vscode' ||
+      action.type === 'calculator'
     ) {
 
       this.openApplication(
-        action.application || 'chrome'
-      );
-
-      return;
-    }
-
-
-    /**
-     * Notepad does not require
-     * confirmation.
-     */
-    if (
-      action.type === 'notepad'
-    ) {
-
-      this.openApplication(
-        action.application || 'notepad'
+        action.application ||
+        ''
       );
 
       return;
@@ -766,10 +854,18 @@ private uptimeInterval?:
           this.isExecuting =
             false;
 
+
           const displayName =
             application === 'notepad'
               ? 'Notepad'
-              : 'Google Chrome';
+              : application === 'chrome'
+                ? 'Google Chrome'
+                : application === 'vscode'
+                  ? 'VS Code'
+                  : application === 'calculator'
+                    ? 'Calculator'
+                    : application;
+
 
           alert(
             this.getErrorMessage(
@@ -800,84 +896,84 @@ private uptimeInterval?:
       fallback
     );
   }
-  
+
 
   /**
- * ================================
- * UPDATE AGENT UPTIME
- * ================================
- */
+   * ================================
+   * UPDATE AGENT UPTIME
+   * ================================
+   */
 
-private updateAgentUptime(): void {
+  private updateAgentUptime(): void {
 
-  if (!this.agentStartedAt) {
-    return;
+    if (!this.agentStartedAt) {
+      return;
+    }
+
+    const elapsed =
+      Date.now() -
+      this.agentStartedAt;
+
+    const totalSeconds =
+      Math.max(
+        0,
+        Math.floor(
+          elapsed / 1000
+        )
+      );
+
+    this.uptime =
+      this.formatUptime(
+        totalSeconds
+      );
   }
 
-  const elapsed =
-    Date.now() -
-    this.agentStartedAt;
 
-  const totalSeconds =
-    Math.max(
-      0,
+  /**
+   * ================================
+   * FORMAT UPTIME
+   * ================================
+   */
+
+  private formatUptime(
+    totalSeconds: number
+  ): string {
+
+    const seconds =
+      Math.max(
+        0,
+        Math.floor(
+          Number(totalSeconds) || 0
+        )
+      );
+
+    const hours =
       Math.floor(
-        elapsed / 1000
-      )
-    );
+        seconds / 3600
+      );
 
-  this.uptime =
-    this.formatUptime(
-      totalSeconds
-    );
-}
-
-
-/**
- * ================================
- * FORMAT UPTIME
- * ================================
- */
-
-private formatUptime(
-  totalSeconds: number
-): string {
-
-  const seconds =
-    Math.max(
-      0,
+    const minutes =
       Math.floor(
-        Number(totalSeconds) || 0
-      )
-    );
+        (seconds % 3600) / 60
+      );
 
-  const hours =
-    Math.floor(
-      seconds / 3600
-    );
+    const remainingSeconds =
+      seconds % 60;
 
-  const minutes =
-    Math.floor(
-      (seconds % 3600) / 60
-    );
+    return [
+      hours
+        .toString()
+        .padStart(2, '0'),
 
-  const remainingSeconds =
-    seconds % 60;
+      minutes
+        .toString()
+        .padStart(2, '0'),
 
-  return [
-    hours
-      .toString()
-      .padStart(2, '0'),
+      remainingSeconds
+        .toString()
+        .padStart(2, '0'),
 
-    minutes
-      .toString()
-      .padStart(2, '0'),
-
-    remainingSeconds
-      .toString()
-      .padStart(2, '0'),
-
-  ].join(':');
-}
+    ].join(':');
+  }
 
 }

@@ -6,6 +6,10 @@ const {
     addCommandHistory
 } = require('./database.service');
 
+/* =========================================================
+   BROWSER CONFIGURATION
+========================================================= */
+
 const BROWSER_CANDIDATES = {
     chrome: [
         path.join(
@@ -75,6 +79,11 @@ const BROWSER_DISPLAY_NAMES = {
     firefox: 'Mozilla Firefox'
 };
 
+
+/* =========================================================
+   APPLICATION CONFIGURATION
+========================================================= */
+
 const APPLICATION_CANDIDATES = {
     notepad: [
         path.join(
@@ -82,30 +91,94 @@ const APPLICATION_CANDIDATES = {
             'System32',
             'notepad.exe'
         )
+    ],
+
+    vscode: [
+        path.join(
+            process.env.LOCALAPPDATA || '',
+            'Programs',
+            'Microsoft VS Code',
+            'Code.exe'
+        ),
+        path.join(
+            process.env.PROGRAMFILES || '',
+            'Microsoft VS Code',
+            'Code.exe'
+        ),
+        path.join(
+            process.env['PROGRAMFILES(X86)'] || '',
+            'Microsoft VS Code',
+            'Code.exe'
+        )
+    ],
+
+    calculator: [
+        path.join(
+            process.env.WINDIR || 'C:\\Windows',
+            'System32',
+            'calc.exe'
+        )
     ]
 };
 
 const APPLICATION_DISPLAY_NAMES = {
-    notepad: 'Notepad'
+    notepad: 'Notepad',
+    vscode: 'Visual Studio Code',
+    calculator: 'Windows Calculator'
 };
+
+
+/* =========================================================
+   APPLICATION ALIASES
+========================================================= */
+
+const APPLICATION_ALIASES = {
+    'vs code': 'vscode',
+    'visual studio code': 'vscode',
+    'visualstudio code': 'vscode',
+    'visualstudio': 'vscode',
+    'vscode': 'vscode',
+
+    'calculator': 'calculator',
+    'windows calculator': 'calculator',
+    'windows calculator app': 'calculator',
+    'calc': 'calculator',
+
+    'notepad': 'notepad',
+    'windows notepad': 'notepad'
+};
+
+
+/* =========================================================
+   NORMALIZE APPLICATION NAME
+========================================================= */
+
+function normalizeApplicationName(application) {
+    const normalized = String(application || '')
+        .trim()
+        .toLowerCase();
+
+    return APPLICATION_ALIASES[normalized] || normalized;
+}
+
+
+/* =========================================================
+   FIND FIRST EXISTING EXECUTABLE
+========================================================= */
 
 function firstExistingPath(paths) {
     return paths.find(
-        candidate =>
-            candidate &&
-            fs.existsSync(candidate)
+        candidate => candidate && fs.existsSync(candidate)
     ) || null;
 }
 
-/**
- * Launch a Windows executable.
- *
- * Uses cmd.exe/start so Windows handles an already-running
- * browser correctly and paths containing spaces safely.
- */
+
+/* =========================================================
+   GENERIC EXECUTABLE LAUNCHER
+========================================================= */
+
 function launchExecutable(executable) {
     return new Promise((resolve, reject) => {
-
         const child = spawn(
             'cmd.exe',
             [
@@ -137,27 +210,24 @@ function launchExecutable(executable) {
         child.once('error', fail);
 
         child.once('spawn', () => {
-
             if (settled) {
                 return;
             }
 
             settled = true;
-
             child.unref();
-
             resolve();
         });
     });
 }
 
-/**
- * Fallback to the browser registered in Windows.
- */
+
+/* =========================================================
+   LAUNCH REGISTERED BROWSER
+========================================================= */
+
 function launchRegisteredBrowser(browser) {
-
     return new Promise((resolve, reject) => {
-
         const executableName =
             browser === 'chrome'
                 ? 'chrome.exe'
@@ -176,7 +246,6 @@ function launchRegisteredBrowser(browser) {
                 windowsHide: true
             },
             error => {
-
                 if (error) {
                     reject(error);
                     return;
@@ -188,18 +257,21 @@ function launchRegisteredBrowser(browser) {
     });
 }
 
-async function launchBrowser(browser) {
 
+/* =========================================================
+   LAUNCH BROWSER
+========================================================= */
+
+async function launchBrowser(browser) {
     if (process.platform !== 'win32') {
         throw new Error(
             'Browser control is supported on Windows only.'
         );
     }
 
-    const executable =
-        firstExistingPath(
-            BROWSER_CANDIDATES[browser] || []
-        );
+    const executable = firstExistingPath(
+        BROWSER_CANDIDATES[browser] || []
+    );
 
     if (executable) {
         await launchExecutable(executable);
@@ -209,126 +281,131 @@ async function launchBrowser(browser) {
     await launchRegisteredBrowser(browser);
 }
 
+
+/* =========================================================
+   LAUNCH APPLICATION
+========================================================= */
+
 async function launchApplication(application) {
-  const normalized = String(application)
-    .trim()
-    .toLowerCase();
+    const normalized = normalizeApplicationName(application);
 
-  const candidates =
-    APPLICATION_CANDIDATES[normalized];
+    const candidates = APPLICATION_CANDIDATES[normalized];
 
-  if (!candidates) {
-    throw new Error(
-      `Unsupported application: ${normalized}`
-    );
-  }
+    if (!candidates) {
+        throw new Error(
+            `Unsupported application: ${normalized}`
+        );
+    }
 
-  const executable =
-    firstExistingPath(candidates);
+    const executable = firstExistingPath(candidates);
 
-  if (!executable) {
-    throw new Error(
-      `${normalized} executable was not found.`
-    );
-  }
+    if (!executable) {
+        throw new Error(
+            `${normalized} executable was not found.`
+        );
+    }
 
-  /*
-   * NOTEPAD
-   *
-   * Open as a normal separate Windows application window.
-   * Do NOT use /min.
-   */
-  if (normalized === 'notepad') {
+    if (normalized === 'notepad') {
+        const child = spawn(
+            executable,
+            [],
+            {
+                detached: true,
+                windowsHide: false,
+                stdio: 'ignore'
+            }
+        );
+
+        child.unref();
+
+        return {
+            success: true,
+            application: 'notepad',
+            message: 'Notepad opened successfully'
+        };
+    }
 
     const child = spawn(
-      executable,
-      [],
-      {
-        detached: true,
-        windowsHide: false,
-        stdio: 'ignore'
-      }
+        executable,
+        [],
+        {
+            detached: true,
+            windowsHide: false,
+            stdio: 'ignore'
+        }
     );
 
     child.unref();
 
     return {
-      success: true,
-      application: 'notepad',
-      message: 'Notepad opened successfully'
+        success: true,
+        application: normalized,
+        message: `${APPLICATION_DISPLAY_NAMES[normalized]} opened successfully`
     };
-  }
-
-  /*
-   * CHROME / OTHER APPLICATIONS
-   */
-  const child = spawn(
-    executable,
-    [],
-    {
-      detached: true,
-      windowsHide: false,
-      stdio: 'ignore'
-    }
-  );
-
-  child.unref();
-
-  return {
-    success: true,
-    application: normalized,
-    message: `${normalized} opened successfully`
-  };
 }
 
-async function executeApplicationCommand(
-    action,
-    application
-) {
+
+/* =========================================================
+   EXECUTE APPLICATION COMMAND
+========================================================= */
+
+async function executeApplicationCommand(action, application) {
 
     if (action !== 'open') {
-    throw new Error(
-        `Unsupported application action: ${action}`
-    );
-}
-
-const normalized =
-    String(application || '')
-        .trim()
-        .toLowerCase();
-
-const isBrowser =
-    Object.prototype.hasOwnProperty.call(
-        BROWSER_CANDIDATES,
-        normalized
-    );
-
-const isApplication =
-    Object.prototype.hasOwnProperty.call(
-        APPLICATION_CANDIDATES,
-        normalized
-    );
-
-if (!isBrowser && !isApplication) {
-    throw new Error(
-        `Unsupported application: ${normalized}`
-    );
-}
-
-try {
-
-    if (isBrowser) {
-        await launchBrowser(normalized);
-    } else {
-        await launchApplication(normalized);
+        throw new Error(
+            `Unsupported application action: ${action}`
+        );
     }
 
-} catch (error) {
+    const normalized = normalizeApplicationName(application);
 
-    console.error(
-        `${normalized} launch error:`,
-        error
-    );
+    const isBrowser =
+        Object.prototype.hasOwnProperty.call(
+            BROWSER_CANDIDATES,
+            normalized
+        );
+
+    const isApplication =
+        Object.prototype.hasOwnProperty.call(
+            APPLICATION_CANDIDATES,
+            normalized
+        );
+
+    if (!isBrowser && !isApplication) {
+        throw new Error(
+            `Unsupported application: ${normalized}`
+        );
+    }
+
+    try {
+        if (isBrowser) {
+            await launchBrowser(normalized);
+        } else {
+            await launchApplication(normalized);
+        }
+    } catch (error) {
+        console.error(
+            `${normalized} launch error:`,
+            error
+        );
+
+        const displayName =
+            isBrowser
+                ? BROWSER_DISPLAY_NAMES[normalized]
+                : APPLICATION_DISPLAY_NAMES[normalized];
+
+        addCommandHistory(
+            'application',
+            `open:${normalized}`,
+            'failed',
+            error?.message ||
+                `Unable to open ${displayName}.`
+        );
+
+        throw new Error(
+            `Unable to open ${displayName}.`
+        );
+    }
 
     const displayName =
         isBrowser
@@ -338,35 +415,21 @@ try {
     addCommandHistory(
         'application',
         `open:${normalized}`,
-        'failed',
-        error?.message ||
-            `Unable to open ${displayName}.`
-    );
-
-    throw new Error(
-        `Unable to open ${displayName}.`
-    );
-}
-
-const displayName =
-    isBrowser
-        ? BROWSER_DISPLAY_NAMES[normalized]
-        : APPLICATION_DISPLAY_NAMES[normalized];
-
-addCommandHistory(
-    'application',
-    `open:${normalized}`,
-    'success',
-    `${displayName} opened successfully`
-);
-
-return {
-    success: true,
-    application: normalized,
-    message:
+        'success',
         `${displayName} opened successfully`
-};
+    );
+
+    return {
+        success: true,
+        application: normalized,
+        message: `${displayName} opened successfully`
+    };
 }
+
+
+/* =========================================================
+   EXPORT
+========================================================= */
 
 module.exports = {
     executeApplicationCommand
