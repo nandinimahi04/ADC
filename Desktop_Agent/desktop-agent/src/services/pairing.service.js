@@ -236,7 +236,7 @@ function verifyPairing(request) {
 
     activePairing.used = true;
 
-
+    
     const pairedDevice = {
 
         deviceId,

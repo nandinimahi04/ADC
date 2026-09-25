@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { DeviceNameService } from './device-name.service';
 
 export interface DesktopPairingData {
   type: string;
@@ -30,6 +31,9 @@ export interface PairingResponse {
 })
 export class PairingService {
 
+
+  constructor( private deviceNameService: DeviceNameService ) {}
+
   /**
    * Verify the Android device with
    * the Desktop Agent.
@@ -45,6 +49,12 @@ export class PairingService {
       'Connecting to Desktop Agent:',
       url
     );
+
+    // Get the actual custom Android device name // before creating the request body. 
+    const androidDeviceName =
+     (await this.deviceNameService.getName()).trim() || 'Android Device';
+    console.log( 'Android device name:', androidDeviceName );
+
 
     const response =
       await fetch(url, {
@@ -66,7 +76,7 @@ export class PairingService {
 
           // Android device name
           deviceName:
-            'Android Phone'
+           androidDeviceName
 
         })
       });

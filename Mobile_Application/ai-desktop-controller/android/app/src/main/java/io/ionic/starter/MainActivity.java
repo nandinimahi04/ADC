@@ -9,10 +9,16 @@ public class MainActivity extends BridgeActivity {
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
+
+        // Register custom DeviceName plugin
+        registerPlugin(DeviceNamePlugin.class);
+
         super.onCreate(savedInstanceState);
 
         getBridge().getWebView()
                 .getSettings()
-                .setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
+                .setMixedContentMode(
+                        WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
+                );
     }
 }

@@ -274,7 +274,7 @@ export class PairDevicePage {
             pairingData.deviceId,
 
           deviceName:
-            pairingData.deviceName,
+            response.data?.device?.deviceName || 'Android Device',
 
           ipAddress:
             pairingData.ipAddress,
