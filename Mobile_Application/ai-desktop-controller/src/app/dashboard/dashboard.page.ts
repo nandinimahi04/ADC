@@ -74,7 +74,7 @@ export class DashboardPage implements OnInit, OnDestroy {
 
   batteryLoaded = false;
 
-  private readonly REFRESH_INTERVAL_MS = 15000;
+  private readonly REFRESH_INTERVAL_MS = 10000;
   private refreshHandle: ReturnType<typeof setInterval> | null = null;
   private appStateListener: PluginListenerHandle | null = null;
 
@@ -120,7 +120,7 @@ export class DashboardPage implements OnInit, OnDestroy {
   private startAutoRefresh(): void {
     this.stopAutoRefresh();
     this.refreshHandle = setInterval(() => {
-      this.loadSystemInfo();
+      void this.loadSystemInfo();
     }, this.REFRESH_INTERVAL_MS);
   }
 
@@ -133,37 +133,111 @@ export class DashboardPage implements OnInit, OnDestroy {
 
   private listenForAppStateChanges(): void {
     App.addListener('appStateChange', (state: AppState) => {
-      if (state.isActive) {
-        this.loadSystemInfo();
-        this.startAutoRefresh();
-      } else {
-        this.stopAutoRefresh();
+        if (state.isActive) {
+          void this.loadSystemInfo();
+          this.startAutoRefresh();
+        } else {
+          this.stopAutoRefresh();
+        }
       }
-    }).then((handle) => {
+    ).then(handle => {
+
       this.appStateListener = handle;
     });
   }
 
   async loadSystemInfo(): Promise<void> {
     try {
-      const response = await this.desktopAgent.getSystemInfo();
+
+      /*
+       * First check whether the Desktop Agent
+       * still considers this device paired.
+       */
+      const pairingStatus =
+        await this.desktopAgent.getPairingStatus();
+
+      /*
+       * A successful response with paired=false
+       * or disconnected means the Desktop Agent
+       * explicitly disconnected this mobile device.
+       */
+      if (
+        !pairingStatus.success ||
+        !pairingStatus.data?.paired ||
+        pairingStatus.data.status === 'disconnected'
+      ) {
+
+        console.warn(
+          'Desktop Agent disconnected the mobile device.'
+        );
+
+        await this.handleDisconnected();
+
+        return;
+      }
+
+      /*
+       * Pairing is still valid.
+       * Continue loading system information.
+       */
+      const response =
+        await this.desktopAgent.getSystemInfo();
+
       const data = response.data as SystemInfoData;
 
-      this.deviceName = data.deviceName || 'Unknown Device';
-      this.operatingSystem = data.operatingSystem || 'Unknown';
+      this.deviceName = data?.deviceName || 'Unknown Device';
+      this.operatingSystem = data?.operatingSystem || 'Unknown';
 
-      this.hasBattery = !!data.hasBattery;
+      this.hasBattery =
+        !!data?.hasBattery;
+
       this.batteryPercentage =
-        typeof data.batteryPercentage === 'number'
+        typeof data?.batteryPercentage === 'number'
           ? data.batteryPercentage
           : null;
-      this.isCharging = data.isCharging ?? null;
+
+      this.isCharging =
+        data?.isCharging ?? null;
 
       this.batteryLoaded = true;
 
     } catch (error) {
-      console.error('Failed to load system information:', error);
+
+      console.error(
+        'Failed to load system information:',
+        error
+      );
+
+      /*
+       * Do NOT immediately disconnect on a temporary
+       * network failure.
+       *
+       * getPairingStatus() already handles HTTP 401
+       * by clearing local authentication and returning
+       * paired=false.
+       *
+       * Therefore this catch is primarily for an
+       * unreachable Desktop Agent.
+       */
     }
+  }
+
+  /**
+   * Handles an explicit Desktop Agent disconnect.
+   */
+  private async handleDisconnected(): Promise<void> {
+
+    this.stopAutoRefresh();
+
+    await this.desktopAgent.clearLocalPairing();
+
+    alert(
+      'Disconnected from Desktop Agent. Please pair again.'
+    );
+
+    await this.router.navigate([
+      '/pair-device'
+    ]);
   }
 
   get batteryDotClass(): string {
@@ -172,7 +246,7 @@ export class DashboardPage implements OnInit, OnDestroy {
     return 'normal';
   }
 
-  async openChrome(): Promise<void> {
+ async openChrome(): Promise<void> {
     if (this.isExecuting) return;
     this.isExecuting = true;
     try {
@@ -232,7 +306,10 @@ export class DashboardPage implements OnInit, OnDestroy {
     } catch (error) {
 
       alert(error instanceof Error ? error.message : 'Failed to disconnect.');
-
+      await this.router.navigate([
+        '/pair-device'
+      ]);
+      
     } finally {
 
       this.isExecuting = false;

@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const { execFile } = require('child_process');
 
 const app = express();
 
@@ -58,9 +59,9 @@ app.use(
 
 app.use((req, res, next) => {
 
-    console.log(
-        `[REQUEST] ${req.method} ${req.originalUrl}`
-    );
+    //console.log(
+        //`[REQUEST] ${req.method} ${req.originalUrl}`
+    //);
 
     next();
 });
@@ -164,25 +165,76 @@ app.get('/', (req, res) => {
 // HEALTH CHECK
 // ============================================================
 
-app.get(
-    '/health',
-    (req, res) => {
+app.get('/health', (req, res) => {
+    execFile(
+        'powershell.exe',
+        [
+            '-NoProfile',
+            '-Command',
+            `
+            $cpu = (Get-Counter '\\Processor(_Total)\\% Processor Time').CounterSamples[0].CookedValue
 
-        return res.status(200).json({
+            $temp = $null
+            try {
+                $thermal = Get-CimInstance -Namespace root/wmi -ClassName MSAcpi_ThermalZoneTemperature -ErrorAction Stop |
+                    Where-Object { $_.CurrentTemperature -gt 0 } |
+                    Select-Object -First 1
 
-            success: true,
+                if ($thermal) {
+                    $temp = [math]::Round(($thermal.CurrentTemperature / 10) - 273.15, 1)
+                }
+            } catch {}
 
-            status: 'online',
+            [PSCustomObject]@{
+                cpuUtilization = [math]::Round($cpu, 1)
+                cpuTemperature = $temp
+            } | ConvertTo-Json -Compress
+            `
+        ],
+        {
+            windowsHide: true,
+            timeout: 5000
+        },
+        (error, stdout) => {
+            if (error) {
+                return res.status(503).json({
+                    success: false,
+                    status: 'unhealthy',
+                    cpu: {
+                        utilization: null,
+                        temperature: null
+                    },
+                    timestamp: new Date().toISOString()
+                });
+            }
 
-            service:
-                'AI Desktop Controller Desktop Agent',
+            try {
+                const data = JSON.parse(stdout.trim());
 
-            port: PORT
-
-        });
-
-    }
-);
+                return res.json({
+                    success: true,
+                    status: 'healthy',
+                    cpu: {
+                        utilization: data.cpuUtilization,
+                        temperature: data.cpuTemperature,
+                        unit: '°C'
+                    },
+                    timestamp: new Date().toISOString()
+                });
+            } catch (parseError) {
+                return res.status(503).json({
+                    success: false,
+                    status: 'unhealthy',
+                    cpu: {
+                        utilization: null,
+                        temperature: null
+                    },
+                    timestamp: new Date().toISOString()
+                });
+            }
+        }
+    );
+});
 
 
 // ============================================================

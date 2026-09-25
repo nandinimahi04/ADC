@@ -3,8 +3,8 @@ const crypto = require('crypto');
 const {
     saveAuthSession,
     getAuthSession,
-    touchPairedDevice,
-    removeAuthSession
+    removeAuthSession,
+    removePairedDevice
 } = require('./database.service');
 
 const ACCESS_TOKEN_TTL =
@@ -54,11 +54,57 @@ function createAuthenticationSession(device) {
 
     saveAuthSession(session);
 
+
+    /*
+     * Automatically disconnect the device
+     * when the 24-hour authentication session
+     * expires.
+     */
+    setTimeout(() => {
+
+        const currentSession =
+            getAuthSession();
+
+        /*
+         * Make sure this timer still belongs
+         * to the currently authenticated device.
+         */
+        if (
+            currentSession &&
+            currentSession.accessToken === accessToken
+        ) {
+
+            const expiryTime =
+                new Date(
+                    currentSession.expiresAt
+                ).getTime();
+
+            if (
+                !Number.isNaN(expiryTime) &&
+                Date.now() >= expiryTime
+            ) {
+
+                removeAuthSession();
+
+                removePairedDevice();
+
+                console.log(
+                    `Authentication expired. Device disconnected: ${device.deviceName}`
+                );
+
+            }
+
+        }
+
+    }, ACCESS_TOKEN_TTL);
+
+
     return {
 
         accessToken,
 
-        tokenType: 'Bearer',
+        tokenType:
+            'Bearer',
 
         expiresAt:
             session.expiresAt,
@@ -84,22 +130,27 @@ function validateAccessToken(token) {
 
         return {
             valid: false,
-            message: 'Access token is required'
+            message:
+                'Access token is required'
         };
 
     }
 
+
     const session =
         getAuthSession();
+
 
     if (!session) {
 
         return {
             valid: false,
-            message: 'No authenticated device exists'
+            message:
+                'No authenticated device exists'
         };
 
     }
+
 
     if (
         token !==
@@ -108,29 +159,36 @@ function validateAccessToken(token) {
 
         return {
             valid: false,
-            message: 'Invalid access token'
+            message:
+                'Invalid access token'
         };
 
     }
+
 
     const expiresAt =
         new Date(
             session.expiresAt
         ).getTime();
 
+
     if (
         Number.isNaN(expiresAt) ||
-        Date.now() > expiresAt
+        Date.now() >= expiresAt
     ) {
 
         removeAuthSession();
 
+        removePairedDevice();
+
         return {
             valid: false,
-            message: 'Access token has expired'
+            message:
+                'Access token has expired'
         };
 
     }
+
 
     return {
 
@@ -156,25 +214,33 @@ function getAuthenticatedDevice() {
     const session =
         getAuthSession();
 
+
     if (!session) {
+
         return null;
+
     }
+
 
     const expiresAt =
         new Date(
             session.expiresAt
         ).getTime();
 
+
     if (
         Number.isNaN(expiresAt) ||
-        Date.now() > expiresAt
+        Date.now() >= expiresAt
     ) {
 
         removeAuthSession();
 
+        removePairedDevice();
+
         return null;
 
     }
+
 
     return {
 
@@ -198,6 +264,8 @@ function getAuthenticatedDevice() {
 function revokeAuthentication() {
 
     removeAuthSession();
+
+    removePairedDevice();
 
 }
 

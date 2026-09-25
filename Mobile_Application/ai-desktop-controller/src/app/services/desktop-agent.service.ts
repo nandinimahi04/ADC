@@ -6,6 +6,24 @@ export interface DesktopResponse {
   data?: unknown;
 }
 
+export interface PairingStatusResponse {
+  success: boolean;
+  message?: string;
+  data?: {
+    status: string;
+    paired: boolean;
+    authenticated?: boolean;
+    device?: {
+      deviceId: string;
+      deviceName: string;
+      pairedAt?: string;
+      lastSeenAt?: string;
+      status?: string;
+    } | null;
+    expiresAt?: string | null;
+  };
+}
+
 interface PairedDevice {
   deviceId: string;
   deviceName: string;
@@ -24,118 +42,458 @@ interface DesktopAuthentication {
 })
 export class DesktopAgentService {
 
+  // ============================================================
+  // LOCAL PAIRING DATA
+  // ============================================================
+
   private getPairedDevice(): PairedDevice {
     const stored = localStorage.getItem('paired_device');
+
     if (!stored) {
       throw new Error('No paired desktop found.');
     }
-    return JSON.parse(stored);
+
+    return JSON.parse(stored) as PairedDevice;
   }
 
   private getAuthentication(): DesktopAuthentication {
-    const stored = localStorage.getItem('desktop_authentication');
+    const stored = localStorage.getItem(
+      'desktop_authentication'
+    );
+
     if (!stored) {
-      throw new Error('Desktop authentication not found. Please pair again.');
+      throw new Error(
+        'Desktop authentication not found. Please pair again.'
+      );
     }
-    return JSON.parse(stored);
+
+    return JSON.parse(
+      stored
+    ) as DesktopAuthentication;
   }
 
-  async openApplication(application: string): Promise<DesktopResponse> {
+  private getDesktopBaseUrl(): string {
     const device = this.getPairedDevice();
-    const authentication = this.getAuthentication();
-    const url = `http://${device.ipAddress}:${device.port}/application`;
 
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${authentication.accessToken}`
-      },
-      body: JSON.stringify({ action: 'open', application })
-    });
-
-    const result = await response.json();
-    if (!response.ok) {
-      throw new Error(result?.message || `Command failed (${response.status})`);
-    }
-    return result;
+    return `http://${device.ipAddress}:${device.port}`;
   }
 
-  async executeSystemCommand(
-    command: 'shutdown' | 'restart' | 'lock' | 'sleep'
-  ): Promise<DesktopResponse> {
-    const device = this.getPairedDevice();
-    const authentication = this.getAuthentication();
-    const url = `http://${device.ipAddress}:${device.port}/system`;
+  private getAuthHeaders(): HeadersInit {
+    const authentication =
+      this.getAuthentication();
 
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${authentication.accessToken}`
-      },
-      body: JSON.stringify({ command })
-    });
-
-    const result = await response.json();
-    if (!response.ok) {
-      throw new Error(result?.message || `System command failed (${response.status})`);
-    }
-    return result;
+    return {
+      'Authorization':
+        `Bearer ${authentication.accessToken}`
+    };
   }
 
-  async getSystemInfo(): Promise<DesktopResponse> {
-    const device = this.getPairedDevice();
-    const authentication = this.getAuthentication();
-    const url = `http://${device.ipAddress}:${device.port}/system/info`;
+  // ============================================================
+  // PAIRING STATUS
+  // ============================================================
 
-    const response = await fetch(url, {
-      method: 'GET',
-      headers: { 'Authorization': `Bearer ${authentication.accessToken}` }
-    });
-
-    const result = await response.json();
-    if (!response.ok) {
-      throw new Error(result?.message || `Failed to get system information (${response.status})`);
-    }
-    return result;
-  }
-
-  /**
-   * Disconnect from the currently paired Desktop Agent.
-   * Notifies the desktop (best-effort) and always clears
-   * local pairing/auth data so the user can pair again.
-   */
-  async disconnect(): Promise<void> {
+  async getPairingStatus(): Promise<PairingStatusResponse> {
 
     try {
 
-      const device = this.getPairedDevice();
-      const url = `http://${device.ipAddress}:${device.port}/pair/unpair`;
+      const baseUrl =
+        this.getDesktopBaseUrl();
 
-      console.log('Notifying Desktop Agent of disconnect:', url);
+      const response = await fetch(
+        `${baseUrl}/pair/status`,
+        {
+          method: 'GET',
+          headers: {
+            ...this.getAuthHeaders()
+          },
+          cache: 'no-store'
+        }
+      );
 
-      await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' }
-      });
+      let result: PairingStatusResponse;
+
+      try {
+
+        result =
+          await response.json() as PairingStatusResponse;
+
+      } catch {
+
+        result = {
+          success: false,
+          message:
+            'Invalid response from Desktop Agent.',
+          data: {
+            status: 'disconnected',
+            paired: false,
+            authenticated: false,
+            device: null,
+            expiresAt: null
+          }
+        };
+
+      }
+
+      // --------------------------------------------------------
+      // Authentication expired / revoked
+      // --------------------------------------------------------
+
+      if (response.status === 401) {
+
+        console.warn(
+          'Desktop Agent authentication expired or was revoked.'
+        );
+
+        await this.clearLocalPairing();
+
+        return {
+          success: false,
+          message:
+            'Authentication expired.',
+          data: {
+            status: 'disconnected',
+            paired: false,
+            authenticated: false,
+            device: null,
+            expiresAt: null
+          }
+        };
+      }
+
+      // --------------------------------------------------------
+      // Other HTTP errors
+      // --------------------------------------------------------
+
+      if (!response.ok) {
+
+        throw new Error(
+          result?.message ||
+          `Failed to get pairing status (${response.status})`
+        );
+
+      }
+
+      // --------------------------------------------------------
+      // Desktop says device is disconnected
+      // --------------------------------------------------------
+
+      if (
+        result?.data?.paired === false ||
+        result?.data?.status === 'disconnected' ||
+        result?.data?.device?.status === 'disconnected'
+      ) {
+
+        console.warn(
+          'Desktop Agent reports this mobile device as disconnected.'
+        );
+
+        await this.clearLocalPairing();
+
+      }
+
+      return result;
 
     } catch (error) {
 
-      console.warn(
-        'Could not notify Desktop Agent (continuing local disconnect):',
+      console.error(
+        'Failed to get pairing status:',
+        error
+      );
+
+      throw error;
+    }
+  }
+
+  // ============================================================
+  // CONNECTION STATUS
+  // ============================================================
+
+  async getConnectionStatus():
+    Promise<PairingStatusResponse> {
+
+    return this.getPairingStatus();
+  }
+
+  // ============================================================
+  // CLEAR LOCAL PAIRING
+  // ============================================================
+
+  async clearLocalPairing(): Promise<void> {
+
+    localStorage.removeItem(
+      'paired_device'
+    );
+
+    localStorage.removeItem(
+      'desktop_authentication'
+    );
+
+    console.log(
+      'Mobile pairing and authentication data cleared.'
+    );
+  }
+
+  // ============================================================
+  // APPLICATION
+  // ============================================================
+
+  async openApplication(
+    application: string
+  ): Promise<DesktopResponse> {
+
+    const device =
+      this.getPairedDevice();
+
+    const authentication =
+      this.getAuthentication();
+
+    const url =
+      `http://${device.ipAddress}:${device.port}/application`;
+
+    const response = await fetch(
+      url,
+      {
+        method: 'POST',
+
+        headers: {
+          'Content-Type':
+            'application/json',
+
+          'Authorization':
+            `Bearer ${authentication.accessToken}`
+        },
+
+        body: JSON.stringify({
+          action: 'open',
+          application
+        })
+      }
+    );
+
+    const result =
+      await response.json();
+
+    if (!response.ok) {
+
+      throw new Error(
+        result?.message ||
+        `Command failed (${response.status})`
+      );
+
+    }
+
+    return result as DesktopResponse;
+  }
+
+  // ============================================================
+  // SYSTEM COMMAND
+  // ============================================================
+
+  async executeSystemCommand(
+    command:
+      | 'shutdown'
+      | 'restart'
+      | 'lock'
+      | 'sleep'
+  ): Promise<DesktopResponse> {
+
+    const device =
+      this.getPairedDevice();
+
+    const authentication =
+      this.getAuthentication();
+
+    const url =
+      `http://${device.ipAddress}:${device.port}/system`;
+
+    const response = await fetch(
+      url,
+      {
+        method: 'POST',
+
+        headers: {
+          'Content-Type':
+            'application/json',
+
+          'Authorization':
+            `Bearer ${authentication.accessToken}`
+        },
+
+        body: JSON.stringify({
+          command
+        })
+      }
+    );
+
+    const result =
+      await response.json();
+
+    if (!response.ok) {
+
+      throw new Error(
+        result?.message ||
+        `System command failed (${response.status})`
+      );
+
+    }
+
+    return result as DesktopResponse;
+  }
+
+  // ============================================================
+  // SYSTEM INFORMATION
+  // ============================================================
+
+  async getSystemInfo():
+    Promise<DesktopResponse> {
+
+    const device =
+      this.getPairedDevice();
+
+    const authentication =
+      this.getAuthentication();
+
+    const url =
+      `http://${device.ipAddress}:${device.port}/system/info`;
+
+    const response = await fetch(
+      url,
+      {
+        method: 'GET',
+
+        headers: {
+          'Authorization':
+            `Bearer ${authentication.accessToken}`
+        },
+
+        cache: 'no-store'
+      }
+    );
+
+    const result =
+      await response.json();
+
+    if (!response.ok) {
+
+      throw new Error(
+        result?.message ||
+        `Failed to get system information (${response.status})`
+      );
+
+    }
+
+    return result as DesktopResponse;
+  }
+
+  // ============================================================
+  // DISCONNECT
+  // ============================================================
+
+  async disconnect(): Promise<void> {
+
+    let disconnectError: unknown = null;
+
+    try {
+
+      const device =
+        this.getPairedDevice();
+
+      const authentication =
+        this.getAuthentication();
+
+      const url =
+        `http://${device.ipAddress}:${device.port}/pair/unpair`;
+
+      console.log(
+        'Sending disconnect request to Desktop Agent:',
+        url
+      );
+
+      const response = await fetch(
+        url,
+        {
+          method: 'POST',
+
+          headers: {
+            'Content-Type':
+              'application/json',
+
+            'Authorization':
+              `Bearer ${authentication.accessToken}`
+          },
+
+          body: JSON.stringify({})
+        }
+      );
+
+      let result:
+        DesktopResponse | null = null;
+
+      try {
+
+        result =
+          await response.json() as DesktopResponse;
+
+      } catch {
+        // Server returned no JSON body.
+      }
+
+      console.log(
+        'Desktop Agent disconnect response:',
+        result
+      );
+
+      if (!response.ok) {
+
+        throw new Error(
+          result?.message ||
+          `Disconnect failed (${response.status})`
+        );
+
+      }
+
+      if (
+        result &&
+        !result.success
+      ) {
+
+        throw new Error(
+          result.message ||
+          'Desktop Agent rejected the disconnect request.'
+        );
+
+      }
+
+      console.log(
+        'Desktop Agent disconnected successfully.'
+      );
+
+    } catch (error) {
+
+      disconnectError = error;
+
+      console.error(
+        'Desktop Agent disconnect request failed:',
         error
       );
 
     } finally {
 
-      localStorage.removeItem('paired_device');
-      localStorage.removeItem('desktop_authentication');
-
-      console.log('Local pairing data cleared.');
+      // Always remove mobile-side pairing data.
+      await this.clearLocalPairing();
 
     }
 
-  }
+    /*
+     * Important:
+     *
+     * Even if the Desktop Agent was unreachable,
+     * the mobile application is now locally disconnected.
+     */
+    if (disconnectError) {
 
+      throw disconnectError;
+
+    }
+  }
 }
