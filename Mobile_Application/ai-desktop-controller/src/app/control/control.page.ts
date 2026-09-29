@@ -26,7 +26,9 @@ import {
   lockClosedOutline,
   moonOutline,
   refreshOutline,
-  globeOutline
+  globeOutline,
+  documentTextOutline,
+  codeSlashOutline
 } from 'ionicons/icons';
 
 import { DesktopAgentService } from '../services/desktop-agent.service';
@@ -51,6 +53,7 @@ import { DesktopAgentService } from '../services/desktop-agent.service';
 export class ControlPage {
 
   isExecuting = false;
+  activeApp: 'chrome' | 'notepad' | 'vscode' | null = null;
 
   constructor(
     private desktopAgent: DesktopAgentService,
@@ -68,20 +71,39 @@ export class ControlPage {
       lockClosedOutline,
       moonOutline,
       refreshOutline,
-      globeOutline
+      globeOutline,
+      documentTextOutline,
+      codeSlashOutline
     });
   }
 
   async openChrome(): Promise<void> {
+    await this.openDesktopApp('chrome', 'Chrome');
+  }
+
+  async openNotepad(): Promise<void> {
+    await this.openDesktopApp('notepad', 'Notepad');
+  }
+
+  async openVSCode(): Promise<void> {
+    await this.openDesktopApp('vscode', 'VS Code');
+  }
+
+  private async openDesktopApp(
+    application: 'chrome' | 'notepad' | 'vscode',
+    label: string
+  ): Promise<void> {
     if (this.isExecuting) return;
     this.isExecuting = true;
+    this.activeApp = application;
     try {
-      const response = await this.desktopAgent.openApplication('chrome');
-      console.log('Chrome command successful:', response);
+      const response = await this.desktopAgent.openApplication(application);
+      console.log(`${label} command successful:`, response);
     } catch (error) {
       alert(error instanceof Error ? error.message : 'Failed to send command.');
     } finally {
       this.isExecuting = false;
+      this.activeApp = null;
     }
   }
 

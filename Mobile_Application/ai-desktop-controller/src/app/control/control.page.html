@@ -24,6 +24,7 @@
 
     <div class="actions-grid">
 
+      <!-- Row 1 -->
       <ion-button
         fill="clear"
         (click)="executeSystemCommand('shutdown')"
@@ -46,6 +47,7 @@
         </div>
       </ion-button>
 
+      <!-- Row 2 -->
       <ion-button
         fill="clear"
         (click)="executeSystemCommand('sleep')"
@@ -68,15 +70,39 @@
         </div>
       </ion-button>
 
+      <!-- Row 3 -->
       <ion-button
-        class="full-width"
         fill="clear"
         (click)="openChrome()"
         [disabled]="isExecuting"
       >
         <div class="action-content">
           <ion-icon name="globe-outline"></ion-icon>
-          <span>{{ isExecuting ? 'Working...' : 'Browser' }}</span>
+          <span>{{ activeApp === 'chrome' ? 'Working...' : 'Browser' }}</span>
+        </div>
+      </ion-button>
+
+      <ion-button
+        fill="clear"
+        (click)="openNotepad()"
+        [disabled]="isExecuting"
+      >
+        <div class="action-content">
+          <ion-icon name="document-text-outline"></ion-icon>
+          <span>{{ activeApp === 'notepad' ? 'Working...' : 'Notepad' }}</span>
+        </div>
+      </ion-button>
+
+      <!-- Row 4 -->
+      <ion-button
+        class="full-width"
+        fill="clear"
+        (click)="openVSCode()"
+        [disabled]="isExecuting"
+      >
+        <div class="action-content">
+          <ion-icon name="code-slash-outline"></ion-icon>
+          <span>{{ activeApp === 'vscode' ? 'Working...' : 'VS Code' }}</span>
         </div>
       </ion-button>
 
@@ -90,47 +116,27 @@
 
   <div class="bottom-nav">
 
-    <button
-      class="nav-item"
-      type="button"
-      (click)="onNavClick('dashboard')"
-    >
+    <button class="nav-item" type="button" (click)="onNavClick('dashboard')">
       <ion-icon name="grid-outline"></ion-icon>
       <span>Dashboard</span>
     </button>
 
-    <button
-      class="nav-item"
-      type="button"
-      (click)="onNavClick('ai-chat')"
-    >
+    <button class="nav-item" type="button" (click)="onNavClick('ai-chat')">
       <ion-icon name="chatbubble-ellipses-outline"></ion-icon>
       <span>AI Chat</span>
     </button>
 
-    <button
-      class="nav-item active"
-      type="button"
-      (click)="onNavClick('control')"
-    >
+    <button class="nav-item active" type="button" (click)="onNavClick('control')">
       <ion-icon name="apps-outline"></ion-icon>
       <span>Control</span>
     </button>
 
-    <button
-      class="nav-item"
-      type="button"
-      (click)="onNavClick('history')"
-    >
+    <button class="nav-item" type="button" (click)="onNavClick('history')">
       <ion-icon name="time-outline"></ion-icon>
       <span>History</span>
     </button>
 
-    <button
-      class="nav-item"
-      type="button"
-      (click)="onNavClick('settings')"
-    >
+    <button class="nav-item" type="button" (click)="onNavClick('settings')">
       <ion-icon name="settings-outline"></ion-icon>
       <span>Settings</span>
     </button>
