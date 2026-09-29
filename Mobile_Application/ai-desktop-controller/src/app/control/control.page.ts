@@ -129,10 +129,14 @@ export class ControlPage {
     }
   }
 
-  onNavClick(tab: 'dashboard' | 'ai-chat' | 'control' | 'history' | 'settings'): void {
+    onNavClick(tab: 'dashboard' | 'ai-chat' | 'control' | 'history' | 'settings'): void {
     if (tab === 'control') return;
     if (tab === 'dashboard') {
       this.router.navigate(['/dashboard']);
+      return;
+    }
+    if (tab === 'ai-chat') {
+      this.router.navigate(['/ai-chat']);
       return;
     }
     alert('This page is not developed yet.');

@@ -1,0 +1,133 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar>
+
+    <ion-buttons slot="start">
+      <ion-icon name="hardware-chip-outline" class="header-icon"></ion-icon>
+    </ion-buttons>
+
+    <ion-title>AI Chat</ion-title>
+
+    <ion-buttons slot="end">
+      <ion-button (click)="clearChat()" [disabled]="busy">
+        <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+
+  <div class="chat-container">
+
+    <div
+      class="msg-row"
+      *ngFor="let m of messages; trackBy: trackById"
+      [class.user]="m.from === 'user'"
+    >
+
+      <div class="avatar" *ngIf="m.from === 'bot'">
+        <ion-icon name="hardware-chip-outline"></ion-icon>
+      </div>
+
+      <div class="bubble" [ngClass]="[m.from, m.type]">
+        <div class="bubble-text">{{ m.text }}</div>
+        <div class="bubble-time">{{ m.time | date: 'shortTime' }}</div>
+      </div>
+
+    </div>
+
+    <!-- Yes / No buttons for confirmations -->
+    <div class="confirm-actions" *ngIf="awaitingConfirm">
+      <button type="button" class="confirm-yes" (click)="send('yes')">Yes</button>
+      <button type="button" class="confirm-no" (click)="send('no')">No</button>
+    </div>
+
+    <!-- Typing indicator -->
+    <div class="msg-row" *ngIf="busy">
+      <div class="avatar">
+        <ion-icon name="hardware-chip-outline"></ion-icon>
+      </div>
+      <div class="bubble bot info typing">
+        <span></span><span></span><span></span>
+      </div>
+    </div>
+
+  </div>
+
+</ion-content>
+
+<ion-footer class="ion-no-border">
+
+  <div class="chat-footer">
+
+    <div class="chips">
+      <button
+        type="button"
+        class="chip"
+        *ngFor="let chip of chips"
+        [disabled]="busy"
+        (click)="send(chip)"
+      >
+        {{ chip }}
+      </button>
+    </div>
+
+    <div class="input-bar">
+      <input
+        type="text"
+        class="chat-input"
+        placeholder="Type a command, e.g. open chrome"
+        autocomplete="off"
+        autocorrect="off"
+        enterkeyhint="send"
+        [(ngModel)]="draft"
+        [disabled]="busy"
+        (keyup.enter)="send()"
+        (focus)="keyboardOpen = true"
+        (blur)="keyboardOpen = false"
+      />
+
+      <button
+        type="button"
+        class="send-btn"
+        [disabled]="busy || !draft.trim()"
+        (pointerdown)="$event.preventDefault()"
+        (click)="send()"
+      >
+        <ion-icon name="send"></ion-icon>
+      </button>
+    </div>
+
+  </div>
+
+  <div class="bottom-nav" *ngIf="!keyboardOpen">
+
+    <button class="nav-item" type="button" (click)="onNavClick('dashboard')">
+      <ion-icon name="grid-outline"></ion-icon>
+      <span>Dashboard</span>
+    </button>
+
+    <button class="nav-item active" type="button" (click)="onNavClick('ai-chat')">
+      <ion-icon name="chatbubble-ellipses-outline"></ion-icon>
+      <span>AI Chat</span>
+    </button>
+
+    <button class="nav-item" type="button" (click)="onNavClick('control')">
+      <ion-icon name="apps-outline"></ion-icon>
+      <span>Control</span>
+    </button>
+
+    <button class="nav-item" type="button" (click)="onNavClick('history')">
+      <ion-icon name="time-outline"></ion-icon>
+      <span>History</span>
+    </button>
+
+    <button class="nav-item" type="button" (click)="onNavClick('settings')">
+      <ion-icon name="settings-outline"></ion-icon>
+      <span>Settings</span>
+    </button>
+
+  </div>
+
+</ion-footer>

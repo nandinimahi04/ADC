@@ -318,10 +318,14 @@ export class DashboardPage implements OnInit, OnDestroy {
 
   }
 
-  onNavClick(tab: 'dashboard' | 'ai-chat' | 'control' | 'history' | 'settings'): void {
+    onNavClick(tab: 'dashboard' | 'ai-chat' | 'control' | 'history' | 'settings'): void {
     if (tab === 'dashboard') return;
     if (tab === 'control') {
       this.router.navigate(['/control']);
+      return;
+    }
+    if (tab === 'ai-chat') {
+      this.router.navigate(['/ai-chat']);
       return;
     }
     alert('This page is not developed yet.');

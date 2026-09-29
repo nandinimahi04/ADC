@@ -94,6 +94,19 @@ export const routes: Routes = [
 
 
   // ===============================
+  // AI CHAT                                  // NEW
+  // ===============================
+
+  {
+    path: 'ai-chat',                          // NEW
+    loadComponent: () =>
+      import('./ai-chat/ai-chat.page').then(
+        (m) => m.AiChatPage
+      )
+  },
+
+
+  // ===============================
   // DEFAULT ROUTE
   // ===============================
 
