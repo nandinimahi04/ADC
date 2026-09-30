@@ -30,8 +30,9 @@ ion-content {
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;   /* centers everything vertically */
 
-  padding: 50px 24px 30px;
+  padding: 30px 24px;
   box-sizing: border-box;
 
   color: var(--text-primary);
@@ -218,8 +219,9 @@ ion-content {
 
 @media (max-height: 700px) {
 
-  .pin-container {
-    padding-top: 25px;
+    .pin-container {
+    padding-top: 20px;
+    padding-bottom: 20px;
   }
 
   .security-icon {

@@ -1,0 +1,175 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar>
+
+    <ion-buttons slot="start">
+      <ion-icon name="hardware-chip-outline" class="header-icon"></ion-icon>
+    </ion-buttons>
+
+    <ion-title>Settings</ion-title>
+
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+
+  <div class="page-container">
+
+    <!-- APPEARANCE -->
+    <div class="section-label">Appearance</div>
+
+    <div class="card theme-card">
+
+      <div class="row">
+        <div class="icon-box">
+          <ion-icon name="color-palette-outline"></ion-icon>
+        </div>
+        <div class="row-text">
+          <h4>Theme</h4>
+          <p>Choose how the app looks</p>
+        </div>
+      </div>
+
+      <div class="theme-options">
+
+        <button
+          type="button"
+          class="theme-option"
+          [class.selected]="theme === 'dark'"
+          (click)="setTheme('dark')"
+        >
+          <ion-icon name="moon-outline"></ion-icon>
+          <span>Dark</span>
+        </button>
+
+        <button
+          type="button"
+          class="theme-option"
+          [class.selected]="theme === 'light'"
+          (click)="setTheme('light')"
+        >
+          <ion-icon name="sunny-outline"></ion-icon>
+          <span>Light</span>
+        </button>
+
+      </div>
+
+    </div>
+
+    <!-- SECURITY -->
+    <div class="section-label">Security</div>
+
+    <div class="card">
+      <button type="button" class="row tappable" (click)="openChangePin()">
+        <div class="icon-box">
+          <ion-icon name="key-outline"></ion-icon>
+        </div>
+        <div class="row-text">
+          <h4>Change PIN</h4>
+          <p>Update your 6-digit app PIN</p>
+        </div>
+        <ion-icon name="chevron-forward-outline" class="chevron"></ion-icon>
+      </button>
+    </div>
+
+    <!-- DEVICES -->
+    <div class="section-label">Devices</div>
+
+    <div class="card">
+      <button type="button" class="row tappable" (click)="openPairedDevices()">
+        <div class="icon-box">
+          <ion-icon name="desktop-outline"></ion-icon>
+        </div>
+        <div class="row-text">
+          <h4>Paired Devices</h4>
+          <p>{{ pairedLabel }}</p>
+        </div>
+        <ion-icon name="chevron-forward-outline" class="chevron"></ion-icon>
+      </button>
+    </div>
+
+    <!-- ABOUT -->
+    <div class="section-label">About</div>
+
+    <div class="card">
+      <button type="button" class="row tappable" (click)="aboutOpen = true">
+        <div class="icon-box">
+          <ion-icon name="information-circle-outline"></ion-icon>
+        </div>
+        <div class="row-text">
+          <h4>About App</h4>
+          <p>Version {{ appVersion }}</p>
+        </div>
+        <ion-icon name="chevron-forward-outline" class="chevron"></ion-icon>
+      </button>
+    </div>
+
+  </div>
+
+</ion-content>
+
+<!-- ABOUT SHEET -->
+<ion-modal
+  [isOpen]="aboutOpen"
+  [initialBreakpoint]="0.55"
+  [breakpoints]="[0, 0.55, 0.9]"
+  (didDismiss)="aboutOpen = false"
+  class="about-modal"
+>
+  <ng-template>
+    <div class="about-sheet">
+
+      <div class="about-logo">
+        <ion-icon name="hardware-chip-outline"></ion-icon>
+      </div>
+
+      <h2>AI Desktop Controller</h2>
+      <p class="about-version">Version {{ appVersion }}</p>
+
+      <p class="about-text">
+        Control your Windows PC from your phone. Pair once with a QR code,
+        then run power commands, open applications and give instructions
+        to the AI chat assistant.
+      </p>
+
+      <div class="about-facts">
+        <div><span>Pairing</span><strong>QR code</strong></div>
+        <div><span>App lock</span><strong>6-digit PIN</strong></div>
+        <div><span>Connection</span><strong>Local network</strong></div>
+      </div>
+
+    </div>
+  </ng-template>
+</ion-modal>
+
+<ion-footer class="ion-no-border">
+
+  <div class="bottom-nav">
+
+    <button class="nav-item" type="button" (click)="onNavClick('dashboard')">
+      <ion-icon name="grid-outline"></ion-icon>
+      <span>Dashboard</span>
+    </button>
+
+    <button class="nav-item" type="button" (click)="onNavClick('ai-chat')">
+      <ion-icon name="chatbubble-ellipses-outline"></ion-icon>
+      <span>AI Chat</span>
+    </button>
+
+    <button class="nav-item" type="button" (click)="onNavClick('control')">
+      <ion-icon name="apps-outline"></ion-icon>
+      <span>Control</span>
+    </button>
+
+    <button class="nav-item" type="button" (click)="onNavClick('history')">
+      <ion-icon name="time-outline"></ion-icon>
+      <span>History</span>
+    </button>
+
+    <button class="nav-item active" type="button" (click)="onNavClick('settings')">
+      <ion-icon name="settings-outline"></ion-icon>
+      <span>Settings</span>
+    </button>
+
+  </div>
+
+</ion-footer>

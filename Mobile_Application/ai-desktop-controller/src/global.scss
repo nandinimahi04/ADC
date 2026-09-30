@@ -33,5 +33,53 @@
  */
 
 /* @import "@ionic/angular/css/palettes/dark.always.css"; */
-/* @import "@ionic/angular/css/palettes/dark.class.css"; */
-@import '@ionic/angular/css/palettes/dark.system.css';
+/* The theme is chosen in Settings (ThemeService adds .ion-palette-dark),
+   so the class-based palette is used instead of the system one. */
+@import '@ionic/angular/css/palettes/dark.class.css';
+
+/**
+ * App colour tokens
+ * Dark is the default. ThemeService adds .adc-light to <html>
+ * for the light theme.
+ */
+:root {
+  --adc-primary: #8cbcff;
+  --adc-primary-light: #b7d8ff;
+  --adc-bg: radial-gradient(circle at top, #162744 0%, #0f1a2d 45%, #08111f 100%);
+  --adc-card-bg: rgba(24, 35, 56, 0.95);
+  --adc-card-gradient: linear-gradient(145deg, rgba(40, 60, 95, 0.95), rgba(22, 32, 50, 0.95));
+  --adc-surface: rgba(32, 45, 68, 0.95);
+  --adc-surface-hover: rgba(42, 60, 90, 0.95);
+  --adc-surface-active: rgba(60, 90, 135, 0.95);
+  --adc-text: #ffffff;
+  --adc-text-secondary: #9eb2d2;
+  --adc-border: rgba(255, 255, 255, 0.08);
+  --adc-shadow: rgba(0, 0, 0, 0.35);
+  --adc-shadow-soft: rgba(0, 0, 0, 0.25);
+  --adc-on-primary: #08111f;
+  --adc-danger: #ff8a8a;
+  --adc-success: #4ade80;
+  --adc-status-text: #a8ffd2;
+  --adc-warning: #fbbf24;
+}
+
+:root.adc-light {
+  --adc-primary: #2f6fe0;
+  --adc-primary-light: #4f88ff;
+  --adc-bg: linear-gradient(180deg, #f5f8fe 0%, #e6edf9 100%);
+  --adc-card-bg: rgba(255, 255, 255, 0.97);
+  --adc-card-gradient: linear-gradient(145deg, #ffffff, #eef3fc);
+  --adc-surface: #ffffff;
+  --adc-surface-hover: #eef3fc;
+  --adc-surface-active: #dbe6fa;
+  --adc-text: #14203a;
+  --adc-text-secondary: #5a6b8c;
+  --adc-border: rgba(20, 32, 58, 0.1);
+  --adc-shadow: rgba(30, 50, 90, 0.16);
+  --adc-shadow-soft: rgba(30, 50, 90, 0.1);
+  --adc-on-primary: #ffffff;
+  --adc-danger: #d64545;
+  --adc-success: #16a34a;
+  --adc-status-text: #15803d;
+  --adc-warning: #b7791f;
+}

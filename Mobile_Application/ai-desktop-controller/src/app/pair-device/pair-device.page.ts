@@ -1,4 +1,5 @@
 import { PairingService } from '../services/pairing.service';
+import { PairedDevicesService } from '../services/paired-devices.service';
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 
@@ -41,9 +42,10 @@ import {
 })
 export class PairDevicePage {
 
-  constructor(
+    constructor(
   private router: Router,
-  private pairingService: PairingService)  {
+  private pairingService: PairingService,
+  private pairedDevices: PairedDevicesService)  {
 
     addIcons({
       arrowBackOutline,
@@ -300,6 +302,30 @@ export class PairDevicePage {
         );
 
       }
+            // Add this desktop to the paired-devices list
+      // (shown in Settings > Paired Devices).
+      this.pairedDevices.upsert({
+        deviceId:
+          pairingData.deviceId,
+
+        deviceName:
+          pairingData.deviceName ||
+          response.data?.device?.deviceName ||
+          'Desktop',
+
+        ipAddress:
+          pairingData.ipAddress,
+
+        port:
+          pairingData.port,
+
+        pairedAt:
+          response.data?.device?.pairedAt ||
+          new Date().toISOString(),
+
+        authentication:
+          response.data?.authentication
+      });
 
 
       console.log(

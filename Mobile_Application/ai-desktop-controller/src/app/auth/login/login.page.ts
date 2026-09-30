@@ -7,6 +7,7 @@ import {
 import { Router } from '@angular/router';
 import { SQLiteService } from '../../services/sqlite.service';
 import { hashPin } from '../../utils/pin.util';
+import { PairedDevicesService } from '../../services/paired-devices.service';
 
 import { addIcons } from 'ionicons';
 import {
@@ -45,9 +46,10 @@ export class LoginPage {
     '7', '8', '9'
   ];
 
-  constructor(
+    constructor(
   private router: Router,
-  private sqliteService: SQLiteService) {
+  private sqliteService: SQLiteService,
+  private pairedDevices: PairedDevicesService) {
 
     addIcons({
       lockClosed,
@@ -136,6 +138,10 @@ export class LoginPage {
     }
 
     // PIN is correct
+        // PIN is correct
+    // Reconnect to a still-paired desktop if none is active.
+    this.pairedDevices.ensureActive();
+
     const pairedDevice =
       localStorage.getItem('paired_device');
 

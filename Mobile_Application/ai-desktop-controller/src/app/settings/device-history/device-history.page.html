@@ -1,0 +1,88 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar>
+
+    <ion-buttons slot="start">
+      <ion-button class="back-btn" (click)="goBack()">
+        <ion-icon slot="icon-only" name="arrow-back-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+
+    <ion-title>History</ion-title>
+
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+
+  <ion-refresher slot="fixed" (ionRefresh)="onRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <div class="page-container">
+
+    @if (device) {
+      <div class="section-label">Commands run on {{ device.deviceName }}</div>
+    }
+
+    @if (loading) {
+
+      <div class="card message-card">
+        <p>Loading history...</p>
+      </div>
+
+    } @else if (errorMessage) {
+
+      <div class="card message-card">
+        <ion-icon name="cloud-offline-outline" class="message-icon"></ion-icon>
+        <p>{{ errorMessage }}</p>
+
+        @if (device) {
+          <ion-button class="retry-btn" (click)="load()">
+            <ion-icon slot="start" name="refresh-outline"></ion-icon>
+            Try again
+          </ion-button>
+        }
+      </div>
+
+    } @else if (items.length === 0) {
+
+      <div class="card message-card">
+        <ion-icon name="time-outline" class="message-icon"></ion-icon>
+        <p>No commands have been run yet.</p>
+      </div>
+
+    } @else {
+
+      <div class="card">
+
+        @for (item of items; track trackById($index, item)) {
+
+          <div class="row history-row">
+
+            <div class="icon-box">
+              <ion-icon [name]="iconFor(item)"></ion-icon>
+            </div>
+
+            <div class="row-text">
+              <h4>{{ titleFor(item) }}</h4>
+              @if (item.message) {
+                <p class="msg">{{ item.message }}</p>
+              }
+              <p class="time">{{ item.createdAt | date: 'MMM d, h:mm a' }}</p>
+            </div>
+
+            <span class="pill" [class.success]="isSuccess(item)" [class.danger]="!isSuccess(item)">
+              {{ statusLabel(item) }}
+            </span>
+
+          </div>
+
+        }
+
+      </div>
+
+    }
+
+  </div>
+
+</ion-content>

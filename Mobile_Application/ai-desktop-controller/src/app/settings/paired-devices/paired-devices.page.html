@@ -1,0 +1,111 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar>
+
+    <ion-buttons slot="start">
+      <ion-button class="back-btn" (click)="goBack()">
+        <ion-icon slot="icon-only" name="arrow-back-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+
+    <ion-title>Paired Devices</ion-title>
+
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+
+  <div class="page-container">
+
+    <div class="section-label">{{ countLabel }}</div>
+
+    @if (rows.length === 0) {
+
+      <div class="card empty-card">
+        <ion-icon name="desktop-outline" class="empty-icon"></ion-icon>
+        <h3>No paired devices</h3>
+        <p>Scan the QR code shown on your desktop to pair a computer.</p>
+
+        <ion-button class="primary-btn" (click)="pairNew()">
+          <ion-icon slot="start" name="qr-code-outline"></ion-icon>
+          Pair a device
+        </ion-button>
+      </div>
+
+    } @else {
+
+      @for (row of rows; track row.device.deviceId) {
+
+        <div class="card device-card">
+
+          <div class="device-top">
+
+            <div class="icon-box">
+              <ion-icon name="desktop-outline"></ion-icon>
+            </div>
+
+            <div class="row-text">
+              <h4>{{ row.device.deviceName }}</h4>
+              <p>{{ row.device.ipAddress }}:{{ row.device.port }}</p>
+            </div>
+
+            @if (row.isActive) {
+              <span class="pill primary">Active</span>
+            }
+
+          </div>
+
+          <div class="device-meta">
+            <span class="pill" [class]="'pill ' + stateClass(row)">
+              {{ stateLabel(row) }}
+            </span>
+            <span class="paired-on">
+              Paired {{ row.device.pairedAt | date: 'MMM d, y' }}
+            </span>
+          </div>
+
+          <div class="device-actions">
+
+            <ion-button
+              fill="outline"
+              size="small"
+              class="action-btn"
+              (click)="viewHistory(row)"
+            >
+              <ion-icon slot="start" name="time-outline"></ion-icon>
+              History
+            </ion-button>
+
+            @if (!row.isActive) {
+              <ion-button
+                fill="outline"
+                size="small"
+                class="action-btn"
+                (click)="makeActive(row)"
+              >
+                <ion-icon slot="start" name="swap-horizontal-outline"></ion-icon>
+                Use
+              </ion-button>
+            }
+
+            <ion-button
+              fill="outline"
+              size="small"
+              class="action-btn danger"
+              [disabled]="busyId === row.device.deviceId"
+              (click)="confirmDisconnect(row)"
+            >
+              <ion-icon slot="start" name="close-circle-outline"></ion-icon>
+              Disconnect
+            </ion-button>
+
+          </div>
+
+        </div>
+
+      }
+
+    }
+
+  </div>
+
+</ion-content>

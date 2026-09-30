@@ -162,6 +162,10 @@ export class AiChatPage implements OnInit, AfterViewInit {
       this.router.navigate(['/control']);
       return;
     }
+        if (tab === 'settings') {
+      this.router.navigate(['/settings']);
+      return;
+    }
     alert('This page is not developed yet.');
   }
 

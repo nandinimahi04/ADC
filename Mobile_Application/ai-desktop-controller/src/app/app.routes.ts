@@ -104,6 +104,41 @@ export const routes: Routes = [
         (m) => m.AiChatPage
       )
   },
+    // ===============================
+  // SETTINGS
+  // ===============================
+
+  {
+    path: 'settings',
+    loadComponent: () =>
+      import('./settings/settings.page').then(
+        (m) => m.SettingsPage
+      )
+  },
+
+  {
+    path: 'change-pin',
+    loadComponent: () =>
+      import('./settings/change-pin/change-pin.page').then(
+        (m) => m.ChangePinPage
+      )
+  },
+
+  {
+    path: 'paired-devices',
+    loadComponent: () =>
+      import('./settings/paired-devices/paired-devices.page').then(
+        (m) => m.PairedDevicesPage
+      )
+  },
+
+  {
+    path: 'device-history/:deviceId',
+    loadComponent: () =>
+      import('./settings/device-history/device-history.page').then(
+        (m) => m.DeviceHistoryPage
+      )
+  },
 
 
   // ===============================

@@ -139,6 +139,10 @@ export class ControlPage {
       this.router.navigate(['/ai-chat']);
       return;
     }
+        if (tab === 'settings') {
+      this.router.navigate(['/settings']);
+      return;
+    }
     alert('This page is not developed yet.');
   }
 

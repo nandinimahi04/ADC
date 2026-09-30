@@ -1,0 +1,87 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar>
+
+    <ion-buttons slot="start">
+      <ion-button class="back-btn" (click)="goBack()" [disabled]="step === 'done'">
+        <ion-icon slot="icon-only" name="arrow-back-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+
+    <ion-title>Change PIN</ion-title>
+
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+
+  <div class="pin-container">
+
+    @if (step === 'done') {
+
+      <div class="success-block">
+        <ion-icon name="checkmark-circle-outline" class="success-icon"></ion-icon>
+        <h1>{{ title }}</h1>
+        <p>{{ subtitle }}</p>
+        <p class="hint">Use the new PIN the next time you open the app.</p>
+      </div>
+
+      <ion-button class="done-button" expand="block" (click)="finish()">
+        Done
+      </ion-button>
+
+    } @else {
+
+      <!-- Step indicator -->
+      <div class="steps">
+        @for (n of [1, 2, 3]; track n) {
+          <span class="step" [class.active]="n <= stepNumber"></span>
+        }
+      </div>
+
+      <div class="header-section">
+        <ion-icon name="shield-checkmark-outline" class="security-icon"></ion-icon>
+        <h1>{{ title }}</h1>
+        <p>{{ subtitle }}</p>
+      </div>
+
+      <!-- PIN dots -->
+      <div class="pin-display" [class.shake]="shake">
+        @for (dot of dots; track dot) {
+          <div class="pin-dot" [class.filled]="dot < pin.length"></div>
+        }
+      </div>
+
+      <!-- Error -->
+      <div class="error-message">
+        @if (errorMessage) {
+          <ion-icon name="alert-circle-outline"></ion-icon>
+          <span>{{ errorMessage }}</span>
+        }
+      </div>
+
+      <!-- Keypad -->
+      <div class="keypad">
+
+        @for (number of numbers; track number) {
+          <button type="button" class="key-button" (click)="pressNumber(number)">
+            {{ number }}
+          </button>
+        }
+
+        <div></div>
+
+        <button type="button" class="key-button" (click)="pressNumber('0')">
+          0
+        </button>
+
+        <button type="button" class="key-button delete-button" (click)="deleteDigit()">
+          <ion-icon name="backspace-outline"></ion-icon>
+        </button>
+
+      </div>
+
+    }
+
+  </div>
+
+</ion-content>

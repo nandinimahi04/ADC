@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { PairedDevicesService } from './paired-devices.service';
 
 export interface DesktopResponse {
   success: boolean;
@@ -41,6 +42,10 @@ interface DesktopAuthentication {
   providedIn: 'root'
 })
 export class DesktopAgentService {
+
+  constructor(
+    private pairedDevices: PairedDevicesService
+  ) {}
 
   // ============================================================
   // LOCAL PAIRING DATA
@@ -218,7 +223,15 @@ export class DesktopAgentService {
   // CLEAR LOCAL PAIRING
   // ============================================================
 
-  async clearLocalPairing(): Promise<void> {
+    async clearLocalPairing(): Promise<void> {
+
+    // Also drop this desktop from the paired-devices list.
+    const activeId =
+      this.pairedDevices.getActiveId();
+
+    if (activeId) {
+      this.pairedDevices.forget(activeId, false);
+    }
 
     localStorage.removeItem(
       'paired_device'

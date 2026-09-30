@@ -1,12 +1,12 @@
 :host {
-  --primary: #8cbcff;
-  --primary-light: #b7d8ff;
-  --card-bg: rgba(24, 35, 56, 0.95);
-  --text-secondary: #9eb2d2;
+  --primary: var(--adc-primary);
+  --primary-light: var(--adc-primary-light);
+  --card-bg: var(--adc-card-bg);
+  --text-secondary: var(--adc-text-secondary);
 }
 
 ion-content {
-  --background: radial-gradient(circle at top, #162744 0%, #0f1a2d 45%, #08111f 100%);
+  --background: var(--adc-bg);
 }
 
 ion-header {
@@ -15,9 +15,9 @@ ion-header {
 
 ion-toolbar {
   --background: var(--card-bg);
-  --color: white;
+  --color: var(--adc-text);
   --min-height: 64px;
-  border-bottom: 1px solid rgba(255,255,255,.08);
+  border-bottom: 1px solid var(--adc-border);
 }
 
 .header-icon {
@@ -28,7 +28,7 @@ ion-toolbar {
 
 .control-container {
   padding: 20px;
-  color: white;
+  color: var(--adc-text);
 }
 
 .section-title {
@@ -43,16 +43,16 @@ ion-toolbar {
 }
 
 .actions-grid ion-button {
-  --background: rgba(32,45,68,.95);
-  --background-hover: rgba(42,60,90,.95);
-  --background-activated: rgba(60,90,135,.95);
+  --background: var(--adc-surface);
+  --background-hover: var(--adc-surface-hover);
+  --background-activated: var(--adc-surface-active);
   --border-radius: 18px;
-  --color: white;
+  --color: var(--adc-text);
   height: 90px;
   font-size: 17px;
   font-weight: 600;
   text-transform: none;
-  box-shadow: 0 8px 18px rgba(0,0,0,.25);
+  box-shadow: 0 8px 18px var(--adc-shadow-soft);
   transition: transform .2s ease;
 }
 
@@ -80,7 +80,7 @@ ion-toolbar {
 .action-content span {
   font-size: 14px;
   font-weight: 600;
-  color: white;
+  color: var(--adc-text);
 }
 
 // ============================================================
@@ -96,8 +96,8 @@ ion-footer {
   align-items: center;
   justify-content: space-around;
   background: var(--card-bg);
-  border-top: 1px solid rgba(255,255,255,.08);
-  box-shadow: 0 -8px 20px rgba(0,0,0,.35);
+  border-top: 1px solid var(--adc-border);
+  box-shadow: 0 -8px 20px var(--adc-shadow);
   padding: 8px 4px calc(8px + env(safe-area-inset-bottom, 0px));
 }
 

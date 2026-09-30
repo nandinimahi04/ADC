@@ -1,6 +1,18 @@
 import { Component } from '@angular/core';
+import { NavigationEnd, Router } from '@angular/router';
 import { IonApp, IonRouterOutlet } from '@ionic/angular/standalone';
+import { filter } from 'rxjs';
 import { SQLiteService } from './services/sqlite.service';
+import { ThemeService } from './services/theme.service';
+
+// Screens that are always shown dark (they have their own dark design).
+const ALWAYS_DARK_ROUTES = [
+  '/splash',
+  '/login',
+  '/create-pin',
+  '/confirm-pin',
+  '/pair-device'
+];
 
 @Component({
   selector: 'app-root',
@@ -10,9 +22,28 @@ import { SQLiteService } from './services/sqlite.service';
 export class AppComponent {
 
   constructor(
-    private sqliteService: SQLiteService
+    private sqliteService: SQLiteService,
+    private themeService: ThemeService,
+    private router: Router
   ) {
+    this.themeService.init();
+    this.watchRoutesForTheme();
     this.initializeSQLite();
+  }
+
+  private watchRoutesForTheme(): void {
+
+    this.router.events
+      .pipe(filter(event => event instanceof NavigationEnd))
+      .subscribe(event => {
+
+        const path =
+          (event as NavigationEnd).urlAfterRedirects.split('?')[0];
+
+        this.themeService.setForceDark(
+          ALWAYS_DARK_ROUTES.includes(path)
+        );
+      });
   }
 
   private async initializeSQLite(): Promise<void> {
