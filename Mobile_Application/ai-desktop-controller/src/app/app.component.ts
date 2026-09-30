@@ -6,12 +6,10 @@ import { SQLiteService } from './services/sqlite.service';
 import { ThemeService } from './services/theme.service';
 
 // Screens that are always shown dark (they have their own dark design).
+// '/splash', '/login' and '/pair-device' follow the chosen theme.
 const ALWAYS_DARK_ROUTES = [
-  '/splash',
-  '/login',
   '/create-pin',
-  '/confirm-pin',
-  '/pair-device'
+  '/confirm-pin'
 ];
 
 @Component({

@@ -1,7 +1,11 @@
+/* Dark (default) values are the original colours.
+   Light values apply when <html> has .adc-light */
+
 :host {
   --background-start: #08111f;
   --background-middle: #0f1a2d;
   --background-end: #07101c;
+  --background-glow: #172a48;
 
   --primary: #4f88ff;
   --primary-light: #8cbcff;
@@ -9,13 +13,51 @@
 
   --text-primary: #ffffff;
   --text-secondary: #93a4c3;
+
+  --logo-bg: linear-gradient(145deg, #2b4467, #17253b);
+  --logo-border: rgba(255, 255, 255, 0.09);
+  --logo-shadow:
+    0 20px 45px rgba(0, 0, 0, 0.45),
+    0 0 35px rgba(140, 188, 255, 0.12),
+    inset 0 1px 1px rgba(255, 255, 255, 0.08);
+  --logo-icon-glow: drop-shadow(0 0 8px rgba(140, 188, 255, 0.45));
+
+  --loading-track: rgba(255, 255, 255, 0.08);
+  --loading-glow: 0 0 12px rgba(140, 188, 255, 0.6);
+  --version-color: rgba(147, 164, 195, 0.65);
+}
+
+:host-context(.adc-light) {
+  --background-start: #e6edf9;
+  --background-middle: #eef3fc;
+  --background-end: #e3ebf8;
+  --background-glow: #fafcff;
+
+  --primary: #2f6fe0;
+  --primary-light: #4f88ff;
+  --glow: #4f88ff;
+
+  --text-primary: #14203a;
+  --text-secondary: #5a6b8c;
+
+  --logo-bg: linear-gradient(145deg, #ffffff, #eaf1fd);
+  --logo-border: rgba(20, 32, 58, 0.1);
+  --logo-shadow:
+    0 20px 45px rgba(30, 50, 90, 0.18),
+    0 0 30px rgba(47, 111, 224, 0.1),
+    inset 0 1px 1px rgba(255, 255, 255, 0.9);
+  --logo-icon-glow: none;
+
+  --loading-track: rgba(20, 32, 58, 0.1);
+  --loading-glow: 0 0 10px rgba(47, 111, 224, 0.4);
+  --version-color: rgba(90, 107, 140, 0.85);
 }
 
 .splash-page {
   --background:
     radial-gradient(
       circle at 50% 38%,
-      #172a48 0%,
+      var(--background-glow) 0%,
       var(--background-middle) 38%,
       var(--background-start) 72%,
       var(--background-end) 100%
@@ -60,19 +102,11 @@
 
   border-radius: 32px;
 
-  background:
-    linear-gradient(
-      145deg,
-      #2b4467,
-      #17253b
-    );
+  background: var(--logo-bg);
 
-  border: 1px solid rgba(255, 255, 255, 0.09);
+  border: 1px solid var(--logo-border);
 
-  box-shadow:
-    0 20px 45px rgba(0, 0, 0, 0.45),
-    0 0 35px rgba(140, 188, 255, 0.12),
-    inset 0 1px 1px rgba(255, 255, 255, 0.08);
+  box-shadow: var(--logo-shadow);
 
   animation:
     logoFloat 3s ease-in-out infinite;
@@ -82,8 +116,7 @@
   font-size: 52px;
   color: var(--primary-light);
 
-  filter:
-    drop-shadow(0 0 8px rgba(140, 188, 255, 0.45));
+  filter: var(--logo-icon-glow);
 }
 
 
@@ -135,7 +168,7 @@ h1 {
 
   border-radius: 10px;
 
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--loading-track);
 }
 
 .loading-progress {
@@ -151,8 +184,7 @@ h1 {
       var(--primary-light)
     );
 
-  box-shadow:
-    0 0 12px rgba(140, 188, 255, 0.6);
+  box-shadow: var(--loading-glow);
 
   animation: loadingProgress 2s ease-in-out infinite;
 }
@@ -177,7 +209,7 @@ h1 {
 
   bottom: 28px;
 
-  color: rgba(147, 164, 195, 0.65);
+  color: var(--version-color);
 
   font-size: 12px;
 

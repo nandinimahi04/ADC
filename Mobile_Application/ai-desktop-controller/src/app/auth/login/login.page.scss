@@ -1,3 +1,9 @@
+/* ===========================
+   THEME VARIABLES
+   Dark (default) values are the original colours.
+   Light values apply when <html> has .adc-light
+=========================== */
+
 :host {
   --bg-color: #08111f;
   --bg-secondary: #101a2b;
@@ -15,16 +21,71 @@
   --button-active: #2d4362;
 
   --shadow-blue: rgba(140, 188, 255, 0.35);
+
+  /* page + header */
+  --page-bg: radial-gradient(circle at top, #13213a 0%, #0b1323 45%, #07101c 100%);
+  --header-border: rgba(255, 255, 255, 0.05);
+  --brand-icon-bg: linear-gradient(145deg, #2b4467, #1a2740);
+  --brand-icon-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+  --conn-bg: rgba(255, 255, 255, 0.05);
+
+  /* lock */
+  --lock-bg: linear-gradient(145deg, rgba(43, 68, 103, 0.95), rgba(22, 31, 50, 0.95));
+  --lock-border: 1px solid rgba(255, 255, 255, 0.08);
+  --lock-shadow: 0 18px 35px rgba(0, 0, 0, 0.45), inset 0 1px 1px rgba(255, 255, 255, 0.05);
+
+  /* pin dots */
+  --dot-border: rgba(170, 190, 220, 0.45);
+  --dot-glow: 0 0 8px rgba(140, 188, 255, 0.75), 0 0 18px rgba(140, 188, 255, 0.35);
+
+  /* keypad */
+  --key-bg: linear-gradient(145deg, #1b2638, #151d2b);
+  --key-text: #ffffff;
+  --key-border: none;
+  --key-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+  --key-active-shadow: 0 0 18px rgba(140, 188, 255, 0.18);
+}
+
+:host-context(.adc-light) {
+  --bg-color: #f5f8fe;
+  --bg-secondary: #e6edf9;
+  --card-color: rgba(255, 255, 255, 0.97);
+  --border-color: rgba(20, 32, 58, 0.1);
+
+  --text-primary: #14203a;
+  --text-secondary: #5a6b8c;
+
+  --primary: #2f6fe0;
+  --primary-light: #2f6fe0;
+
+  --button-bg: #ffffff;
+  --button-hover: #eef3fc;
+  --button-active: #dbe6fa;
+
+  --shadow-blue: rgba(47, 111, 224, 0.3);
+
+  --page-bg: linear-gradient(180deg, #f5f8fe 0%, #e6edf9 100%);
+  --header-border: rgba(20, 32, 58, 0.08);
+  --brand-icon-bg: linear-gradient(145deg, #ffffff, #eaf1fd);
+  --brand-icon-shadow: 0 6px 16px rgba(30, 50, 90, 0.16);
+  --conn-bg: rgba(20, 32, 58, 0.06);
+
+  --lock-bg: linear-gradient(145deg, #ffffff, #eaf1fd);
+  --lock-border: 1px solid rgba(20, 32, 58, 0.1);
+  --lock-shadow: 0 18px 35px rgba(30, 50, 90, 0.16), inset 0 1px 1px rgba(255, 255, 255, 0.9);
+
+  --dot-border: rgba(90, 107, 140, 0.55);
+  --dot-glow: 0 0 8px rgba(47, 111, 224, 0.45), 0 0 16px rgba(47, 111, 224, 0.2);
+
+  --key-bg: linear-gradient(145deg, #ffffff, #f0f5fd);
+  --key-text: #14203a;
+  --key-border: 1px solid rgba(20, 32, 58, 0.08);
+  --key-shadow: 0 8px 18px rgba(30, 50, 90, 0.12);
+  --key-active-shadow: 0 0 14px rgba(47, 111, 224, 0.2);
 }
 
 .login-page {
-
-  --background:
-    radial-gradient(circle at top,
-      #13213a 0%,
-      #0b1323 45%,
-      #07101c 100%);
-
+  --background: var(--page-bg);
   color: var(--text-primary);
 }
 
@@ -34,105 +95,59 @@
 =========================== */
 
 .top-header {
-
   height: 72px;
-
   display: flex;
-
   justify-content: space-between;
-
   align-items: center;
-
   padding: 0 24px;
-
-  border-bottom: 1px solid rgba(255,255,255,.05);
-
+  border-bottom: 1px solid var(--header-border);
 }
 
 .brand {
-
   display: flex;
-
   align-items: center;
-
   gap: 14px;
-
 }
 
 .brand-icon {
-
   width: 42px;
-
   height: 42px;
-
   border-radius: 14px;
-
-  background: linear-gradient(
-      145deg,
-      #2b4467,
-      #1a2740);
-
+  background: var(--brand-icon-bg);
   display: flex;
-
   justify-content: center;
-
   align-items: center;
-
   color: var(--primary-light);
-
   font-size: 20px;
-
-  box-shadow:
-      0 6px 20px rgba(0,0,0,.35);
-
+  box-shadow: var(--brand-icon-shadow);
 }
 
 .brand-text {
-
   display: flex;
-
   flex-direction: column;
-
 }
 
 .brand-title {
-
   font-size: 13px;
-
   letter-spacing: 2px;
-
   font-weight: 700;
-
 }
 
 .brand-subtitle {
-
   color: var(--text-secondary);
-
   font-size: 12px;
-
 }
 
 .connection-status {
-
   width: 42px;
-
   height: 42px;
-
   border-radius: 14px;
-
   display: flex;
-
   justify-content: center;
-
   align-items: center;
-
-  background: rgba(255,255,255,.05);
-
+  background: var(--conn-bg);
   color: var(--primary-light);
-
   font-size: 20px;
-
 }
 
 
@@ -141,19 +156,12 @@
 =========================== */
 
 .login-container {
-
   min-height: calc(100vh - 72px);
-
   display: flex;
-
   flex-direction: column;
-
   justify-content: center;
-
   align-items: center;
-
   padding: 30px;
-
 }
 
 
@@ -162,45 +170,24 @@
 =========================== */
 
 .lock-wrapper {
-
   margin-bottom: 26px;
-
 }
 
 .lock-circle {
-
   width: 96px;
-
   height: 96px;
-
   border-radius: 28px;
-
   display: flex;
-
   justify-content: center;
-
   align-items: center;
-
-  background:
-      linear-gradient(
-      145deg,
-      rgba(43,68,103,.95),
-      rgba(22,31,50,.95));
-
-  border: 1px solid rgba(255,255,255,.08);
-
-  box-shadow:
-      0 18px 35px rgba(0,0,0,.45),
-      inset 0 1px 1px rgba(255,255,255,.05);
-
+  background: var(--lock-bg);
+  border: var(--lock-border);
+  box-shadow: var(--lock-shadow);
 }
 
 .lock-icon {
-
   font-size: 42px;
-
   color: var(--primary-light);
-
 }
 
 
@@ -209,27 +196,17 @@
 =========================== */
 
 h1 {
-
   margin: 0;
-
   font-size: 30px;
-
   font-weight: 700;
-
 }
 
 .subtitle {
-
   margin-top: 14px;
-
   color: var(--text-secondary);
-
   text-align: center;
-
   line-height: 1.6;
-
   max-width: 290px;
-
 }
 
 
@@ -238,41 +215,24 @@ h1 {
 =========================== */
 
 .pin-display {
-
   display: flex;
-
   gap: 14px;
-
   margin: 42px 0;
-
 }
 
 .pin-dot {
-
   width: 15px;
-
   height: 15px;
-
   border-radius: 50%;
-
   background: transparent;
-
-  border: 2px solid rgba(170,190,220,.45);
-
+  border: 2px solid var(--dot-border);
   transition: all .25s ease;
-
 }
 
 .pin-dot.active {
-
   background: var(--primary);
-
   border-color: var(--primary);
-
-  box-shadow:
-      0 0 8px rgba(140,188,255,.75),
-      0 0 18px rgba(140,188,255,.35);
-
+  box-shadow: var(--dot-glow);
 }
 
 
@@ -281,71 +241,41 @@ h1 {
 =========================== */
 
 .keypad {
-
   display: grid;
-
   grid-template-columns: repeat(3, 88px);
-
   gap: 16px;
-
   margin-top: 6px;
-
 }
 
 .key {
-
   width: 88px;
-
   height: 72px;
-
-  border: none;
-
+  border: var(--key-border);
   border-radius: 18px;
-
-  background: linear-gradient(
-      145deg,
-      #1b2638,
-      #151d2b);
-
-  color: white;
-
+  background: var(--key-bg);
+  color: var(--key-text);
   font-size: 28px;
-
   font-weight: 600;
-
   transition:
       transform .15s,
       background .2s,
       box-shadow .2s;
-
-  box-shadow:
-      0 8px 20px rgba(0,0,0,.25);
-
+  box-shadow: var(--key-shadow);
 }
 
 .key:hover {
-
   background: var(--button-hover);
-
 }
 
 .key:active {
-
   transform: scale(.94);
-
   background: var(--button-active);
-
-  box-shadow:
-      0 0 18px rgba(140,188,255,.18);
-
+  box-shadow: var(--key-active-shadow);
 }
 
 .action-key ion-icon {
-
   font-size: 26px;
-
   color: var(--primary-light);
-
 }
 
 
@@ -354,53 +284,34 @@ h1 {
 =========================== */
 
 .login-button {
-
   margin-top: 34px;
-
   width: 300px;
-
   height: 56px;
-
   border: none;
-
   border-radius: 18px;
-
   background: linear-gradient(
       90deg,
       #4f88ff,
       #7eb5ff);
-
   color: white;
-
   font-size: 17px;
-
   font-weight: 700;
-
   transition: .25s;
-
   box-shadow:
       0 10px 25px rgba(79,136,255,.28);
-
 }
 
 .login-button:disabled {
-
   opacity: .45;
-
   box-shadow: none;
-
 }
 
 .login-button:not(:disabled):hover {
-
   transform: translateY(-2px);
-
 }
 
 .login-button:not(:disabled):active {
-
   transform: scale(.97);
-
 }
 
 
@@ -409,13 +320,8 @@ h1 {
 =========================== */
 
 .footer-text {
-
   margin-top: 22px;
-
   color: var(--text-secondary);
-
   font-size: 13px;
-
   letter-spacing: 1px;
-
 }

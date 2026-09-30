@@ -13,8 +13,8 @@ export class ThemeService {
 
   private _mode: ThemeMode = 'dark';
 
-  // Starts true because the first screen is always the splash page.
-  private forceDark = true;
+  // Starts false so the splash page also follows the saved theme.
+  private forceDark = false;
 
   /** The theme the user picked (not affected by forceDark). */
   get mode(): ThemeMode {
