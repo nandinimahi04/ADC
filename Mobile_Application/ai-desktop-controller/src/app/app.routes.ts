@@ -2,10 +2,7 @@ import { Routes } from '@angular/router';
 
 export const routes: Routes = [
 
-  // ===============================
   // SPLASH
-  // ===============================
-
   {
     path: 'splash',
     loadComponent: () =>
@@ -14,11 +11,7 @@ export const routes: Routes = [
       )
   },
 
-
-  // ===============================
   // LOGIN
-  // ===============================
-
   {
     path: 'login',
     loadComponent: () =>
@@ -27,11 +20,7 @@ export const routes: Routes = [
       )
   },
 
-
-  // ===============================
   // CREATE PIN
-  // ===============================
-
   {
     path: 'create-pin',
     loadComponent: () =>
@@ -40,11 +29,7 @@ export const routes: Routes = [
       )
   },
 
-
-  // ===============================
   // CONFIRM PIN
-  // ===============================
-
   {
     path: 'confirm-pin',
     loadComponent: () =>
@@ -53,11 +38,7 @@ export const routes: Routes = [
       )
   },
 
-
-  // ===============================
   // PAIR DEVICE / QR SCANNER
-  // ===============================
-
   {
     path: 'pair-device',
     loadComponent: () =>
@@ -66,11 +47,7 @@ export const routes: Routes = [
       )
   },
 
-
-  // ===============================
   // DASHBOARD
-  // ===============================
-
   {
     path: 'dashboard',
     loadComponent: () =>
@@ -79,11 +56,7 @@ export const routes: Routes = [
       )
   },
 
-
-  // ===============================
   // CONTROL
-  // ===============================
-
   {
     path: 'control',
     loadComponent: () =>
@@ -92,22 +65,25 @@ export const routes: Routes = [
       )
   },
 
-
-  // ===============================
-  // AI CHAT                                  // NEW
-  // ===============================
-
+  // AI CHAT
   {
-    path: 'ai-chat',                          // NEW
+    path: 'ai-chat',
     loadComponent: () =>
       import('./ai-chat/ai-chat.page').then(
         (m) => m.AiChatPage
       )
   },
-    // ===============================
-  // SETTINGS
-  // ===============================
 
+  // HISTORY  (NEW)
+  {
+    path: 'history',
+    loadComponent: () =>
+      import('./history/history.page').then(
+        (m) => m.HistoryPage
+      )
+  },
+
+  // SETTINGS
   {
     path: 'settings',
     loadComponent: () =>
@@ -140,22 +116,14 @@ export const routes: Routes = [
       )
   },
 
-
-  // ===============================
   // DEFAULT ROUTE
-  // ===============================
-
   {
     path: '',
     redirectTo: 'splash',
     pathMatch: 'full'
   },
 
-
-  // ===============================
   // UNKNOWN ROUTES
-  // ===============================
-
   {
     path: '**',
     redirectTo: 'splash'

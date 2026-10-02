@@ -1,0 +1,123 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar>
+
+    <ion-buttons slot="start">
+      <ion-icon name="time-outline" class="header-icon"></ion-icon>
+    </ion-buttons>
+
+    <ion-title>History</ion-title>
+
+    <ion-buttons slot="end">
+      <ion-button (click)="confirmClearAll()" [disabled]="items.length === 0">
+        <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+
+  <ion-refresher slot="fixed" (ionRefresh)="onRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <div class="page-container">
+
+    <!-- Current auto-delete setting (changed in Settings) -->
+    <button type="button" class="retention-banner" (click)="openSettings()">
+      <ion-icon name="timer-outline" class="banner-icon"></ion-icon>
+      <span class="banner-text">
+        Auto-delete: <strong>{{ retentionText }}</strong>
+      </span>
+      <span class="banner-link">Change</span>
+      <ion-icon name="chevron-forward-outline" class="banner-chevron"></ion-icon>
+    </button>
+
+    <div class="section-label">Commands sent from this phone</div>
+
+    @if (loading) {
+
+      <div class="card message-card">
+        <p>Loading history...</p>
+      </div>
+
+    } @else if (items.length === 0) {
+
+      <div class="card message-card">
+        <ion-icon name="time-outline" class="message-icon"></ion-icon>
+        <p>No history yet.</p>
+      </div>
+
+    } @else {
+
+      <div class="card">
+
+        @for (item of items; track trackById($index, item)) {
+
+          <div class="history-row">
+
+            <div class="icon-box">
+              <ion-icon [name]="iconFor(item)"></ion-icon>
+            </div>
+
+            <div class="row-text">
+              <h4>{{ titleFor(item) }}</h4>
+              <p class="meta">{{ item.deviceName }} · {{ item.createdAt | date: 'MMM d, h:mm a' }}</p>
+              @if (!isSuccess(item) && item.message) {
+                <p class="msg">{{ item.message }}</p>
+              }
+            </div>
+
+            <span class="pill" [class.success]="isSuccess(item)" [class.danger]="!isSuccess(item)">
+              {{ isSuccess(item) ? 'Success' : 'Failed' }}
+            </span>
+
+            <button type="button" class="delete-btn" (click)="deleteItem(item)">
+              <ion-icon name="close-outline"></ion-icon>
+            </button>
+
+          </div>
+
+        }
+
+      </div>
+
+    }
+
+  </div>
+
+</ion-content>
+
+<ion-footer class="ion-no-border">
+
+  <div class="bottom-nav">
+
+    <button class="nav-item" type="button" (click)="onNavClick('dashboard')">
+      <ion-icon name="grid-outline"></ion-icon>
+      <span>Dashboard</span>
+    </button>
+
+    <button class="nav-item" type="button" (click)="onNavClick('ai-chat')">
+      <ion-icon name="chatbubble-ellipses-outline"></ion-icon>
+      <span>AI Chat</span>
+    </button>
+
+    <button class="nav-item" type="button" (click)="onNavClick('control')">
+      <ion-icon name="apps-outline"></ion-icon>
+      <span>Control</span>
+    </button>
+
+    <button class="nav-item active" type="button" (click)="onNavClick('history')">
+      <ion-icon name="time-outline"></ion-icon>
+      <span>History</span>
+    </button>
+
+    <button class="nav-item" type="button" (click)="onNavClick('settings')">
+      <ion-icon name="settings-outline"></ion-icon>
+      <span>Settings</span>
+    </button>
+
+  </div>
+
+</ion-footer>

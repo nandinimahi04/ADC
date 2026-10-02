@@ -11,7 +11,9 @@ import {
   IonButtons,
   IonIcon,
   IonFooter,
-  IonModal
+  IonModal,
+  AlertController,
+  ToastController
 } from '@ionic/angular/standalone';
 
 import { addIcons } from 'ionicons';
@@ -29,11 +31,18 @@ import {
   chevronForwardOutline,
   colorPaletteOutline,
   closeOutline,
-  hardwareChipOutline
+  hardwareChipOutline,
+  timerOutline,
+  trashOutline,
+  checkmarkOutline
 } from 'ionicons/icons';
 
 import { ThemeService, ThemeMode } from '../services/theme.service';
 import { PairedDevicesService } from '../services/paired-devices.service';
+import {
+  HistoryService,
+  RETENTION_OPTIONS
+} from '../services/history.service';
 
 @Component({
   selector: 'app-settings',
@@ -59,10 +68,18 @@ export class SettingsPage {
   aboutOpen = false;
   appVersion = '0.0.1';
 
+  // History settings
+  retentionOpen = false;
+  retentionDays = 7;
+  readonly retentionOptions = RETENTION_OPTIONS;
+
   constructor(
     private router: Router,
     private themeService: ThemeService,
-    private pairedDevices: PairedDevicesService
+    private pairedDevices: PairedDevicesService,
+    private history: HistoryService,
+    private alertController: AlertController,
+    private toastController: ToastController
   ) {
     addIcons({
       gridOutline,
@@ -78,7 +95,10 @@ export class SettingsPage {
       chevronForwardOutline,
       colorPaletteOutline,
       closeOutline,
-      hardwareChipOutline
+      hardwareChipOutline,
+      timerOutline,
+      trashOutline,
+      checkmarkOutline
     });
 
     void this.loadAppVersion();
@@ -88,6 +108,7 @@ export class SettingsPage {
   ionViewWillEnter(): void {
     this.theme = this.themeService.mode;
     this.pairedCount = this.pairedDevices.list().length;
+    this.retentionDays = this.history.getRetentionDays();
   }
 
   get pairedLabel(): string {
@@ -95,6 +116,16 @@ export class SettingsPage {
     return this.pairedCount === 1
       ? '1 device paired'
       : `${this.pairedCount} devices paired`;
+  }
+
+  get retentionLabel(): string {
+    return this.history.retentionLabel(this.retentionDays);
+  }
+
+  get retentionSubtitle(): string {
+    return this.retentionDays === 0
+      ? 'History is kept forever'
+      : `Older than ${this.retentionLabel} is deleted`;
   }
 
   setTheme(mode: ThemeMode): void {
@@ -108,6 +139,54 @@ export class SettingsPage {
 
   openPairedDevices(): void {
     this.router.navigate(['/paired-devices']);
+  }
+
+  // ============================================================
+  // HISTORY SETTINGS
+  // ============================================================
+
+  async selectRetention(days: number): Promise<void> {
+
+    this.retentionDays = days;
+    this.retentionOpen = false;
+
+    await this.history.setRetentionDays(days);
+
+    void this.toast(
+      days === 0
+        ? 'History will be kept forever.'
+        : `History older than ${this.history.retentionLabel(days)} will be deleted automatically.`
+    );
+  }
+
+  async confirmClearHistory(): Promise<void> {
+
+    const alert = await this.alertController.create({
+      header: 'Clear all history?',
+      message: 'This deletes all history stored on this phone. It does not affect the desktop.',
+      buttons: [
+        { text: 'Cancel', role: 'cancel' },
+        {
+          text: 'Clear all',
+          role: 'destructive',
+          handler: async () => {
+            await this.history.clearAll();
+            void this.toast('History cleared.');
+          }
+        }
+      ]
+    });
+
+    await alert.present();
+  }
+
+  private async toast(message: string): Promise<void> {
+    const t = await this.toastController.create({
+      message,
+      duration: 2200,
+      position: 'bottom'
+    });
+    await t.present();
   }
 
   private async loadAppVersion(): Promise<void> {
@@ -138,6 +217,9 @@ export class SettingsPage {
       this.router.navigate(['/ai-chat']);
       return;
     }
-    alert('This page is not developed yet.');
+    if (tab === 'history') {
+      this.router.navigate(['/history']);
+      return;
+    }
   }
 }

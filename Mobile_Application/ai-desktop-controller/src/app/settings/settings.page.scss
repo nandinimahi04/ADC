@@ -83,6 +83,12 @@ ion-toolbar {
     font-size: 22px;
     color: var(--primary);
   }
+
+  &.danger {
+    background: color-mix(in srgb, var(--adc-danger) 14%, transparent);
+
+    ion-icon { color: var(--adc-danger); }
+  }
 }
 
 .row-text {
@@ -105,6 +111,16 @@ ion-toolbar {
 .chevron {
   font-size: 18px;
   color: var(--text-secondary);
+}
+
+.value-pill {
+  flex-shrink: 0;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 14%, transparent);
 }
 
 // ============================================================
@@ -142,6 +158,77 @@ ion-toolbar {
   &.selected {
     border-color: var(--adc-primary);
     color: var(--adc-primary);
+    background: color-mix(in srgb, var(--adc-primary) 10%, var(--adc-surface));
+  }
+}
+
+// ============================================================
+// AUTO-DELETE SHEET (scrollable list)
+// ============================================================
+
+.retention-modal {
+  --background: var(--adc-card-bg);
+  --border-radius: 24px;
+}
+
+.retention-content {
+  --background: var(--adc-card-bg);
+  --overflow: auto;
+}
+
+.retention-sheet {
+  padding: 24px 20px 28px;
+  color: var(--adc-text);
+
+  h2 {
+    margin: 0 0 6px;
+    font-size: 20px;
+    font-weight: 700;
+  }
+
+  .retention-hint {
+    margin: 0 0 16px;
+    font-size: 13.5px;
+    line-height: 1.5;
+    color: var(--adc-text-secondary);
+  }
+}
+
+.retention-list {
+  border-radius: 16px;
+  border: 1px solid var(--adc-border);
+  background: var(--adc-surface);
+  overflow: hidden;
+}
+
+.retention-option {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 15px 16px;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--adc-text);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 500;
+  text-align: left;
+  -webkit-tap-highlight-color: transparent;
+
+  & + .retention-option { border-top: 1px solid var(--adc-border); }
+
+  &:active { background: var(--adc-surface-hover); }
+
+  ion-icon {
+    font-size: 20px;
+    color: var(--adc-primary);
+  }
+
+  &.selected {
+    color: var(--adc-primary);
+    font-weight: 700;
     background: color-mix(in srgb, var(--adc-primary) 10%, var(--adc-surface));
   }
 }

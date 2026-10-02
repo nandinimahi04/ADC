@@ -4,6 +4,7 @@ import { IonApp, IonRouterOutlet } from '@ionic/angular/standalone';
 import { filter } from 'rxjs';
 import { SQLiteService } from './services/sqlite.service';
 import { ThemeService } from './services/theme.service';
+import { HistoryService } from './services/history.service';
 
 // Screens that are always shown dark (they have their own dark design).
 // '/splash', '/login' and '/pair-device' follow the chosen theme.
@@ -22,7 +23,8 @@ export class AppComponent {
   constructor(
     private sqliteService: SQLiteService,
     private themeService: ThemeService,
-    private router: Router
+    private router: Router,
+    private historyService: HistoryService
   ) {
     this.themeService.init();
     this.watchRoutesForTheme();
@@ -49,6 +51,9 @@ export class AppComponent {
     try {
 
       await this.sqliteService.initializeDatabase();
+
+      // Delete history older than the chosen retention period
+      await this.historyService.purgeExpired();
 
       console.log('SQLite ready.');
 

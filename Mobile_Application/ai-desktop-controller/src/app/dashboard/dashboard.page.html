@@ -122,6 +122,39 @@
 
     </div>
 
+    <!-- RECENT ACTIONS (last 3, from phone SQLite) -->
+    <div class="section-header">
+      <h3 class="section-title">Recent Actions</h3>
+      <button type="button" class="see-all" (click)="onNavClick('history')">See all</button>
+    </div>
+
+    <div class="recent-card">
+
+      <div class="recent-empty" *ngIf="recentActions.length === 0">
+        No actions yet. Commands you send will appear here.
+      </div>
+
+      <div class="recent-row" *ngFor="let item of recentActions; trackBy: trackById">
+
+        <div class="recent-icon">
+          <ion-icon [name]="iconFor(item)"></ion-icon>
+        </div>
+
+        <div class="recent-text">
+          <h4>{{ titleFor(item) }}</h4>
+          <p>{{ timeAgo(item) }}</p>
+        </div>
+
+        <ion-icon
+          class="recent-status"
+          [class.failed]="item.status !== 'success'"
+          [name]="item.status === 'success' ? 'checkmark-circle-outline' : 'close-circle-outline'"
+        ></ion-icon>
+
+      </div>
+
+    </div>
+
   </div>
 
 </ion-content>

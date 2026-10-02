@@ -129,7 +129,7 @@ export class ControlPage {
     }
   }
 
-    onNavClick(tab: 'dashboard' | 'ai-chat' | 'control' | 'history' | 'settings'): void {
+  onNavClick(tab: 'dashboard' | 'ai-chat' | 'control' | 'history' | 'settings'): void {
     if (tab === 'control') return;
     if (tab === 'dashboard') {
       this.router.navigate(['/dashboard']);
@@ -139,11 +139,14 @@ export class ControlPage {
       this.router.navigate(['/ai-chat']);
       return;
     }
-        if (tab === 'settings') {
+    if (tab === 'history') {
+      this.router.navigate(['/history']);
+      return;
+    }
+    if (tab === 'settings') {
       this.router.navigate(['/settings']);
       return;
     }
-    alert('This page is not developed yet.');
   }
 
 }

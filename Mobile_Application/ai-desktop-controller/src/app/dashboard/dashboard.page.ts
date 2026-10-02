@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { App, AppState } from '@capacitor/app';
 import type { PluginListenerHandle } from '@capacitor/core';
+import { Subscription } from 'rxjs';
 
 import {
   IonContent,
@@ -32,10 +33,12 @@ import {
   powerOutline,
   lockClosedOutline,
   moonOutline,
-  refreshOutline
+  refreshOutline,
+  terminalOutline
 } from 'ionicons/icons';
 
 import { DesktopAgentService } from '../services/desktop-agent.service';
+import { HistoryService, HistoryEntry } from '../services/history.service';
 
 interface SystemInfoData {
   deviceName?: string;
@@ -74,13 +77,18 @@ export class DashboardPage implements OnInit, OnDestroy {
 
   batteryLoaded = false;
 
+  // Last 3 commands, read from the phone's SQLite database
+  recentActions: HistoryEntry[] = [];
+
   private readonly REFRESH_INTERVAL_MS = 10000;
   private refreshHandle: ReturnType<typeof setInterval> | null = null;
   private appStateListener: PluginListenerHandle | null = null;
+  private historySub: Subscription | null = null;
 
   constructor(
     private desktopAgent: DesktopAgentService,
-    private router: Router
+    private router: Router,
+    private history: HistoryService
   ) {
     addIcons({
       closeCircleOutline,
@@ -98,7 +106,8 @@ export class DashboardPage implements OnInit, OnDestroy {
       powerOutline,
       lockClosedOutline,
       moonOutline,
-      refreshOutline
+      refreshOutline,
+      terminalOutline
     });
   }
 
@@ -106,16 +115,61 @@ export class DashboardPage implements OnInit, OnDestroy {
     this.loadSystemInfo();
     this.startAutoRefresh();
     this.listenForAppStateChanges();
+
+    void this.loadRecent();
+    this.historySub = this.history.changes$.subscribe(
+      () => void this.loadRecent()
+    );
+  }
+
+  ionViewWillEnter(): void {
+    void this.loadRecent();
   }
 
   ngOnDestroy(): void {
     this.stopAutoRefresh();
+
+    this.historySub?.unsubscribe();
+    this.historySub = null;
 
     if (this.appStateListener) {
       this.appStateListener.remove();
       this.appStateListener = null;
     }
   }
+
+  // ============================================================
+  // RECENT ACTIONS
+  // ============================================================
+
+  async loadRecent(): Promise<void> {
+    try {
+      this.recentActions = await this.history.recent(3);
+    } catch (error) {
+      console.error('Failed to load recent actions:', error);
+      this.recentActions = [];
+    }
+  }
+
+  iconFor(item: HistoryEntry): string {
+    return this.history.iconFor(item);
+  }
+
+  titleFor(item: HistoryEntry): string {
+    return this.history.titleFor(item);
+  }
+
+  timeAgo(item: HistoryEntry): string {
+    return this.history.timeAgo(item.createdAt);
+  }
+
+  trackById(_: number, item: HistoryEntry): number {
+    return item.id;
+  }
+
+  // ============================================================
+  // AUTO REFRESH
+  // ============================================================
 
   private startAutoRefresh(): void {
     this.stopAutoRefresh();
@@ -135,6 +189,7 @@ export class DashboardPage implements OnInit, OnDestroy {
     App.addListener('appStateChange', (state: AppState) => {
         if (state.isActive) {
           void this.loadSystemInfo();
+          void this.loadRecent();
           this.startAutoRefresh();
         } else {
           this.stopAutoRefresh();
@@ -215,9 +270,6 @@ export class DashboardPage implements OnInit, OnDestroy {
        * getPairingStatus() already handles HTTP 401
        * by clearing local authentication and returning
        * paired=false.
-       *
-       * Therefore this catch is primarily for an
-       * unreachable Desktop Agent.
        */
     }
   }
@@ -246,7 +298,7 @@ export class DashboardPage implements OnInit, OnDestroy {
     return 'normal';
   }
 
- async openChrome(): Promise<void> {
+  async openChrome(): Promise<void> {
     if (this.isExecuting) return;
     this.isExecuting = true;
     try {
@@ -309,7 +361,7 @@ export class DashboardPage implements OnInit, OnDestroy {
       await this.router.navigate([
         '/pair-device'
       ]);
-      
+
     } finally {
 
       this.isExecuting = false;
@@ -318,7 +370,7 @@ export class DashboardPage implements OnInit, OnDestroy {
 
   }
 
-    onNavClick(tab: 'dashboard' | 'ai-chat' | 'control' | 'history' | 'settings'): void {
+  onNavClick(tab: 'dashboard' | 'ai-chat' | 'control' | 'history' | 'settings'): void {
     if (tab === 'dashboard') return;
     if (tab === 'control') {
       this.router.navigate(['/control']);
@@ -328,11 +380,14 @@ export class DashboardPage implements OnInit, OnDestroy {
       this.router.navigate(['/ai-chat']);
       return;
     }
-        if (tab === 'settings') {
+    if (tab === 'history') {
+      this.router.navigate(['/history']);
+      return;
+    }
+    if (tab === 'settings') {
       this.router.navigate(['/settings']);
       return;
     }
-    alert('This page is not developed yet.');
   }
 
 }

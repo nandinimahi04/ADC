@@ -25,6 +25,9 @@
 @import "@ionic/angular/css/text-transformation.css";
 @import "@ionic/angular/css/flex-utils.css";
 
+/* Bundled font: identical typography on every phone (works offline) */
+@import "@fontsource-variable/inter/index.css";
+
 /**
  * Ionic Dark Mode
  * -----------------------------------------------------
@@ -82,4 +85,46 @@
   --adc-success: #16a34a;
   --adc-status-text: #15803d;
   --adc-warning: #b7791f;
+}
+
+/**
+ * SAME LOOK ON EVERY PHONE
+ * ----------------------------------------------------------------------------
+ */
+
+/* 1. Same font everywhere (instead of Samsung / Xiaomi / Motorola system fonts) */
+:root {
+  --ion-font-family: 'Inter Variable', 'Inter', system-ui, -apple-system,
+    'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  font-family: var(--ion-font-family);
+}
+
+/* 2. Safe areas (status bar / navigation bar).
+      Capacitor 8 injects --safe-area-inset-* on every Android version,
+      which is more reliable than env() on older WebViews. */
+:root {
+  --ion-safe-area-top: var(--safe-area-inset-top, env(safe-area-inset-top, 0px));
+  --ion-safe-area-bottom: var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px));
+  --ion-safe-area-left: var(--safe-area-inset-left, env(safe-area-inset-left, 0px));
+  --ion-safe-area-right: var(--safe-area-inset-right, env(safe-area-inset-right, 0px));
+}
+
+/* Bottom navigation bar on Dashboard, Control, AI Chat, History, Settings */
+.bottom-nav {
+  padding-bottom: calc(8px + var(--ion-safe-area-bottom, 0px)) !important;
+}
+
+/* Pages without an ion-header (splash, login, create/confirm PIN, pair device):
+   Ionic does not add safe-area padding to ion-content by itself. */
+.ion-page > ion-content:first-child {
+  --padding-top: var(--ion-safe-area-top, 0px);
+  --padding-bottom: var(--ion-safe-area-bottom, 0px);
 }

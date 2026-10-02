@@ -87,6 +87,36 @@
       </button>
     </div>
 
+    <!-- HISTORY -->
+    <div class="section-label">History</div>
+
+    <div class="card">
+
+      <button type="button" class="row tappable" (click)="retentionOpen = true">
+        <div class="icon-box">
+          <ion-icon name="timer-outline"></ion-icon>
+        </div>
+        <div class="row-text">
+          <h4>Auto-delete history</h4>
+          <p>{{ retentionSubtitle }}</p>
+        </div>
+        <span class="value-pill">{{ retentionLabel }}</span>
+        <ion-icon name="chevron-forward-outline" class="chevron"></ion-icon>
+      </button>
+
+      <button type="button" class="row tappable" (click)="confirmClearHistory()">
+        <div class="icon-box danger">
+          <ion-icon name="trash-outline"></ion-icon>
+        </div>
+        <div class="row-text">
+          <h4>Clear all history</h4>
+          <p>Delete everything saved on this phone</p>
+        </div>
+        <ion-icon name="chevron-forward-outline" class="chevron"></ion-icon>
+      </button>
+
+    </div>
+
     <!-- ABOUT -->
     <div class="section-label">About</div>
 
@@ -106,6 +136,52 @@
   </div>
 
 </ion-content>
+
+<!-- AUTO-DELETE SHEET (scrollable) -->
+<ion-modal
+  [isOpen]="retentionOpen"
+  [initialBreakpoint]="0.6"
+  [breakpoints]="[0, 0.6, 0.92]"
+  (didDismiss)="retentionOpen = false"
+  class="retention-modal"
+>
+  <ng-template>
+
+    <ion-content class="retention-content">
+
+      <div class="retention-sheet">
+
+        <h2>Auto-delete history</h2>
+        <p class="retention-hint">
+          History older than the period you choose is deleted automatically.
+        </p>
+
+        <div class="retention-list">
+
+          @for (opt of retentionOptions; track opt.days) {
+
+            <button
+              type="button"
+              class="retention-option"
+              [class.selected]="retentionDays === opt.days"
+              (click)="selectRetention(opt.days)"
+            >
+              <span>{{ opt.label }}</span>
+              @if (retentionDays === opt.days) {
+                <ion-icon name="checkmark-outline"></ion-icon>
+              }
+            </button>
+
+          }
+
+        </div>
+
+      </div>
+
+    </ion-content>
+
+  </ng-template>
+</ion-modal>
 
 <!-- ABOUT SHEET -->
 <ion-modal

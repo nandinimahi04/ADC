@@ -94,12 +94,18 @@ const APPLICATION_CANDIDATES = {
     ],
 
     vscode: [
+        // Optional manual override: add ADC_VSCODE_PATH=C:\...\Code.exe to .env
+        process.env.ADC_VSCODE_PATH || '',
+
+        // User install (default installer)
         path.join(
             process.env.LOCALAPPDATA || '',
             'Programs',
             'Microsoft VS Code',
             'Code.exe'
         ),
+
+        // System install
         path.join(
             process.env.PROGRAMFILES || '',
             'Microsoft VS Code',
@@ -174,6 +180,74 @@ function firstExistingPath(paths) {
 
 
 /* =========================================================
+   CLEAN ENVIRONMENT FOR LAUNCHED APPS
+
+   If the agent was started from inside VS Code (its integrated
+   terminal, a task, etc.) the environment can contain
+   ELECTRON_RUN_AS_NODE / VSCODE_* variables. A child Code.exe
+   that inherits ELECTRON_RUN_AS_NODE runs as plain Node and
+   exits at once without showing any window.
+========================================================= */
+
+function buildCleanEnvironment() {
+    const env = { ...process.env };
+
+    for (const key of Object.keys(env)) {
+        const upper = key.toUpperCase();
+
+        if (
+            upper === 'ELECTRON_RUN_AS_NODE' ||
+            upper === 'ELECTRON_NO_ATTACH_CONSOLE' ||
+            upper.startsWith('VSCODE_')
+        ) {
+            delete env[key];
+        }
+    }
+
+    return env;
+}
+
+
+/* =========================================================
+   FIND VS CODE USING "where code" (custom install locations)
+========================================================= */
+
+function findVsCodeFromPath() {
+    return new Promise(resolve => {
+        execFile(
+            'where',
+            ['code'],
+            { windowsHide: true },
+            (error, stdout) => {
+                if (error || !stdout) {
+                    resolve(null);
+                    return;
+                }
+
+                const lines = stdout
+                    .split(/\r?\n/)
+                    .map(line => line.trim())
+                    .filter(Boolean);
+
+                for (const line of lines) {
+                    // ...\Microsoft VS Code\bin\code.cmd  ->  ...\Microsoft VS Code\Code.exe
+                    const installDir = path.dirname(path.dirname(line));
+                    const exe = path.join(installDir, 'Code.exe');
+
+                    if (fs.existsSync(exe)) {
+                        resolve(exe);
+                        return;
+                    }
+                }
+
+                resolve(null);
+            }
+        );
+    });
+}
+
+
+/* =========================================================
    GENERIC EXECUTABLE LAUNCHER
 ========================================================= */
 
@@ -192,7 +266,8 @@ function launchExecutable(executable) {
                 detached: true,
                 windowsHide: true,
                 shell: false,
-                stdio: 'ignore'
+                stdio: 'ignore',
+                env: buildCleanEnvironment()
             }
         );
 
@@ -297,45 +372,24 @@ async function launchApplication(application) {
         );
     }
 
-    const executable = firstExistingPath(candidates);
+    let executable = firstExistingPath(candidates);
+
+    // VS Code installed in a custom folder: find it through PATH
+    if (!executable && normalized === 'vscode') {
+        executable = await findVsCodeFromPath();
+    }
 
     if (!executable) {
         throw new Error(
-            `${normalized} executable was not found.`
+            normalized === 'vscode'
+                ? 'Code.exe was not found. Set ADC_VSCODE_PATH in the agent .env file.'
+                : `${normalized} executable was not found.`
         );
     }
 
-    if (normalized === 'notepad') {
-        const child = spawn(
-            executable,
-            [],
-            {
-                detached: true,
-                windowsHide: false,
-                stdio: 'ignore'
-            }
-        );
+    console.log(`Launching ${normalized}: ${executable}`);
 
-        child.unref();
-
-        return {
-            success: true,
-            application: 'notepad',
-            message: 'Notepad opened successfully'
-        };
-    }
-
-    const child = spawn(
-        executable,
-        [],
-        {
-            detached: true,
-            windowsHide: false,
-            stdio: 'ignore'
-        }
-    );
-
-    child.unref();
+    await launchExecutable(executable);
 
     return {
         success: true,
@@ -377,6 +431,11 @@ async function executeApplicationCommand(action, application) {
         );
     }
 
+    const displayName =
+        isBrowser
+            ? BROWSER_DISPLAY_NAMES[normalized]
+            : APPLICATION_DISPLAY_NAMES[normalized];
+
     try {
         if (isBrowser) {
             await launchBrowser(normalized);
@@ -389,11 +448,6 @@ async function executeApplicationCommand(action, application) {
             error
         );
 
-        const displayName =
-            isBrowser
-                ? BROWSER_DISPLAY_NAMES[normalized]
-                : APPLICATION_DISPLAY_NAMES[normalized];
-
         addCommandHistory(
             'application',
             `open:${normalized}`,
@@ -403,14 +457,9 @@ async function executeApplicationCommand(action, application) {
         );
 
         throw new Error(
-            `Unable to open ${displayName}.`
+            `Unable to open ${displayName}. ${error?.message || ''}`.trim()
         );
     }
-
-    const displayName =
-        isBrowser
-            ? BROWSER_DISPLAY_NAMES[normalized]
-            : APPLICATION_DISPLAY_NAMES[normalized];
 
     addCommandHistory(
         'application',

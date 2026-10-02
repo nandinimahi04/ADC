@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { PairedDevicesService } from './paired-devices.service';
+import { HistoryService } from './history.service';
 
 export interface DesktopResponse {
   success: boolean;
@@ -44,7 +45,8 @@ interface DesktopAuthentication {
 export class DesktopAgentService {
 
   constructor(
-    private pairedDevices: PairedDevicesService
+    private pairedDevices: PairedDevicesService,
+    private history: HistoryService
   ) {}
 
   // ============================================================
@@ -62,9 +64,7 @@ export class DesktopAgentService {
   }
 
   private getAuthentication(): DesktopAuthentication {
-    const stored = localStorage.getItem(
-      'desktop_authentication'
-    );
+    const stored = localStorage.getItem('desktop_authentication');
 
     if (!stored) {
       throw new Error(
@@ -72,9 +72,7 @@ export class DesktopAgentService {
       );
     }
 
-    return JSON.parse(
-      stored
-    ) as DesktopAuthentication;
+    return JSON.parse(stored) as DesktopAuthentication;
   }
 
   private getDesktopBaseUrl(): string {
@@ -84,12 +82,10 @@ export class DesktopAgentService {
   }
 
   private getAuthHeaders(): HeadersInit {
-    const authentication =
-      this.getAuthentication();
+    const authentication = this.getAuthentication();
 
     return {
-      'Authorization':
-        `Bearer ${authentication.accessToken}`
+      'Authorization': `Bearer ${authentication.accessToken}`
     };
   }
 
@@ -101,8 +97,7 @@ export class DesktopAgentService {
 
     try {
 
-      const baseUrl =
-        this.getDesktopBaseUrl();
+      const baseUrl = this.getDesktopBaseUrl();
 
       const response = await fetch(
         `${baseUrl}/pair/status`,
@@ -119,15 +114,13 @@ export class DesktopAgentService {
 
       try {
 
-        result =
-          await response.json() as PairingStatusResponse;
+        result = await response.json() as PairingStatusResponse;
 
       } catch {
 
         result = {
           success: false,
-          message:
-            'Invalid response from Desktop Agent.',
+          message: 'Invalid response from Desktop Agent.',
           data: {
             status: 'disconnected',
             paired: false,
@@ -153,8 +146,7 @@ export class DesktopAgentService {
 
         return {
           success: false,
-          message:
-            'Authentication expired.',
+          message: 'Authentication expired.',
           data: {
             status: 'disconnected',
             paired: false,
@@ -200,10 +192,7 @@ export class DesktopAgentService {
 
     } catch (error) {
 
-      console.error(
-        'Failed to get pairing status:',
-        error
-      );
+      console.error('Failed to get pairing status:', error);
 
       throw error;
     }
@@ -213,8 +202,7 @@ export class DesktopAgentService {
   // CONNECTION STATUS
   // ============================================================
 
-  async getConnectionStatus():
-    Promise<PairingStatusResponse> {
+  async getConnectionStatus(): Promise<PairingStatusResponse> {
 
     return this.getPairingStatus();
   }
@@ -223,83 +211,90 @@ export class DesktopAgentService {
   // CLEAR LOCAL PAIRING
   // ============================================================
 
-    async clearLocalPairing(): Promise<void> {
+  async clearLocalPairing(): Promise<void> {
 
     // Also drop this desktop from the paired-devices list.
-    const activeId =
-      this.pairedDevices.getActiveId();
+    const activeId = this.pairedDevices.getActiveId();
 
     if (activeId) {
       this.pairedDevices.forget(activeId, false);
     }
 
-    localStorage.removeItem(
-      'paired_device'
-    );
+    localStorage.removeItem('paired_device');
 
-    localStorage.removeItem(
-      'desktop_authentication'
-    );
+    localStorage.removeItem('desktop_authentication');
 
-    console.log(
-      'Mobile pairing and authentication data cleared.'
-    );
+    console.log('Mobile pairing and authentication data cleared.');
   }
 
   // ============================================================
-  // APPLICATION
+  // APPLICATION  (saved to phone history)
   // ============================================================
 
   async openApplication(
     application: string
   ): Promise<DesktopResponse> {
 
-    const device =
-      this.getPairedDevice();
+    const command = `open:${application}`;
 
-    const authentication =
-      this.getAuthentication();
+    try {
 
-    const url =
-      `http://${device.ipAddress}:${device.port}/application`;
+      const device = this.getPairedDevice();
+      const authentication = this.getAuthentication();
 
-    const response = await fetch(
-      url,
-      {
-        method: 'POST',
+      const url =
+        `http://${device.ipAddress}:${device.port}/application`;
 
-        headers: {
-          'Content-Type':
-            'application/json',
+      const response = await fetch(
+        url,
+        {
+          method: 'POST',
 
-          'Authorization':
-            `Bearer ${authentication.accessToken}`
-        },
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${authentication.accessToken}`
+          },
 
-        body: JSON.stringify({
-          action: 'open',
-          application
-        })
-      }
-    );
-
-    const result =
-      await response.json();
-
-    if (!response.ok) {
-
-      throw new Error(
-        result?.message ||
-        `Command failed (${response.status})`
+          body: JSON.stringify({
+            action: 'open',
+            application
+          })
+        }
       );
 
-    }
+      const result = await response.json();
 
-    return result as DesktopResponse;
+      if (!response.ok) {
+        throw new Error(
+          result?.message ||
+          `Command failed (${response.status})`
+        );
+      }
+
+      await this.history.record(
+        'application',
+        command,
+        'success',
+        result?.message || ''
+      );
+
+      return result as DesktopResponse;
+
+    } catch (error) {
+
+      await this.history.record(
+        'application',
+        command,
+        'failed',
+        error instanceof Error ? error.message : 'Command failed'
+      );
+
+      throw error;
+    }
   }
 
   // ============================================================
-  // SYSTEM COMMAND
+  // SYSTEM COMMAND  (saved to phone history)
   // ============================================================
 
   async executeSystemCommand(
@@ -310,61 +305,69 @@ export class DesktopAgentService {
       | 'sleep'
   ): Promise<DesktopResponse> {
 
-    const device =
-      this.getPairedDevice();
+    try {
 
-    const authentication =
-      this.getAuthentication();
+      const device = this.getPairedDevice();
+      const authentication = this.getAuthentication();
 
-    const url =
-      `http://${device.ipAddress}:${device.port}/system`;
+      const url =
+        `http://${device.ipAddress}:${device.port}/system`;
 
-    const response = await fetch(
-      url,
-      {
-        method: 'POST',
+      const response = await fetch(
+        url,
+        {
+          method: 'POST',
 
-        headers: {
-          'Content-Type':
-            'application/json',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${authentication.accessToken}`
+          },
 
-          'Authorization':
-            `Bearer ${authentication.accessToken}`
-        },
-
-        body: JSON.stringify({
-          command
-        })
-      }
-    );
-
-    const result =
-      await response.json();
-
-    if (!response.ok) {
-
-      throw new Error(
-        result?.message ||
-        `System command failed (${response.status})`
+          body: JSON.stringify({
+            command
+          })
+        }
       );
 
-    }
+      const result = await response.json();
 
-    return result as DesktopResponse;
+      if (!response.ok) {
+        throw new Error(
+          result?.message ||
+          `System command failed (${response.status})`
+        );
+      }
+
+      await this.history.record(
+        'system',
+        command,
+        'success',
+        result?.message || ''
+      );
+
+      return result as DesktopResponse;
+
+    } catch (error) {
+
+      await this.history.record(
+        'system',
+        command,
+        'failed',
+        error instanceof Error ? error.message : 'Command failed'
+      );
+
+      throw error;
+    }
   }
 
   // ============================================================
   // SYSTEM INFORMATION
   // ============================================================
 
-  async getSystemInfo():
-    Promise<DesktopResponse> {
+  async getSystemInfo(): Promise<DesktopResponse> {
 
-    const device =
-      this.getPairedDevice();
-
-    const authentication =
-      this.getAuthentication();
+    const device = this.getPairedDevice();
+    const authentication = this.getAuthentication();
 
     const url =
       `http://${device.ipAddress}:${device.port}/system/info`;
@@ -375,16 +378,14 @@ export class DesktopAgentService {
         method: 'GET',
 
         headers: {
-          'Authorization':
-            `Bearer ${authentication.accessToken}`
+          'Authorization': `Bearer ${authentication.accessToken}`
         },
 
         cache: 'no-store'
       }
     );
 
-    const result =
-      await response.json();
+    const result = await response.json();
 
     if (!response.ok) {
 
@@ -408,11 +409,8 @@ export class DesktopAgentService {
 
     try {
 
-      const device =
-        this.getPairedDevice();
-
-      const authentication =
-        this.getAuthentication();
+      const device = this.getPairedDevice();
+      const authentication = this.getAuthentication();
 
       const url =
         `http://${device.ipAddress}:${device.port}/pair/unpair`;
@@ -428,33 +426,25 @@ export class DesktopAgentService {
           method: 'POST',
 
           headers: {
-            'Content-Type':
-              'application/json',
-
-            'Authorization':
-              `Bearer ${authentication.accessToken}`
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${authentication.accessToken}`
           },
 
           body: JSON.stringify({})
         }
       );
 
-      let result:
-        DesktopResponse | null = null;
+      let result: DesktopResponse | null = null;
 
       try {
 
-        result =
-          await response.json() as DesktopResponse;
+        result = await response.json() as DesktopResponse;
 
       } catch {
         // Server returned no JSON body.
       }
 
-      console.log(
-        'Desktop Agent disconnect response:',
-        result
-      );
+      console.log('Desktop Agent disconnect response:', result);
 
       if (!response.ok) {
 
@@ -465,10 +455,7 @@ export class DesktopAgentService {
 
       }
 
-      if (
-        result &&
-        !result.success
-      ) {
+      if (result && !result.success) {
 
         throw new Error(
           result.message ||
@@ -477,9 +464,7 @@ export class DesktopAgentService {
 
       }
 
-      console.log(
-        'Desktop Agent disconnected successfully.'
-      );
+      console.log('Desktop Agent disconnected successfully.');
 
     } catch (error) {
 
@@ -498,8 +483,6 @@ export class DesktopAgentService {
     }
 
     /*
-     * Important:
-     *
      * Even if the Desktop Agent was unreachable,
      * the mobile application is now locally disconnected.
      */
