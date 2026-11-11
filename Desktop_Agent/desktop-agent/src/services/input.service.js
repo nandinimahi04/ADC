@@ -7,6 +7,16 @@ const {
 
 
 /* =========================================================
+   SPEED
+   nut-js waits 300 ms between keys by default, which makes
+   typing from the phone very slow. Remove that delay.
+========================================================= */
+
+keyboard.config.autoDelayMs = 0;
+mouse.config.autoDelayMs = 0;
+
+
+/* =========================================================
    KEY MAP
 ========================================================= */
 
@@ -51,8 +61,44 @@ const KEY_MAP = {
     f9: Key.F9,
     f10: Key.F10,
     f11: Key.F11,
-    f12: Key.F12
+    f12: Key.F12,
+
+    /* Punctuation (used in shortcuts like Ctrl + /) */
+    '`': Key.Grave,
+    '-': Key.Minus,
+    '=': Key.Equal,
+    '[': Key.LeftBracket,
+    ']': Key.RightBracket,
+    '\\': Key.Backslash,
+    ';': Key.Semicolon,
+    "'": Key.Quote,
+    ',': Key.Comma,
+    '.': Key.Period,
+    '/': Key.Slash,
+
+    printscreen: Key.Print,
+    menu: Key.Menu
 };
+
+/*
+   Letters a-z  -> Key.A ... Key.Z
+   Digits  0-9  -> Key.Num0 ... Key.Num9
+   (nut-js needs Key values, plain strings like 'c' do not work)
+*/
+for (const letter of 'abcdefghijklmnopqrstuvwxyz') {
+    KEY_MAP[letter] = Key[letter.toUpperCase()];
+}
+
+for (const digit of '0123456789') {
+    KEY_MAP[digit] = Key[`Num${digit}`];
+}
+
+/* Remove any key that does not exist in this nut-js version */
+for (const name of Object.keys(KEY_MAP)) {
+    if (KEY_MAP[name] === undefined) {
+        delete KEY_MAP[name];
+    }
+}
 
 
 /* =========================================================
@@ -80,22 +126,10 @@ function getKey(key) {
         .toLowerCase();
 
     /*
-       Special key
+       Special key, letter, digit or punctuation
     */
-    if (KEY_MAP[normalized]) {
+    if (KEY_MAP[normalized] !== undefined) {
         return KEY_MAP[normalized];
-    }
-
-    /*
-       Single character
-       Examples:
-       a
-       b
-       1
-       ?
-    */
-    if (normalized.length === 1) {
-        return normalized;
     }
 
     throw new Error(`Unsupported keyboard key: ${key}`);
@@ -131,6 +165,10 @@ async function typeText(text) {
     }
 
     const value = String(text);
+
+    if (value.length === 0) {
+        throw new Error('Text is required.');
+    }
 
     await keyboard.type(value);
 

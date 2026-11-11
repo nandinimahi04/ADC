@@ -1,0 +1,124 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar>
+
+    <ion-buttons slot="start">
+      <ion-icon name="keypad-outline" class="header-icon"></ion-icon>
+    </ion-buttons>
+
+    <ion-title>Keyboard</ion-title>
+
+    <ion-buttons slot="end">
+      <ion-button (click)="close()">
+        <ion-icon slot="icon-only" name="close-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+
+  <div class="keyboard-container">
+
+    <p class="hint">
+      Click with your laptop mouse where you want to type,
+      then type here. Every letter appears on the laptop instantly.
+    </p>
+
+    <!-- Live typing box -->
+    <div class="typing-card">
+      <textarea
+        #typingBox
+        class="typing-box"
+        rows="3"
+        placeholder="Start typing..."
+        autocomplete="off"
+        autocorrect="off"
+        autocapitalize="off"
+        spellcheck="false"
+        (input)="onTyping($event)"
+        (keydown)="onKeyDown($event)"
+      ></textarea>
+
+      <button
+        class="clear-btn"
+        type="button"
+        (pointerdown)="$event.preventDefault()"
+        (click)="clearBox()"
+      >
+        <ion-icon name="trash-outline"></ion-icon>
+        <span>Clear box</span>
+      </button>
+    </div>
+
+    <div class="error" *ngIf="errorMessage">{{ errorMessage }}</div>
+
+    <!-- Modifier keys -->
+    <h3 class="section-title">Modifiers</h3>
+    <div class="key-grid four">
+      <button
+        *ngFor="let m of modifierList"
+        type="button"
+        class="key"
+        [class.active]="modifiers[m.key]"
+        (pointerdown)="$event.preventDefault()"
+        (click)="toggleModifier(m.key)"
+      >
+        {{ m.label }}
+      </button>
+    </div>
+
+    <!-- Special keys -->
+    <h3 class="section-title">Keys</h3>
+    <div class="key-grid four">
+      <button type="button" class="key" (pointerdown)="$event.preventDefault()" (click)="sendKey('escape')">Esc</button>
+      <button type="button" class="key" (pointerdown)="$event.preventDefault()" (click)="sendKey('tab')">Tab</button>
+      <button type="button" class="key" (pointerdown)="$event.preventDefault()" (click)="sendKey('delete')">Del</button>
+      <button type="button" class="key" (pointerdown)="$event.preventDefault()" (click)="sendKey('space')">Space</button>
+
+      <button type="button" class="key" (pointerdown)="$event.preventDefault()" (click)="sendKey('home')">Home</button>
+      <button type="button" class="key" (pointerdown)="$event.preventDefault()" (click)="sendKey('end')">End</button>
+      <button type="button" class="key" (pointerdown)="$event.preventDefault()" (click)="sendKey('backspace')">
+        <ion-icon name="backspace-outline"></ion-icon>
+      </button>
+      <button type="button" class="key" (pointerdown)="$event.preventDefault()" (click)="sendKey('enter')">
+        <ion-icon name="return-down-back-outline"></ion-icon>
+      </button>
+    </div>
+
+    <!-- Arrow keys -->
+    <div class="arrows">
+      <div></div>
+      <button type="button" class="key" (pointerdown)="$event.preventDefault()" (click)="sendKey('up')">
+        <ion-icon name="arrow-up-outline"></ion-icon>
+      </button>
+      <div></div>
+
+      <button type="button" class="key" (pointerdown)="$event.preventDefault()" (click)="sendKey('left')">
+        <ion-icon name="arrow-back-outline"></ion-icon>
+      </button>
+      <button type="button" class="key" (pointerdown)="$event.preventDefault()" (click)="sendKey('down')">
+        <ion-icon name="arrow-down-outline"></ion-icon>
+      </button>
+      <button type="button" class="key" (pointerdown)="$event.preventDefault()" (click)="sendKey('right')">
+        <ion-icon name="arrow-forward-outline"></ion-icon>
+      </button>
+    </div>
+
+    <!-- Shortcuts -->
+    <h3 class="section-title">Shortcuts</h3>
+    <div class="key-grid two">
+      <button
+        *ngFor="let s of shortcuts"
+        type="button"
+        class="key shortcut"
+        (pointerdown)="$event.preventDefault()"
+        (click)="sendShortcut(s)"
+      >
+        {{ s.label }}
+      </button>
+    </div>
+
+  </div>
+
+</ion-content>

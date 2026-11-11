@@ -10,7 +10,8 @@ import {
   IonButtons,
   IonButton,
   IonIcon,
-  IonFooter
+  IonFooter,
+  IonModal
 } from '@ionic/angular/standalone';
 
 import { addIcons } from 'ionicons';
@@ -28,10 +29,12 @@ import {
   refreshOutline,
   globeOutline,
   documentTextOutline,
-  codeSlashOutline
+  codeSlashOutline,
+  keypadOutline
 } from 'ionicons/icons';
 
 import { DesktopAgentService } from '../services/desktop-agent.service';
+import { KeyboardPanelComponent } from './keyboard-panel/keyboard-panel.component';
 
 @Component({
   selector: 'app-control',
@@ -47,13 +50,16 @@ import { DesktopAgentService } from '../services/desktop-agent.service';
     IonButtons,
     IonButton,
     IonIcon,
-    IonFooter
+    IonFooter,
+    IonModal,
+    KeyboardPanelComponent
   ]
 })
 export class ControlPage {
 
   isExecuting = false;
   activeApp: 'chrome' | 'notepad' | 'vscode' | null = null;
+  isKeyboardOpen = false;
 
   constructor(
     private desktopAgent: DesktopAgentService,
@@ -73,8 +79,22 @@ export class ControlPage {
       refreshOutline,
       globeOutline,
       documentTextOutline,
-      codeSlashOutline
+      codeSlashOutline,
+      keypadOutline
     });
+  }
+
+  // ============================================================
+  // KEYBOARD
+  // ============================================================
+
+  openKeyboard(): void {
+    if (this.isExecuting) return;
+    this.isKeyboardOpen = true;
+  }
+
+  closeKeyboard(): void {
+    this.isKeyboardOpen = false;
   }
 
   async openChrome(): Promise<void> {

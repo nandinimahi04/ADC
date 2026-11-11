@@ -95,7 +95,6 @@
 
       <!-- Row 4 -->
       <ion-button
-        class="full-width"
         fill="clear"
         (click)="openVSCode()"
         [disabled]="isExecuting"
@@ -106,9 +105,30 @@
         </div>
       </ion-button>
 
+      <ion-button
+        fill="clear"
+        (click)="openKeyboard()"
+        [disabled]="isExecuting"
+      >
+        <div class="action-content">
+          <ion-icon name="keypad-outline"></ion-icon>
+          <span>Keyboard</span>
+        </div>
+      </ion-button>
+
     </div>
 
   </div>
+
+  <!-- Keyboard popup -->
+  <ion-modal
+    [isOpen]="isKeyboardOpen"
+    (didDismiss)="closeKeyboard()"
+  >
+    <ng-template>
+      <app-keyboard-panel (closed)="closeKeyboard()"></app-keyboard-panel>
+    </ng-template>
+  </ion-modal>
 
 </ion-content>
 
